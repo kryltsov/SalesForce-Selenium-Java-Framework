@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="sf_tests_suite" parallel="methods" thread-count="7" verbose="3" >
+    
+    <parameter name="webSite" value="http://salesforce.com" />
+    <parameter name="seleniumHost" value="192.168.232.13" />
+    <parameter name="seleniumPort" value="4444" />
+    <parameter name="browser" value="*chrome" />
+
+    <test name="sf_test"   >
+        <packages>
+            <package name="com.deepshiftlabs.sf_tests" />
+        </packages>
+     
+  
+    </test>
+</suite>

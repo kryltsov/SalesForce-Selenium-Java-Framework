@@ -1,0 +1,63 @@
+<project name="my_tests" default="all" >    <!--  po umolchaniyu vypolnitsya tsel' All  -->
+
+<!--  sozdanie papok dlya skompilirovannyh klassov  -->
+         <target name="make.dirs" description="Make some dirs">
+                 <mkdir dir="build"/>
+                 <mkdir dir="build/class"/>
+                 <mkdir dir="logs"/>
+                 <copy file="src/log4j.properties" todir="build/class/"/>
+         </target>
+    
+<!--  ukazanie putei dlya poiska bibliotek i klassov    -->      
+        <path id="compile_classpath">
+            <fileset dir="lib">
+                <include name="*.jar"/>		<!--  nashi biblioteki  -->
+            </fileset>
+            <fileset dir="c:\testng-5.8">      
+                <include name="**/*.jar"/>  	<!--  dlya togo, chtoby podklyuchit' testng -->
+            </fileset>
+            
+            <pathelement path="${java.class.path}/"/>
+<!--  zdes' budut lezhat' nashi skompilirovannye klassy -->
+            <pathelement path="c:\trillium\ivk\tests\trunk\salesforce\java\build\class\"/>
+        </path>
+      
+<!--  eta tsel' sozdaet papki, kompiliruet ishodniki i lozhit v /build/class -->
+         <target name="all" description="compile java" depends="make.dirs">
+                 <javac destdir="build/class" classpathref="compile_classpath">
+                         <src path="src"/>
+                     </javac>
+         </target>
+
+<!--  eta tsel' udalyaet papki so starymi versiyami, sozdaet papki i kompiliruet ishodniki -->
+         <target name="rebuild" description="clean dirs and build" depends="clean, make.dirs">
+                 <javac destdir="build/class" classpathref="compile_classpath">
+                         <src path="src"/>
+                 </javac>
+         </target>
+
+<!--  udalenie papok so starymi versiyami  -->
+         <target name="clean" description="Clean up">
+                 <delete dir="build"/>
+                 <delete file="logs/message.log"/>
+                 <echo>Dirs deleted!</echo>
+         </target>
+
+         <!--  zapuskaet nashi testy s pomosch'yu testng  -->
+        <target name="run" description="Run Selenium tests">
+            <java classpathref="compile_classpath"
+                classname="org.testng.TestNG"
+                failonerror="true">
+                
+                <arg value="-d" />
+                <arg value="logs/testng_reports" />
+                <arg value="-suitename" />
+                <arg value="sf_tests_suite" />
+                <arg value="-parallel"/>
+                <arg value="methods"/>
+                <arg value="-threadcount"/>
+                <arg value="20"/>
+                <arg value="testng.xml"/>    <!--  fail dlya nastroiki testng  -->
+             </java>
+        </target>
+</project>
