@@ -49,8 +49,8 @@ protected void login() {
         session().waitForPageToLoad(TIMEOUT);
         session().click("xpath=//li[@id='tabnavlogin']/a/span");
         session().waitForPageToLoad(TIMEOUT);
-        session().type("username","bearoffl@rambler.ru");
-        session().type("password","bear1111");
+        session().type("username","your_login");
+        session().type("password","your_password");
         session().click("//input[@id='Login']");
         session().waitForPageToLoad(TIMEOUT);
         ut.info("--------LOGIN DONE: logged to "+ session().getTitle());
