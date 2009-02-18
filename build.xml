@@ -19,7 +19,7 @@
             
             <pathelement path="${java.class.path}/"/>
 <!--  zdes' budut lezhat' nashi skompilirovannye klassy -->
-            <pathelement path="c:\trillium\ivk\tests\trunk\salesforce\java\build\class\"/>
+            <pathelement path="c:\trillium\tests\trunk\salesforce\java\build\class\"/>
         </path>
       
 <!--  eta tsel' sozdaet papki, kompiliruet ishodniki i lozhit v /build/class -->

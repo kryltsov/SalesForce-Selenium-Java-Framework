@@ -26,5 +26,10 @@ public class utils {
         public void warn (String message){
              logger.warn(message);
         }
+        public void error (String message){
+             logger.error("!!!---  "+message+"  ---!!!");
+        }
+        
+        
 }
 
