@@ -21,12 +21,13 @@ public class genericPage {
     
     public int prepareBrowser()
     {
-        sInstance = action.getSelenium("192.168.232.13", 4444, "*chrome", "https://login.salesforce.com");
+        sInstance = action.getSelenium("192.168.232.1", 4444, "*chrome", "https://login.salesforce.com");
         return 0;
     };
     
     public int freeBrowser()
     {
+    	action.logout(sInstance);
         action.freeSelenium(sInstance);
         return 0;
     };    
@@ -50,14 +51,39 @@ public class genericPage {
 	    return missed;
     }
     
+    public int fillElementsByValidValues(){
+        genericElement tempElement;
+
+        Iterator iterator = elements.iterator();
+	    while (iterator.hasNext()) {
+		     tempElement = (genericElement)iterator.next();
+		     tempElement.fillByValidValue(sInstance);
+	    }
+	    return 0;
+    }
+    
+    public int checkAllElements(){
+        genericElement tempElement;
+
+        Iterator iterator = elements.iterator();
+//	    tempElement = (genericElement)iterator.next();
+//	    tempElement.checkAll(sInstance);
+	    
+	    while (iterator.hasNext()) {
+	    	 fillElementsByValidValues();	    	
+		     tempElement = (genericElement)iterator.next();
+		     tempElement.checkAll(sInstance);
+	    }
+	    return 0;
+    }
+    
     public int createNewEmptyRecord(){
-        prepareBrowser();
-        action.login(sInstance, "bearoffl_dev@rambler.ru", "bear1212");
+    	action.login(sInstance, "bearoffl_dev@rambler.ru", "bear1212");
         action.openTab(sInstance, parentTabID);
         sInstance.click("//input[@name='new']");
         sInstance.waitForPageToLoad("30000") ;
         
-        action.info("New record created, title is " + sInstance.elemegetTitle());
+        action.info("New record created, title is " + sInstance.getTitle());
         return 0;
     }
 }

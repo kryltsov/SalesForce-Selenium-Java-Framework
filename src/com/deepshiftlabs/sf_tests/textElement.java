@@ -1,29 +1,15 @@
 package com.deepshiftlabs.sf_tests;
 
-
-import com.thoughtworks.selenium.*;
-import org.testng.annotations.*;
+import com.thoughtworks.selenium.DefaultSelenium;
 
 
-public class textElement extends genericElement{
+//import com.thoughtworks.selenium.*;
+//import org.testng.annotations.*;
+
+
+public class textElement extends genericTextElement{
     
-    private int inputLength = 255;
-    private String validValue = "abcdef";
-    
-    textElement(String a_elementName, String a_elementSfId, String a_parentObjectType, String a_parentId){
-        super(a_elementName, a_elementSfId,a_parentObjectType,a_parentId);
-    }
-    
-    public void setInputLength (int a_length){
-       inputLength =  a_length;
-    }
-    
-    public int getInputLength (){
-      return inputLength;
-    }
-    
-    public int fillByValidValue (DefaultSelenium selInstance){
-      selInstance.type("//input[@id='" + elementName + "']", validValue);
-      return 0;
+    textElement(String a_elementName, String a_elementSfId, String a_parentObjectType, String a_parentId, String a_validValue, boolean a_isRequired, int a_maxLength){
+        super(a_elementName, a_elementSfId,a_parentObjectType,a_parentId, a_validValue, a_isRequired, a_maxLength);
     }
 }

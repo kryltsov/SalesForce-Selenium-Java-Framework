@@ -1,12 +1,11 @@
 package com.deepshiftlabs.sf_tests;
 
-import java.util.*;
-import org.apache.log4j.*;
-import org.apache.log4j.Level;
+//import java.util.*;
+//import org.apache.log4j.*;
+//import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.FileAppender.*;
+//import org.apache.log4j.SimpleLayout;
+//import org.apache.log4j.FileAppender.*;
 
 /**
   * @author bear
