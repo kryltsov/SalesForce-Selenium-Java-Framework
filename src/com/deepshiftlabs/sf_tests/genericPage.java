@@ -10,33 +10,65 @@ import java.util.Iterator;
 public class genericPage {
     String parentObjectType;
     String parentTabID;
+    String myRecordId;    
     ArrayList elements = new ArrayList();
     commonActions action = new commonActions();
     settings privateSettings;
     DefaultSelenium sInstance;
     
-    genericPage(String a_parentObjectType, String a_parentTabID) {
+    genericPage(String a_parentObjectType, String a_parentTabID, String a_myRecordId ) {
         parentObjectType = a_parentObjectType;
         parentTabID = a_parentTabID;
+        myRecordId = a_myRecordId;
     }
     
-    public int prepareBrowser()
+    public int prepareBrowser(String hub, int port, String browser, String url)
     {
-        sInstance = action.getSelenium("192.168.232.1", 4444, "*chrome", "https://login.salesforce.com");
-        return 0;
+        sInstance = action.getSelenium(hub, port, browser, url);
+        return settings.RET_OK;
     };
     
+    public int logout(){
+    	action.logout(sInstance);
+        return settings.RET_OK;    	
+    }
     public int freeBrowser()
     {
-    	action.logout(sInstance);
         action.freeSelenium(sInstance);
-        return 0;
+        return settings.RET_OK;
     };    
         
     public int addElement(genericElement el){
         elements.add(el);
         return elements.size();
     }
+    
+    public int findElementByName(String elementName){
+        genericElement tempElement;
+        int index = 0;
+
+        Iterator iterator = elements.iterator();
+	    while (iterator.hasNext()) {
+		     tempElement = (genericElement)iterator.next();
+		     if (tempElement.getElementName().equals(elementName)){
+		        return index;
+		    }
+	    }
+	    return settings.RET_ERROR;
+    }
+
+    public int setDeterminingRecordIdField(String elementName){
+    	int elementIndexInList;
+        genericElement tempElement;    	
+    	
+    	elementIndexInList = findElementByName(elementName);
+    	if (elementIndexInList!=settings.RET_ERROR){
+    		tempElement = (genericElement)elements.get(elementIndexInList);
+    		tempElement.forceToDetermineRecordID(myRecordId);
+    		return settings.RET_OK;
+    	}
+        return settings.RET_ERROR;        
+    }    
     
     public int checkElementsPresence (){
         genericElement tempElement;
@@ -45,7 +77,7 @@ public class genericPage {
         Iterator iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (genericElement)iterator.next();
-		     if (!tempElement.checkPresence(sInstance)){
+		     if (tempElement.checkPresence(sInstance)==settings.RET_ERROR){
 		        missed++;
 		    }
 	    }
@@ -60,33 +92,42 @@ public class genericPage {
 		     tempElement = (genericElement)iterator.next();
 		     tempElement.fillByValidValue(sInstance);
 	    }
-	    return 0;
+	    return settings.RET_OK;
     }
     
     public int checkAllElements(){
         genericElement tempElement;
+        int returnValue = settings.RET_OK;
 
         Iterator iterator = elements.iterator();
-//	    tempElement = (genericElement)iterator.next();
-//	    tempElement.checkAll(sInstance);
 	    
 	    while (iterator.hasNext()) {
 	    	 fillElementsByValidValues();	    	
 		     tempElement = (genericElement)iterator.next();
 		     tempElement.checkAll(sInstance);
 	    }
-	    return 0;
+	    return settings.RET_OK;
+    }
+    
+    public int login(){
+    	action.login(sInstance, privateSettings.SF_LOGIN, privateSettings.SF_PASSWORD);
+    	return settings.RET_OK;
     }
     
     public int createNewEmptyRecord(){
-    	action.login(sInstance, privateSettings.SF_LOGIN, privateSettings.SF_PASSWORD);
-        action.openTab(sInstance, parentTabID);
-        sInstance.click("//input[@name='new']");
-        sInstance.waitForPageToLoad("30000") ;
-        
-        action.info("New record created, title is " + sInstance.getTitle());
-        return 0;
+    	action.createNewEmptyRecord(sInstance, parentTabID);
+    	return settings.RET_OK;    	
     }
-}
-      
+    
+    public int recreateRecord(){
+    	action.deleteRecord(sInstance, parentTabID, myRecordId);
+    	action.createNewEmptyRecord(sInstance, parentTabID);    	
+        return settings.RET_OK;
+    }    
+    
+    public int saveRecord(){
+    	action.saveRecord(sInstance);
+        return settings.RET_OK;
+    }
+}  
 

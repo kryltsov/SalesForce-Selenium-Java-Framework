@@ -5,15 +5,15 @@ import com.thoughtworks.selenium.DefaultSelenium;
 public class genericTextElement extends genericElement {
 	
     private int inputLength;
-
+    
 	public genericTextElement(String name, String sfId, String objectType,
-			String id, String value, boolean a_isRequired) {
-		super(name, sfId, objectType, id, "a", a_isRequired);
+			 String value, boolean a_isRequired) {
+		super(name, sfId, objectType, "a", a_isRequired);
 		setInputLength(255);
 	}
 	
-    public genericTextElement(String a_elementName, String a_elementSfId, String a_parentObjectType, String a_parentId, String a_validValue, boolean a_isRequired, int a_maxLength){
-        super(a_elementName, a_elementSfId,a_parentObjectType,a_parentId, "a", a_isRequired);
+    public genericTextElement(String a_elementName, String a_elementSfId, String a_parentObjectType, String a_validValue, boolean a_isRequired, int a_maxLength){
+        super(a_elementName, a_elementSfId,a_parentObjectType, "a", a_isRequired);
         setInputLength(a_maxLength);
     }    
     
@@ -25,16 +25,14 @@ public class genericTextElement extends genericElement {
        return inputLength;
      }
      
-     public boolean fillByValidValue (DefaultSelenium selInstance){
-         String tempLocator;
-         
-         tempLocator = "//input[@id='"+elementSfId+"']";
-         selInstance.type(tempLocator, validValue);
-         action.info ("Filling Element _"+ elementName + "_ by valid value = _"+validValue+"_");
-        return true;
-     }
-     
-     public boolean checkMaxLength(DefaultSelenium selInstance){
+     public int checkMaxLengthRunCount=0;
+     public int checkMaxLength(DefaultSelenium selInstance){
+      	if (checkMaxLengthRunCount>0) {
+    		action.info("checkMaxLength for element _"+elementSfId+"_ already was performed, skipping");      		
+      		return settings.RET_SKIPPED;
+      	}
+      	checkMaxLengthRunCount++;    	 
+    	 
          String tempLocator;
          String testString;
          int realLength;
@@ -42,7 +40,7 @@ public class genericTextElement extends genericElement {
          
          if (validValue.length()>inputLength){
         	 action.error("Can't perform check because max Length is less than validValue");
-        	 return false;
+        	 return settings.RET_ERROR;
          } 
          
          tempLocator = "//input[@id='"+elementSfId+"']";
@@ -67,12 +65,12 @@ public class genericTextElement extends genericElement {
          }
         action.info ("Real maxLenght for _"+ elementName + "_ is OK.");
         action.getScreenshot(selInstance, false);        
-        return true;
+        return settings.RET_OK;
      }
     
      public int  checkAll (DefaultSelenium selInstance){
      	super.checkAll(selInstance);
-     	checkMaxLength(selInstance);
-     	return 0;
+     	if (checkMaxLength(selInstance)== settings.RET_PAGE_BROKEN) return settings.RET_PAGE_BROKEN;     	
+     	return settings.RET_OK;
      }         
 }

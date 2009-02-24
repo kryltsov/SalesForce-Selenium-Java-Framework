@@ -5,6 +5,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 import java.util.Date;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -102,8 +103,72 @@ protected void getScreenshot(DefaultSelenium seleniumInstance, boolean error) {
 	
 	filename = (SCREENSHOTS_PATH+SCREENSHOTS_PREFIX+df.format(d)+status+".png");
     ut.info("--------GETTING SCREENSHOT to file "+filename+"--");
-    seleniumInstance.captureEntirePageScreenshot(filename,"args");
-}   
+    try{
+    	seleniumInstance.captureEntirePageScreenshot(filename,"args");
+    }
+    catch(Exception e){
+    	ut.error("--------ERROR while GETTING SCREENSHOT to file _"+filename+"_, check if directory is present.--");    	
+    };
+}
+
+protected int checkRecordPresence(DefaultSelenium seleniumInstance, String tabName, String recordId) {            
+    String tempLocator;
+    
+    openTab(seleniumInstance, tabName);
+
+    tempLocator = "//a[contains(text(),'"+recordId+"')]";
+    
+    if (seleniumInstance.isElementPresent(tempLocator)){
+        ut.info("--------RECORD _"+tabName+":"+recordId+"_ FOUND");    	
+    	return settings.RET_OK;
+    }
+    else {
+    	ut.warn("--------RECORD _"+tabName+":"+recordId+" NOT FOUND");    	
+    	return settings.RET_ERROR;
+    }
+}
+
+public int createNewEmptyRecord(DefaultSelenium seleniumInstance, String tabName){
+	openTab(seleniumInstance, tabName);
+	seleniumInstance.click("//input[@name='new']");
+	seleniumInstance.waitForPageToLoad("30000") ;
+    
+	info("New record on tab _"+tabName+"_ created, waiting for input.");
+    return 0;
+}
+
+protected int deleteRecord(DefaultSelenium seleniumInstance, String tabName, String recordId) {            
+    String tempLocator;
+
+    openTab(seleniumInstance, tabName);
+    
+    tempLocator = "//a[contains(text(),'"+recordId+"')]";
+    
+    if (seleniumInstance.isElementPresent(tempLocator)){
+        ut.info("--------RECORD _"+tabName+":"+recordId+"_ FOUND");
+        seleniumInstance.click(tempLocator);
+    	seleniumInstance.waitForPageToLoad(TIMEOUT);
+
+    	seleniumInstance.chooseOkOnNextConfirmation();
+    	tempLocator = "del";
+    	seleniumInstance.click(tempLocator);
+//    	seleniumInstance.waitForPageToLoad(TIMEOUT);
+    	seleniumInstance.getConfirmation();
+    	
+    	if (checkRecordPresence(seleniumInstance, tabName, recordId)==settings.RET_ERROR){
+    		ut.info("--------RECORD _"+tabName+":"+recordId+" DELETED");    		
+    		return settings.RET_OK;
+    	}else{
+    			ut.error("--------RECORD _"+tabName+":"+recordId+" CAN'T BE DELETED");    		
+    			return settings.RET_OK;
+   		}
+    }
+
+    else {
+    	ut.error("--------RECORD _"+tabName+":"+recordId+" NOT FOUND FOR REMOVAL");    	
+    	return settings.RET_ERROR;
+    }
+}
     
 public void info (String message){
 		if (!LOG_INFOS) return;

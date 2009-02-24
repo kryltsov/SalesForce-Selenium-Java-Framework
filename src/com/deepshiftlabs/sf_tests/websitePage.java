@@ -9,36 +9,50 @@ import java.io.*;
 
 public class websitePage {
 	
+    settings privateSettings;	
 	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));      
     
-    genericPage page = new genericPage ("Employment Website", "Employment Websites");
-    String myRecordId = "websitePage00001";
-    
+    genericPage page = new genericPage ("Employment Website", "Employment Websites", "websitePage00001");
+
     public int addAllElements(){
-       page.addElement(new textElement("Employment Website Name", "Name","Employment Website", myRecordId,"",true,80));
-       page.addElement(new urlElement("Web Address", "00N80000002suMr","Employment Website", myRecordId,"",true));
-       page.addElement(new numberElement("Price Per Post", "00N80000002sumz" ,"Employment Website", myRecordId,"",true));
-       page.addElement(new numberElement("Maximum Budget", "00N80000002sun3" ,"Employment Website", myRecordId,"",true));       
+       page.addElement(new textElement("Employment Website Name", "Name","Employment Website", "",true,80));
+       page.addElement(new urlElement("Web Address", "00N80000002suMr","Employment Website", "",true));
+       page.addElement(new numberElement("Price Per Post", "00N80000002sumz" ,"Employment Website", "",true));
+       page.addElement(new numberElement("Maximum Budget", "00N80000002sun3" ,"Employment Website", "",true));       
        return 0;
     }
 
     @Test(groups = {"default"}, description = "login_logout_test")
-//    @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
-    public void runAllPageTests(){
-    	page.prepareBrowser();
+    @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
+    public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
+        
+        if (seleniumHost.equals("")){
+            seleniumHost = settings.SELENIUM_HOST;
+            seleniumPort = settings.SELENIUM_PORT;
+            browser = settings.BROWSER;
+            webSite = settings.WEB_SITE;
+        }
     	
     	addAllElements();
-        
+    	page.setDeterminingRecordIdField("Employment Website Name");
+    	
+    	page.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
+    	page.login();    	
     	page.createNewEmptyRecord();
         page.checkElementsPresence();
         page.fillElementsByValidValues();
+        page.saveRecord();
+        page.recreateRecord();
+        
+        
         page.checkAllElements();
         
         try{
-        System.out.println("------------------WAITING FOR ENTER-------------------");
-        stdin.read();}
+        	System.out.println("------------------WAITING FOR ENTER-------------------");
+        	stdin.read();}
         catch(IOException e) {};
         
+        page.logout();
         page.freeBrowser();
     };
     
