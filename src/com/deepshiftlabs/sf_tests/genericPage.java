@@ -12,6 +12,7 @@ public class genericPage {
     String parentTabID;
     ArrayList elements = new ArrayList();
     commonActions action = new commonActions();
+    settings privateSettings;
     DefaultSelenium sInstance;
     
     genericPage(String a_parentObjectType, String a_parentTabID) {
@@ -78,7 +79,7 @@ public class genericPage {
     }
     
     public int createNewEmptyRecord(){
-    	action.login(sInstance, "bearoffl_dev@rambler.ru", "bear1212");
+    	action.login(sInstance, privateSettings.SF_LOGIN, privateSettings.SF_PASSWORD);
         action.openTab(sInstance, parentTabID);
         sInstance.click("//input[@name='new']");
         sInstance.waitForPageToLoad("30000") ;

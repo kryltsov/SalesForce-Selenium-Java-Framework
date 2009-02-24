@@ -15,7 +15,7 @@ public class websitePage {
     String myRecordId = "websitePage00001";
     
     public int addAllElements(){
-       page.addElement(new textElement("Employment Website Name", "Name","Employment Website", myRecordId,"",true,33));
+       page.addElement(new textElement("Employment Website Name", "Name","Employment Website", myRecordId,"",true,80));
        page.addElement(new urlElement("Web Address", "00N80000002suMr","Employment Website", myRecordId,"",true));
        page.addElement(new numberElement("Price Per Post", "00N80000002sumz" ,"Employment Website", myRecordId,"",true));
        page.addElement(new numberElement("Maximum Budget", "00N80000002sun3" ,"Employment Website", myRecordId,"",true));       
