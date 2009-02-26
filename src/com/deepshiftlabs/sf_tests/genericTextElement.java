@@ -69,8 +69,13 @@ public class genericTextElement extends genericElement {
      }
     
      public int  checkAll (DefaultSelenium selInstance){
-     	super.checkAll(selInstance);
-     	if (checkMaxLength(selInstance)== settings.RET_PAGE_BROKEN) return settings.RET_PAGE_BROKEN;     	
+    	int returnedValue;
+
+    	returnedValue = super.checkAll(selInstance);
+    	if (returnedValue!=settings.RET_OK)
+    		return returnedValue;
+    	
+     	checkMaxLength(selInstance);     	
      	return settings.RET_OK;
      }         
 }

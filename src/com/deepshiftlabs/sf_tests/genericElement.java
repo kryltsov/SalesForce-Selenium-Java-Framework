@@ -26,15 +26,6 @@ public class genericElement {
         isRequired = a_isRequired;
     }
         
-/*    public int preparePage(DefaultSelenium selInstance){
-        action.openTab(selInstance parentTabID);
-        if (selInstance.isElementPresent("name="+parentID)){
-                selInstance.click("//a[contains(text(),'"+parentID+"')]");            
-                waitForPageToLoad(30000);
-            return 0;
-        }
-    }   */
-    
     public String getElementName(){
     	return elementName;
     }
@@ -66,7 +57,7 @@ public class genericElement {
         tempLocator = "//input[@id='"+elementSfId+"']";
         
         selInstance.type(tempLocator, tempValidValue);
-        action.info ("Filling Element _"+ elementName + "_ by valid value = _"+tempValidValue+"_");
+        action.infoV ("Filling Element _"+ elementName + "_ by valid value = _"+tempValidValue+"_");
        return settings.RET_OK;
     }
     
@@ -76,41 +67,61 @@ public class genericElement {
         tempLocator = "//input[@id='"+elementSfId+"']";
         
         selInstance.type(tempLocator, "");
-        action.info ("Filling Element _"+ elementName + "_ by NULL");
+        action.infoV ("Filling Element _"+ elementName + "_ by NULL");
        return settings.RET_OK;
     }
     
     public int  checkAll (DefaultSelenium selInstance){
-        action.info ("Starting checking all");
-    	if (checkRequired(selInstance)== settings.RET_PAGE_BROKEN) return settings.RET_PAGE_BROKEN;
+    	int returnedValue;
+        action.infoV ("Starting checking all for element _"+elementSfId+"_");
+        returnedValue = checkRequired(selInstance); 
+        if ((returnedValue == settings.RET_PAGE_BROKEN_OK)||
+    			(returnedValue== settings.RET_PAGE_BROKEN_ERROR)) 
+    		return returnedValue;
+        
+        
        return settings.RET_OK;
     }
    
     private int checkRequiredRunCount=0;
     public int checkRequired (DefaultSelenium selInstance){
+    	boolean realRequired = false;
     	if (checkRequiredRunCount>0) {
     		action.info("CheckRequired for element _"+elementSfId+"_ already was performed, skipping");
     		return settings.RET_SKIPPED;
     	}
     	checkRequiredRunCount++;
-    	if (isRequired){
-	        action.info ("Starting checkRequired for _"+elementName+"_");
+	        action.infoV ("Starting checkRequired for _"+elementName+"_");
 	    	fillByNull(selInstance);
 	    	action.saveRecord(selInstance);
-	    	if (selInstance.isTextPresent("Error: Invalid Data.")){
-	    		if (selInstance.isTextPresent("Error: Invalid Data."))
-	    			action.info("Element _"+ elementName + "_is required!");
+	    	if (selInstance.isTextPresent("Review all error messages below to correct your data.")){
+	    		if (selInstance.isTextPresent("Error: You must enter a value"))
+	    			realRequired = true;
+	    	}
+
+	    	if (realRequired==true){
+	    		if (isRequired==true){
+	    	    	action.info("Element _"+ elementName + "_ is required!(OK)");
 	    			action.getScreenshot(selInstance, false);
 	    			return settings.RET_OK;
+	    		}else{
+	    			action.error("Element _"+ elementName + "_ is required!(ERROR)");
+	    			action.getScreenshot(selInstance, true);
+	    			return settings.RET_ERROR;
+	    		}
 	    	}
-	    	action.error("Element _"+ elementName + "_is not required!");
-	    	action.getScreenshot(selInstance, true);
-	    	return settings.RET_PAGE_BROKEN;
-    	} else {
-    		action.info ("CheckRequired for _"+elementName+"_ was not performed, element is optional");
-    		return settings.RET_OK;
-    		// here should be check if optional elements are obligatory in real
-    	}
+	    	if (realRequired==false){
+	    		if (isRequired==false){
+	    	    	action.info("Element _"+ elementName + "_ is NOT required!(OK)");
+	    			action.getScreenshot(selInstance, false);
+	    			return settings.RET_PAGE_BROKEN_OK;
+	    		}else{
+	    			action.error("Element _"+ elementName + "_ is NOT required!(ERROR)");
+	    			action.getScreenshot(selInstance, true);
+	    			return settings.RET_PAGE_BROKEN_ERROR;
+	    		}
+	    	}
+	    	return settings.RET_SOMETHING_STRANGE;
     }
 }
       

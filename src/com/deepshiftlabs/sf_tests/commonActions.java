@@ -28,9 +28,10 @@ import com.thoughtworks.selenium.*;
 public class commonActions {
   
 	// ---- constants  ---- //
-    public static final String TIMEOUT = "40000";
+    public static final String TIMEOUT = "60000";
     public static final Boolean USE_SCREENSHOTS = true;
     public static final Boolean LOG_INFOS = true;
+    public static final Boolean LOG_VERBOSE = false;
     public static final String SCREENSHOTS_PATH = "C:\\trillium\\logs\\";
     public static final String SAVE_RECORD_LOCATOR = "save";
     public static final String SCREENSHOTS_PREFIX = "screen_";
@@ -78,17 +79,17 @@ protected void logout(DefaultSelenium seleniumInstance) {
 
 protected void openTab(DefaultSelenium seleniumInstance, String tabName) {            
 
-        ut.info("--------TAB OPENING STARTED-------");
+        infoV("--------TAB OPENING STARTED-------");
 		seleniumInstance.click("link="+tabName);
 		seleniumInstance.waitForPageToLoad(TIMEOUT);
-        ut.info("--------TAB OPENING DONE: title is "+ seleniumInstance.getTitle());
+        infoV("--------TAB OPENED: title is "+ seleniumInstance.getTitle());
     }    
 protected void saveRecord(DefaultSelenium seleniumInstance) {            
 
-    ut.info("--------SAVING RECORD STARTED-------");
+    infoV("--------SAVING RECORD STARTED-------");
     seleniumInstance.click(SAVE_RECORD_LOCATOR);
 	seleniumInstance.waitForPageToLoad(TIMEOUT);
-    ut.info("--------RECORD SAVED: title is "+ seleniumInstance.getTitle());
+    info("--------SAVE ATTEMPT DONE: title is "+ seleniumInstance.getTitle());
 }    
 
 protected void getScreenshot(DefaultSelenium seleniumInstance, boolean error) {            
@@ -119,11 +120,11 @@ protected int checkRecordPresence(DefaultSelenium seleniumInstance, String tabNa
     tempLocator = "//a[contains(text(),'"+recordId+"')]";
     
     if (seleniumInstance.isElementPresent(tempLocator)){
-        ut.info("--------RECORD _"+tabName+":"+recordId+"_ FOUND");    	
+        infoV("--------RECORD _"+tabName+":"+recordId+"_ FOUND");    	
     	return settings.RET_OK;
     }
     else {
-    	ut.warn("--------RECORD _"+tabName+":"+recordId+" NOT FOUND");    	
+    	infoV("--------RECORD _"+tabName+":"+recordId+" NOT FOUND");    	
     	return settings.RET_ERROR;
     }
 }
@@ -145,22 +146,22 @@ protected int deleteRecord(DefaultSelenium seleniumInstance, String tabName, Str
     tempLocator = "//a[contains(text(),'"+recordId+"')]";
     
     if (seleniumInstance.isElementPresent(tempLocator)){
-        ut.info("--------RECORD _"+tabName+":"+recordId+"_ FOUND");
+        infoV("--------RECORD _"+tabName+":"+recordId+"_ FOUND");
         seleniumInstance.click(tempLocator);
     	seleniumInstance.waitForPageToLoad(TIMEOUT);
 
     	seleniumInstance.chooseOkOnNextConfirmation();
     	tempLocator = "del";
     	seleniumInstance.click(tempLocator);
-//    	seleniumInstance.waitForPageToLoad(TIMEOUT);
     	seleniumInstance.getConfirmation();
     	
     	if (checkRecordPresence(seleniumInstance, tabName, recordId)==settings.RET_ERROR){
     		ut.info("--------RECORD _"+tabName+":"+recordId+" DELETED");    		
     		return settings.RET_OK;
     	}else{
-    			ut.error("--------RECORD _"+tabName+":"+recordId+" CAN'T BE DELETED");    		
-    			return settings.RET_OK;
+    			ut.error("--------RECORD _"+tabName+":"+recordId+" CAN'T BE DELETED (may be record was present before test started)");    		
+    			getScreenshot(seleniumInstance, true);
+    			return settings.RET_ERROR;
    		}
     }
 
@@ -182,6 +183,11 @@ public void warn (String message){
 public void error (String message){
         ut.error(message);
     }    
+
+public void infoV (String message){
+	if (!LOG_VERBOSE) return;
+    ut.info("(V)"+message);
+}
     
   
 //@Test(groups = { "sf_tests" }, enabled = true )    

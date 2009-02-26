@@ -43,7 +43,7 @@ public class genericPage {
         return elements.size();
     }
     
-    public int findElementByName(String elementName){
+    public int findElementIndexByName(String elementName){
         genericElement tempElement;
         int index = 0;
 
@@ -61,7 +61,7 @@ public class genericPage {
     	int elementIndexInList;
         genericElement tempElement;    	
     	
-    	elementIndexInList = findElementByName(elementName);
+    	elementIndexInList = findElementIndexByName(elementName);
     	if (elementIndexInList!=settings.RET_ERROR){
     		tempElement = (genericElement)elements.get(elementIndexInList);
     		tempElement.forceToDetermineRecordID(myRecordId);
@@ -69,6 +69,24 @@ public class genericPage {
     	}
         return settings.RET_ERROR;        
     }    
+    
+    public int setUnique(String elementName, boolean isCaseSens){
+    	int elementIndexInList;
+        genericElement tempElement;    	
+    	
+    	elementIndexInList = findElementIndexByName(elementName);
+    	if (elementIndexInList!=settings.RET_ERROR){
+    		tempElement = (genericElement)elements.get(elementIndexInList);
+    		if (tempElement instanceof textElement){
+    			((textElement)tempElement).setUnique(isCaseSens);
+    			return settings.RET_OK;
+    		}
+    		action.error("Can't setUnique - it isn't textElement!");
+    		return settings.RET_ERROR;
+    	}
+    	action.error("Can't setUnique - there are no such element");
+        return settings.RET_ERROR;
+    }       
     
     public int checkElementsPresence (){
         genericElement tempElement;
@@ -97,14 +115,23 @@ public class genericPage {
     
     public int checkAllElements(){
         genericElement tempElement;
-        int returnValue = settings.RET_OK;
+        int returnedValue;
 
         Iterator iterator = elements.iterator();
 	    
 	    while (iterator.hasNext()) {
 	    	 fillElementsByValidValues();	    	
 		     tempElement = (genericElement)iterator.next();
-		     tempElement.checkAll(sInstance);
+
+		     returnedValue = settings.RET_ERROR;
+		     while (returnedValue!=settings.RET_OK){
+		    	 returnedValue = tempElement.checkAll(sInstance);
+		    	 if (returnedValue==settings.RET_PAGE_BROKEN_ERROR || 
+		    			 returnedValue==settings.RET_PAGE_BROKEN_OK){
+		    		recreateRecord();
+		    	 	fillElementsByValidValues();
+		    	 }
+		     }
 	    }
 	    return settings.RET_OK;
     }

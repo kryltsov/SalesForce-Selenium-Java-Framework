@@ -18,7 +18,11 @@ public class websitePage {
        page.addElement(new textElement("Employment Website Name", "Name","Employment Website", "",true,80));
        page.addElement(new urlElement("Web Address", "00N80000002suMr","Employment Website", "",true));
        page.addElement(new numberElement("Price Per Post", "00N80000002sumz" ,"Employment Website", "",true));
-       page.addElement(new numberElement("Maximum Budget", "00N80000002sun3" ,"Employment Website", "",true));       
+       
+//       page.addElement(new textElement("for_unique_check", "00N800000036pL8" ,"for_unique_check", "",false,20));
+//       page.setUnique("for_unique_check",false);
+       
+       page.addElement(new numberElement("Maximum Budget", "00N80000002sun3" ,"Employment Website", "",true));
        return 0;
     }
 
@@ -41,9 +45,6 @@ public class websitePage {
     	page.createNewEmptyRecord();
         page.checkElementsPresence();
         page.fillElementsByValidValues();
-        page.saveRecord();
-        page.recreateRecord();
-        
         
         page.checkAllElements();
         
@@ -55,18 +56,6 @@ public class websitePage {
         page.logout();
         page.freeBrowser();
     };
-    
-
-/*    @Test(groups = {"default"}, description = "login_logout_test")
-    @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
-    public void do_login_logout(String seleniumHost, int seleniumPort, String browser, String webSite){
-        commonActions actions = new commonActions();
-        
-        DefaultSelenium selenium = actions.getSelenium(seleniumHost, seleniumPort,  browser, webSite);
-        actions.login(selenium, "bearoffl_dev@rambler.ru", "bear1212");
-        actions.logout(selenium);
-        actions.freeSelenium(selenium);
-    }*/
 }
       
 
