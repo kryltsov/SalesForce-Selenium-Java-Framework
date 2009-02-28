@@ -7,13 +7,4 @@ public final class settings {
 	public static final int SELENIUM_PORT = 4444;	
 	public static final String BROWSER = "*chrome";	
 	public static final String WEB_SITE = "https://login.salesforce.com";
-	
-	public static final int RET_OK = 0;
-	public static final int RET_SKIPPED = -100;
-	public static final int RET_ERROR = -1;
-//	public static final int RET_PAGE_BROKEN = -2;
-	public static final int RET_PAGE_BROKEN_OK = -3;
-	public static final int RET_PAGE_BROKEN_ERROR = -4;
-	public static final int RET_SOMETHING_STRANGE = -50;
-
 }

@@ -28,7 +28,7 @@ import com.thoughtworks.selenium.*;
 public class commonActions {
   
 	// ---- constants  ---- //
-    public static final String TIMEOUT = "60000";
+    public static final String TIMEOUT = "180000";
     public static final Boolean USE_SCREENSHOTS = true;
     public static final Boolean LOG_INFOS = true;
     public static final Boolean LOG_VERBOSE = false;
@@ -121,11 +121,11 @@ protected int checkRecordPresence(DefaultSelenium seleniumInstance, String tabNa
     
     if (seleniumInstance.isElementPresent(tempLocator)){
         infoV("--------RECORD _"+tabName+":"+recordId+"_ FOUND");    	
-    	return settings.RET_OK;
+    	return constants.RET_OK;
     }
     else {
     	infoV("--------RECORD _"+tabName+":"+recordId+" NOT FOUND");    	
-    	return settings.RET_ERROR;
+    	return constants.RET_ERROR;
     }
 }
 
@@ -154,23 +154,39 @@ protected int deleteRecord(DefaultSelenium seleniumInstance, String tabName, Str
     	tempLocator = "del";
     	seleniumInstance.click(tempLocator);
     	seleniumInstance.getConfirmation();
+    	seleniumInstance.waitForPageToLoad(TIMEOUT);    	
     	
-    	if (checkRecordPresence(seleniumInstance, tabName, recordId)==settings.RET_ERROR){
+    	if (checkRecordPresence(seleniumInstance, tabName, recordId)==constants.RET_ERROR){
     		ut.info("--------RECORD _"+tabName+":"+recordId+" DELETED");    		
-    		return settings.RET_OK;
+    		return constants.RET_OK;
     	}else{
     			ut.error("--------RECORD _"+tabName+":"+recordId+" CAN'T BE DELETED (may be record was present before test started)");    		
     			getScreenshot(seleniumInstance, true);
-    			return settings.RET_ERROR;
+    			return constants.RET_ERROR;
    		}
     }
 
     else {
     	ut.error("--------RECORD _"+tabName+":"+recordId+" NOT FOUND FOR REMOVAL");    	
-    	return settings.RET_ERROR;
+    	return constants.RET_ERROR;
     }
 }
-    
+
+// TODO this function should be optimized
+public boolean isErrorPresent (DefaultSelenium seleniumInstance, String errorMessage){
+	boolean isPresent = false; 
+	String tempLocator;
+	tempLocator = "//*[contains(text(),'"+constants.GENERAL_PAGE_ERROR+"')]";
+	if (seleniumInstance.isElementPresent(tempLocator)&&
+			seleniumInstance.isVisible(tempLocator)){
+				tempLocator = "//*[contains(text(),'"+errorMessage+"')]";
+				if (seleniumInstance.isElementPresent(tempLocator)&&
+						seleniumInstance.isVisible(tempLocator))
+					isPresent = true;
+	}
+	return isPresent;
+}
+
 public void info (String message){
 		if (!LOG_INFOS) return;
         ut.info(message);

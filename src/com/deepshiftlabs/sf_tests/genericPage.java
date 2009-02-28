@@ -13,8 +13,9 @@ public class genericPage {
     String myRecordId;    
     ArrayList elements = new ArrayList();
     commonActions action = new commonActions();
-    settings privateSettings;
     DefaultSelenium sInstance;
+    
+    private int determiningRecordFieldIndex = -1;
     
     genericPage(String a_parentObjectType, String a_parentTabID, String a_myRecordId ) {
         parentObjectType = a_parentObjectType;
@@ -25,17 +26,17 @@ public class genericPage {
     public int prepareBrowser(String hub, int port, String browser, String url)
     {
         sInstance = action.getSelenium(hub, port, browser, url);
-        return settings.RET_OK;
+        return constants.RET_OK;
     };
     
     public int logout(){
     	action.logout(sInstance);
-        return settings.RET_OK;    	
+        return constants.RET_OK;    	
     }
     public int freeBrowser()
     {
         action.freeSelenium(sInstance);
-        return settings.RET_OK;
+        return constants.RET_OK;
     };    
         
     public int addElement(genericElement el){
@@ -54,20 +55,19 @@ public class genericPage {
 		        return index;
 		    }
 	    }
-	    return settings.RET_ERROR;
+	    return constants.RET_ERROR;
     }
 
     public int setDeterminingRecordIdField(String elementName){
-    	int elementIndexInList;
         genericElement tempElement;    	
     	
-    	elementIndexInList = findElementIndexByName(elementName);
-    	if (elementIndexInList!=settings.RET_ERROR){
-    		tempElement = (genericElement)elements.get(elementIndexInList);
+        determiningRecordFieldIndex = findElementIndexByName(elementName);
+    	if (determiningRecordFieldIndex!=constants.RET_ERROR){
+    		tempElement = (genericElement)elements.get(determiningRecordFieldIndex);
     		tempElement.forceToDetermineRecordID(myRecordId);
-    		return settings.RET_OK;
+    		return constants.RET_OK;
     	}
-        return settings.RET_ERROR;        
+        return constants.RET_ERROR;        
     }    
     
     public int setUnique(String elementName, boolean isCaseSens){
@@ -75,17 +75,17 @@ public class genericPage {
         genericElement tempElement;    	
     	
     	elementIndexInList = findElementIndexByName(elementName);
-    	if (elementIndexInList!=settings.RET_ERROR){
+    	if (elementIndexInList!=constants.RET_ERROR){
     		tempElement = (genericElement)elements.get(elementIndexInList);
     		if (tempElement instanceof textElement){
     			((textElement)tempElement).setUnique(isCaseSens);
-    			return settings.RET_OK;
+    			return constants.RET_OK;
     		}
     		action.error("Can't setUnique - it isn't textElement!");
-    		return settings.RET_ERROR;
+    		return constants.RET_ERROR;
     	}
     	action.error("Can't setUnique - there are no such element");
-        return settings.RET_ERROR;
+        return constants.RET_ERROR;
     }       
     
     public int checkElementsPresence (){
@@ -95,7 +95,7 @@ public class genericPage {
         Iterator iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (genericElement)iterator.next();
-		     if (tempElement.checkPresence(sInstance)==settings.RET_ERROR){
+		     if (tempElement.checkPresence(sInstance)==constants.RET_ERROR){
 		        missed++;
 		    }
 	    }
@@ -110,7 +110,7 @@ public class genericPage {
 		     tempElement = (genericElement)iterator.next();
 		     tempElement.fillByValidValue(sInstance);
 	    }
-	    return settings.RET_OK;
+	    return constants.RET_OK;
     }
     
     public int checkAllElements(){
@@ -123,38 +123,53 @@ public class genericPage {
 	    	 fillElementsByValidValues();	    	
 		     tempElement = (genericElement)iterator.next();
 
-		     returnedValue = settings.RET_ERROR;
-		     while (returnedValue!=settings.RET_OK){
+		     returnedValue = constants.RET_ERROR;
+		     while (returnedValue!=constants.RET_OK){
 		    	 returnedValue = tempElement.checkAll(sInstance);
-		    	 if (returnedValue==settings.RET_PAGE_BROKEN_ERROR || 
-		    			 returnedValue==settings.RET_PAGE_BROKEN_OK){
+		    	 if (returnedValue==constants.RET_PAGE_BROKEN_ERROR || 
+		    			 returnedValue==constants.RET_PAGE_BROKEN_OK){
 		    		recreateRecord();
 		    	 	fillElementsByValidValues();
 		    	 }
 		     }
 	    }
-	    return settings.RET_OK;
+	    return constants.RET_OK;
     }
     
     public int login(){
-    	action.login(sInstance, privateSettings.SF_LOGIN, privateSettings.SF_PASSWORD);
-    	return settings.RET_OK;
+    	action.login(sInstance, settings.SF_LOGIN, settings.SF_PASSWORD);
+    	return constants.RET_OK;
     }
     
     public int createNewEmptyRecord(){
     	action.createNewEmptyRecord(sInstance, parentTabID);
-    	return settings.RET_OK;    	
+    	return constants.RET_OK;    	
+    }
+    
+    String getIdOfStoredRecord(){
+        genericElement tempElement;    	
+    	
+        if (determiningRecordFieldIndex==-1)
+        	return myRecordId;
+        if (determiningRecordFieldIndex>=0 || determiningRecordFieldIndex< elements.size()){
+        	tempElement = (genericElement)elements.get(determiningRecordFieldIndex);
+        	return tempElement.getLastEnteredValue(); 
+        }
+        else {
+        	action.error("No such element");        	
+        	return myRecordId;
+        }
     }
     
     public int recreateRecord(){
-    	action.deleteRecord(sInstance, parentTabID, myRecordId);
+    	action.deleteRecord(sInstance, parentTabID, getIdOfStoredRecord());
     	action.createNewEmptyRecord(sInstance, parentTabID);    	
-        return settings.RET_OK;
+        return constants.RET_OK;
     }    
     
     public int saveRecord(){
     	action.saveRecord(sInstance);
-        return settings.RET_OK;
+        return constants.RET_OK;
     }
 }  
 

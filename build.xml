@@ -13,13 +13,10 @@
             <fileset dir="lib">
                 <include name="*.jar"/>		<!--  nashi biblioteki  -->
             </fileset>
-            <fileset dir="c:\testng-5.8">      
-                <include name="**/*.jar"/>  	<!--  dlya togo, chtoby podklyuchit' testng -->
-            </fileset>
             
             <pathelement path="${java.class.path}/"/>
 <!--  zdes' budut lezhat' nashi skompilirovannye klassy -->
-            <pathelement path="c:\trillium\tests\trunk\salesforce\java\build\class\"/>
+            <pathelement path="build\class\"/>
         </path>
       
 <!--  eta tsel' sozdaet papki, kompiliruet ishodniki i lozhit v /build/class -->

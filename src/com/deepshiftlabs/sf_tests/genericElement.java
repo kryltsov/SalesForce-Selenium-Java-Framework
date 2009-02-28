@@ -2,6 +2,7 @@ package com.deepshiftlabs.sf_tests;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.thoughtworks.selenium.*;
 //import org.testng.annotations.*;
@@ -12,23 +13,32 @@ public class genericElement {
     protected String elementSfId;
     protected String parentObjectType;
     protected String validValue;
+    protected String elementLocator;
+    protected String lastEnteredValue;
     protected boolean isRequired;
     protected boolean determinesRecordId = false;
+    
+    ArrayList <checkValue> values = new ArrayList <checkValue> ();
+    
     String recordId = "";
     commonActions action = new commonActions();
     
-    
-    genericElement(String a_elementName, String a_elementSfId, String a_parentObjectType, String a_validValue, boolean a_isRequired) {
+    genericElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired) {
         elementName = a_elementName;
         parentObjectType = a_parentObjectType;
         elementSfId = a_elementSfId;
-        validValue = a_validValue;
         isRequired = a_isRequired;
+        elementLocator = "//input[@id='"+elementSfId+"']";
+        lastEnteredValue = "";
     }
         
     public String getElementName(){
     	return elementName;
     }
+    
+    public String getLastEnteredValue(){
+    	return lastEnteredValue;
+    }    
     
     public void forceToDetermineRecordID(String a_recordId){
     	determinesRecordId = true;
@@ -36,92 +46,159 @@ public class genericElement {
     }
     
     public int checkPresence (DefaultSelenium selInstance){
-        String tempLocator;
         
-        tempLocator = "//input[@id='"+elementSfId+"']";
-        
-        if (selInstance.isElementPresent(tempLocator)){
+        if (selInstance.isElementPresent(elementLocator)){
             action.info ("Element name = "+elementName + " is PRESENT");
-            return settings.RET_OK;
+            return constants.RET_OK;
         }
-        action.error ("Element name = "+elementName + " is NOT PRESENT. Locator was _"+tempLocator+"_");
-        return settings.RET_ERROR;
+        action.error ("Element name = "+elementName + " is NOT PRESENT. Locator was _"+elementLocator+"_");
+        return constants.RET_ERROR;
     }
     
     public int fillByValidValue (DefaultSelenium selInstance){
-        String tempLocator;
         String tempValidValue = validValue;
         
         if (determinesRecordId) tempValidValue = recordId;
         
-        tempLocator = "//input[@id='"+elementSfId+"']";
-        
-        selInstance.type(tempLocator, tempValidValue);
+        selInstance.type(elementLocator, tempValidValue);
+        lastEnteredValue = tempValidValue;
         action.infoV ("Filling Element _"+ elementName + "_ by valid value = _"+tempValidValue+"_");
-       return settings.RET_OK;
+       return constants.RET_OK;
     }
     
     public int fillByNull (DefaultSelenium selInstance){
-        String tempLocator;
-        
-        tempLocator = "//input[@id='"+elementSfId+"']";
-        
-        selInstance.type(tempLocator, "");
+        selInstance.type(elementLocator, "");
+        lastEnteredValue = "";
         action.infoV ("Filling Element _"+ elementName + "_ by NULL");
-       return settings.RET_OK;
+       return constants.RET_OK;
     }
     
     public int  checkAll (DefaultSelenium selInstance){
     	int returnedValue;
-        action.infoV ("Starting checking all for element _"+elementSfId+"_");
+        action.infoV ("Starting checking all for element _"+elementName+"_");
+
         returnedValue = checkRequired(selInstance); 
-        if ((returnedValue == settings.RET_PAGE_BROKEN_OK)||
-    			(returnedValue== settings.RET_PAGE_BROKEN_ERROR)) 
+        if ((returnedValue == constants.RET_PAGE_BROKEN_OK)||
+    			(returnedValue== constants.RET_PAGE_BROKEN_ERROR)) 
     		return returnedValue;
-        
-        
-       return settings.RET_OK;
+
+        returnedValue = checkAllValues(selInstance); 
+        if ((returnedValue == constants.RET_PAGE_BROKEN_OK)||
+    			(returnedValue== constants.RET_PAGE_BROKEN_ERROR)) 
+    		return returnedValue;
+
+        return constants.RET_OK;
     }
    
     private int checkRequiredRunCount=0;
     public int checkRequired (DefaultSelenium selInstance){
     	boolean realRequired = false;
     	if (checkRequiredRunCount>0) {
-    		action.info("CheckRequired for element _"+elementSfId+"_ already was performed, skipping");
-    		return settings.RET_SKIPPED;
+    		action.infoV("CheckRequired for element _"+elementName+"_ already was performed, skipping");
+    		return constants.RET_SKIPPED;
     	}
     	checkRequiredRunCount++;
 	        action.infoV ("Starting checkRequired for _"+elementName+"_");
 	    	fillByNull(selInstance);
 	    	action.saveRecord(selInstance);
-	    	if (selInstance.isTextPresent("Review all error messages below to correct your data.")){
-	    		if (selInstance.isTextPresent("Error: You must enter a value"))
-	    			realRequired = true;
-	    	}
+	    	
+	    	realRequired = action.isErrorPresent(selInstance, "You must enter a value");
 
 	    	if (realRequired==true){
 	    		if (isRequired==true){
 	    	    	action.info("Element _"+ elementName + "_ is required!(OK)");
 	    			action.getScreenshot(selInstance, false);
-	    			return settings.RET_OK;
+	    			return constants.RET_OK;
 	    		}else{
 	    			action.error("Element _"+ elementName + "_ is required!(ERROR)");
 	    			action.getScreenshot(selInstance, true);
-	    			return settings.RET_ERROR;
+	    			return constants.RET_ERROR;
 	    		}
 	    	}
-	    	if (realRequired==false){
+	    	else{
 	    		if (isRequired==false){
 	    	    	action.info("Element _"+ elementName + "_ is NOT required!(OK)");
 	    			action.getScreenshot(selInstance, false);
-	    			return settings.RET_PAGE_BROKEN_OK;
+	    			return constants.RET_PAGE_BROKEN_OK;
 	    		}else{
 	    			action.error("Element _"+ elementName + "_ is NOT required!(ERROR)");
 	    			action.getScreenshot(selInstance, true);
-	    			return settings.RET_PAGE_BROKEN_ERROR;
+	    			return constants.RET_PAGE_BROKEN_ERROR;
 	    		}
 	    	}
-	    	return settings.RET_SOMETHING_STRANGE;
+    }
+    
+ // TODO - Text element we should check if theValue.value.length()>maxLength and then skip this value
+    private int checkOneValue(DefaultSelenium selInstance, checkValue theValue){
+    	boolean isValid = false;
+    	boolean isValueOK = false;
+    	boolean pageBroken = false;
+    	
+    	theValue.status = constants.CHECKED;
+    	selInstance.type (elementLocator, theValue.value);
+    	lastEnteredValue = theValue.value;
+    	
+    	action.saveRecord(selInstance);
+    	isValid = !(action.isErrorPresent(selInstance, theValue.shouldBeErrorMessage));
+    	pageBroken = isValid;
+    	
+    	isValueOK = (isValid==theValue.shouldBeValid);
+    	if (isValueOK) theValue.validCheckResult= constants.CHECK_OK;
+    	else theValue.validCheckResult = constants.CHECK_ERROR;
+
+// logging
+		String isValidInRealString = "invalid";
+		if (isValid) 
+			isValidInRealString = "valid";
+		
+    	if (isValueOK)
+    		action.info("Value _"+theValue.value+"_ for element _"+elementName+"_ is "+isValidInRealString+" (OK)");
+    	else {
+    		action.error("Value _"+theValue.value+"_ for element _"+elementName+"_ is "+isValidInRealString+" (ERROR)");
+    		action.getScreenshot(selInstance, true);
+    	}
+// end logging    	
+    	
+    	if (pageBroken){
+    		if (isValueOK) return constants.RET_PAGE_BROKEN_OK;
+    		else return constants.RET_PAGE_BROKEN_ERROR;
+    	}
+
+    	if (isValueOK) return constants.RET_OK;
+    	else return constants.RET_ERROR;
+    }
+
+    private int checkIsDisplayedRight(DefaultSelenium selInstance, checkValue theValue){
+    	if (selInstance.isTextPresent(theValue.shouldBeDisplayed)){
+    		action.infoV("Value _"+theValue.value+"_ for element _"+elementName+"_ is displayed as _"+theValue.shouldBeDisplayed+"_ (OK)");
+    		theValue.displayedRightResult = constants.CHECK_OK;
+    		return constants.RET_PAGE_BROKEN_OK;
+    	}
+    	
+    	theValue.displayedRightResult = constants.CHECK_ERROR;
+    	action.infoV("Value _"+theValue.value+"_ for element _"+elementName+"_ is NOT displayed as _"+theValue.shouldBeDisplayed+"_ (ERROR)");
+    	action.getScreenshot(selInstance, true);
+    	return constants.RET_PAGE_BROKEN_ERROR;
+    }
+    
+    private int checkAllValuesRunCount=0;
+    public int checkAllValues (DefaultSelenium selInstance){
+    	int retValue;
+    	if (checkAllValuesRunCount>values.size()-1) {
+    		action.infoV("checkAllValues _"+elementName+"_ already was performed, skipping");
+    		return constants.RET_SKIPPED;
+    	}
+
+    	while (checkAllValuesRunCount<values.size()){
+	    	retValue = checkOneValue(selInstance, values.get(checkAllValuesRunCount));
+	    	if (retValue==constants.RET_PAGE_BROKEN_OK)
+	    		retValue = checkIsDisplayedRight(selInstance, values.get(checkAllValuesRunCount));
+
+	    	checkAllValuesRunCount++;
+	    	if (retValue==constants.RET_PAGE_BROKEN_ERROR || retValue==constants.RET_PAGE_BROKEN_OK)
+	    		return retValue;
+    	}
+    	return constants.RET_OK;
     }
 }
       
