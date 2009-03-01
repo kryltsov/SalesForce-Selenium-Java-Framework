@@ -4,19 +4,28 @@ import com.thoughtworks.selenium.DefaultSelenium;
 
 public class genericTextElement extends genericElement {
 	
-    private int inputLength;
-    
 	public genericTextElement(String name, String sfId, String objectType,
 			 String value, boolean a_isRequired) {
 		super(name, sfId, objectType, a_isRequired);
 		validValue = "a";
 		setInputLength(255);
+//TODO should check when we go here and cut this
+		action.error("Check TODO.");
 	}
 	
     public genericTextElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired, int a_maxLength){
         super(a_elementName, a_elementSfId,a_parentObjectType, a_isRequired);
         validValue = "a";
         setInputLength(a_maxLength);
+
+// there we can't place symbols <> and "  because urlElement can't display them 		
+
+        values.add(new checkValue("test", constants.IT_IS_VALID_VALUE));
+        values.add(new checkValue("test!@#", constants.IT_IS_VALID_VALUE));
+        values.add(new checkValue("test··ar", constants.IT_IS_VALID_VALUE));
+        values.add(new checkValue("test...!+=%$*()!@#$%^&*?{}[]", constants.IT_IS_VALID_VALUE));		
+        values.add(new checkValue("debug test to find if we corect work with lenghts of check values more than input maxsize (there are near 100 symbols here)", constants.IT_IS_VALID_VALUE));
+
     }    
     
     public void setInputLength (int a_length){
@@ -26,6 +35,14 @@ public class genericTextElement extends genericElement {
      public int getInputLength (){
        return inputLength;
      }
+     
+    public boolean isValueValidForThisElementLength(checkValue theValue){
+    	if (theValue.value.length()>inputLength){
+    		action.error("Length of check value _"+theValue.value+"_ is greater then element _"+elementName+"_ max size ("+inputLength+"), value skipped.");
+    		return false;
+    	}
+    	return true;
+    }     
      
      public int checkMaxLengthRunCount=0;
      public int checkMaxLength(DefaultSelenium selInstance){

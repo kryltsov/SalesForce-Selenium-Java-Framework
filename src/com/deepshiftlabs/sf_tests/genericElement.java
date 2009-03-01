@@ -15,10 +15,11 @@ public class genericElement {
     protected String validValue;
     protected String elementLocator;
     protected String lastEnteredValue;
+    protected int inputLength;
     protected boolean isRequired;
     protected boolean determinesRecordId = false;
     
-    ArrayList <checkValue> values = new ArrayList <checkValue> ();
+    protected ArrayList <checkValue> values = new ArrayList <checkValue> ();
     
     String recordId = "";
     commonActions action = new commonActions();
@@ -30,6 +31,7 @@ public class genericElement {
         isRequired = a_isRequired;
         elementLocator = "//input[@id='"+elementSfId+"']";
         lastEnteredValue = "";
+        inputLength = 32000+100;
     }
         
     public String getElementName(){
@@ -71,6 +73,10 @@ public class genericElement {
         lastEnteredValue = "";
         action.infoV ("Filling Element _"+ elementName + "_ by NULL");
        return constants.RET_OK;
+    }
+
+    public boolean isValueValidForThisElementLength(checkValue theValue){
+    	return true;
     }
     
     public int  checkAll (DefaultSelenium selInstance){
@@ -168,7 +174,7 @@ public class genericElement {
     	else return constants.RET_ERROR;
     }
 
-    private int checkIsDisplayedRight(DefaultSelenium selInstance, checkValue theValue){
+    protected int checkIsDisplayedRight(DefaultSelenium selInstance, checkValue theValue){
     	if (selInstance.isTextPresent(theValue.shouldBeDisplayed)){
     		action.infoV("Value _"+theValue.value+"_ for element _"+elementName+"_ is displayed as _"+theValue.shouldBeDisplayed+"_ (OK)");
     		theValue.displayedRightResult = constants.CHECK_OK;
@@ -184,19 +190,27 @@ public class genericElement {
     private int checkAllValuesRunCount=0;
     public int checkAllValues (DefaultSelenium selInstance){
     	int retValue;
+    	checkValue tempCheckValue;
     	if (checkAllValuesRunCount>values.size()-1) {
     		action.infoV("checkAllValues _"+elementName+"_ already was performed, skipping");
     		return constants.RET_SKIPPED;
     	}
 
     	while (checkAllValuesRunCount<values.size()){
-	    	retValue = checkOneValue(selInstance, values.get(checkAllValuesRunCount));
-	    	if (retValue==constants.RET_PAGE_BROKEN_OK)
-	    		retValue = checkIsDisplayedRight(selInstance, values.get(checkAllValuesRunCount));
+    		tempCheckValue = values.get(checkAllValuesRunCount);
 
-	    	checkAllValuesRunCount++;
-	    	if (retValue==constants.RET_PAGE_BROKEN_ERROR || retValue==constants.RET_PAGE_BROKEN_OK)
-	    		return retValue;
+    		if (isValueValidForThisElementLength(tempCheckValue)== false){
+    			checkAllValuesRunCount++;
+//TODO implement function to divide long entries
+    		}else{
+		    	retValue = checkOneValue(selInstance, tempCheckValue);
+		    	if (retValue==constants.RET_PAGE_BROKEN_OK)
+		    		retValue = checkIsDisplayedRight(selInstance, tempCheckValue);
+	
+		    	checkAllValuesRunCount++;
+		    	if (retValue==constants.RET_PAGE_BROKEN_ERROR || retValue==constants.RET_PAGE_BROKEN_OK)
+		    		return retValue;
+    		}
     	}
     	return constants.RET_OK;
     }
