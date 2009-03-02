@@ -191,12 +191,22 @@ public class genericElement {
     public int checkAllValues (DefaultSelenium selInstance){
     	int retValue;
     	checkValue tempCheckValue;
-    	if (checkAllValuesRunCount>values.size()-1) {
+    	int countOfValuesToRun = 0;
+    	
+    	countOfValuesToRun = values.size();
+    	
+    	if (checkAllValuesRunCount>countOfValuesToRun-1) {
     		action.infoV("checkAllValues _"+elementName+"_ already was performed, skipping");
     		return constants.RET_SKIPPED;
     	}
+    	
+    	if (settings.LIMIT_CHECK_VALUES_COUNT_TO > 0 &&
+    			settings.LIMIT_CHECK_VALUES_COUNT_TO<countOfValuesToRun){
+        			countOfValuesToRun = settings.LIMIT_CHECK_VALUES_COUNT_TO;
+        			action.warn("CountOfValuesToRun is limited to " + countOfValuesToRun);
+        	}    	
 
-    	while (checkAllValuesRunCount<values.size()){
+    	while (checkAllValuesRunCount<countOfValuesToRun){
     		tempCheckValue = values.get(checkAllValuesRunCount);
 
     		if (isValueValidForThisElementLength(tempCheckValue)== false){

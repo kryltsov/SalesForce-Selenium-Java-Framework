@@ -4,18 +4,9 @@ import com.thoughtworks.selenium.DefaultSelenium;
 
 public class genericTextElement extends genericElement {
 	
-	public genericTextElement(String name, String sfId, String objectType,
-			 String value, boolean a_isRequired) {
-		super(name, sfId, objectType, a_isRequired);
-		validValue = "a";
-		setInputLength(255);
-//TODO should check when we go here and cut this
-		action.error("Check TODO.");
-	}
-	
     public genericTextElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired, int a_maxLength){
         super(a_elementName, a_elementSfId,a_parentObjectType, a_isRequired);
-        validValue = "a";
+        validValue = "1";
         setInputLength(a_maxLength);
 
 // there we can't place symbols <> and "  because urlElement can't display them 		

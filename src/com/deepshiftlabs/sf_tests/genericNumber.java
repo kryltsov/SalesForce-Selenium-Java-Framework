@@ -8,11 +8,13 @@ public class genericNumber extends genericElement {
 	private String standartInvalidMessage;
 
 	public genericNumber(String name, String sfId, String objectType,
-			 String value, boolean a_isRequired, int a_intPlaces, int a_decimalPlaces) {
+			 boolean a_isRequired, int a_intPlaces, int a_decimalPlaces) {
 		super(name, sfId, objectType, a_isRequired);
 		validValue = "1";
     	intPlaces =  a_intPlaces;
     	decimalPlaces = a_decimalPlaces;
+
+    	values.add(new checkValue("78.7245", constants.IT_IS_VALID_VALUE,"","78.7"));  // to check decimal places
     	
 		values.add(new checkValue("be", constants.IT_IS_INVALID_VALUE));
 		values.add(new checkValue("1-e", constants.IT_IS_INVALID_VALUE));
@@ -74,10 +76,10 @@ public class genericNumber extends genericElement {
     		int count = getDecimalPlacesCount(displayedValue);
     		checkDecimalPlacesCountRunCount++;
     		if (count==decimalPlaces){
-	        	action.error("Real decimal places numb of _"+ elementName + "_ is OK ("+decimalPlaces+" )");
+	        	action.infoV("Real decimal places numb of _"+ elementName + "_ is OK ("+decimalPlaces+" )");
 	        	return constants.RET_OK;    			
     		}else{//
-	        	action.error("Real decimal places numb of _"+ elementName + "_ is "+count+" (ERROR). Should be (should be "+decimalPlaces+" )");
+	        	action.error("Real decimal places numb of _"+ elementName + "_ is "+count+" (ERROR). Should be "+decimalPlaces);
 //TODO here I don't get screenshot
 	        	return constants.RET_ERROR;    			
     		}
@@ -95,7 +97,7 @@ public class genericNumber extends genericElement {
      	checkMaxLengthRunCount++;
      	
         if (validValue.length()>1){
-          	 action.error("Can't perform check because validValue is not one digit.");
+          	 action.error("Can't perform checkMaxLength because validValue is not one digit.");
           	 return constants.RET_ERROR;
         }     	
 

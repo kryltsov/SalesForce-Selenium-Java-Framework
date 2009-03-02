@@ -4,7 +4,7 @@ import com.thoughtworks.selenium.DefaultSelenium;
 
 public class urlElement extends genericTextElement {
 
-	urlElement(String a_elementName, String a_elementSfId, String a_parentObjectType, String a_validValue, boolean a_isRequired){
+	urlElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired){
         super(a_elementName, a_elementSfId,a_parentObjectType, a_isRequired, 255);
         
         for (int i=0; i<values.size();i++){

@@ -4,6 +4,7 @@ public final class constants {
 
 // TODO when working with xpath we should not use ' in locators	
 	
+	
 // return values
 	public static final int RET_OK = 0;
 	public static final int RET_SKIPPED = -100;
@@ -14,11 +15,12 @@ public final class constants {
 //	public static final int RET_PAGE_BROKEN = -2;
 	
 	
-// standart parameters	
+// standard parameters	
 	public static final boolean REQUIRED = true;
 	public static final boolean IT_IS_VALID_VALUE = true;
 	public static final boolean IT_IS_INVALID_VALUE = false;
 	public static final String ONLY_GENERAL_ERROR = "";
+	public static final String STANDARD_INVALID_VALUE_ERROR = "";	
 	
 	
 //statuses
@@ -32,5 +34,5 @@ public final class constants {
 
 	// i can't understand why "Review all error messages below to correct your data." is not working in xpath
 	public static final String GENERAL_PAGE_ERROR = "Error: Invalid Data.";
-	public static final String STANDARD_INVALID_VALUE_ERROR = "";
+    public static final String SAVE_RECORD_LOCATOR = "save";	
 }
