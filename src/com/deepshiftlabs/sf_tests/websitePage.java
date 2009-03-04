@@ -17,9 +17,9 @@ public class websitePage {
     public int addAllElements(){
 
        page.addElement(new textElement("Employment Website Name", "//input[@id='Name']","Employment Website", constants.REQUIRED,80));
-       page.addElement(new urlElement("Web Address", "//tr[2]/td[2]/input","Employment Website", constants.REQUIRED));
-       page.addElement(new currencyElement("Price Per Post", "//tr[3]/td[2]/div/input" ,"Employment Website", constants.REQUIRED,5,2));
-       page.addElement(new currencyElement("Maximum Budget", "//tr[4]/td[2]/div/input" ,"Employment Website", constants.REQUIRED,6,2));    
+       page.addElement(new urlElement("Web Address", "document.forms[3].elements[8]","Employment Website", constants.REQUIRED));
+       page.addElement(new currencyElement("Price Per Post", "document.forms[3].elements[9]" ,"Employment Website", constants.REQUIRED,5,2));
+       page.addElement(new currencyElement("Maximum Budget", "document.forms[3].elements[10]" ,"Employment Website", constants.REQUIRED,6,2));    
 
 /*     page.addElement(new textElement("Employment Website Name", "Name","Employment Website", constants.REQUIRED,80));
        page.addElement(new urlElement("Web Address", "00N80000002suMr","Employment Website", constants.REQUIRED));
