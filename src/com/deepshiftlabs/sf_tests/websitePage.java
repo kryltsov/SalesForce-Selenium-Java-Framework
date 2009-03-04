@@ -16,9 +16,8 @@ public class websitePage {
 
     public int addAllElements(){
        page.addElement(new textElement("Employment Website Name", "Name","Employment Website", constants.REQUIRED,80));
-  //     page.addElement(new urlElement("Web Address", "00N80000002suMr","Employment Website", constants.REQUIRED));
-       page.addElement(new textElement("Price Per Post", "00N80000002sumz","Employment Website", constants.REQUIRED,80));
-       //page.addElement(new currencyElement("Price Per Post", "00N80000002sumz" ,"Employment Website", constants.REQUIRED,5,2));
+       page.addElement(new urlElement("Web Address", "00N80000002suMr","Employment Website", constants.REQUIRED));
+       page.addElement(new currencyElement("Price Per Post", "00N80000002sumz" ,"Employment Website", constants.REQUIRED,5,2));
        
 //       page.addElement(new textElement("for_unique_check", "00N800000036pL8" ,"for_unique_check", "",false,20));
 //       page.setUnique("for_unique_check",false);
