@@ -29,7 +29,8 @@ public class genericElement {
         parentObjectType = a_parentObjectType;
         elementSfId = a_elementSfId;
         isRequired = a_isRequired;
-        elementLocator = "//input[@id='"+elementSfId+"']";
+//        elementLocator = "//input[@id='"+elementSfId+"']";
+        elementLocator = elementSfId;
         lastEnteredValue = "";
         inputLength = 32000+100;
     }

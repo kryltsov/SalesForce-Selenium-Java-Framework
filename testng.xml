@@ -3,7 +3,7 @@
 <suite name="sf_tests_suite" parallel="methods" thread-count="7" verbose="3" >
     
     <parameter name="webSite" value="https://login.salesforce.com" />
-    <parameter name="seleniumHost" value="192.168.232.13" />
+    <parameter name="seleniumHost" value="localhost" />
     <parameter name="seleniumPort" value="4444" />
     <parameter name="browser" value="*chrome" />
 
