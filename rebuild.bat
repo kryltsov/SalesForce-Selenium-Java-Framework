@@ -1,1 +1,1 @@
-c:\ant171\bin\ant rebuild
+ant rebuild
