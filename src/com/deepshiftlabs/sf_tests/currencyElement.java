@@ -19,7 +19,7 @@ public class currencyElement extends genericNumber {
         }
         
         values.add(new checkValue("$$44", constants.IT_IS_INVALID_VALUE, "Invalid currency"));
-        values.add(new checkValue("$446", constants.IT_IS_VALID_VALUE, "", "$446"));
-        values.add(new checkValue("477", constants.IT_IS_VALID_VALUE, "", "$477"));
+        values.add(new checkValue("$446", constants.IT_IS_VALID_VALUE, "", "$446.00"));
+        values.add(new checkValue("477", constants.IT_IS_VALID_VALUE, "", "$477.00"));
 	}
 }

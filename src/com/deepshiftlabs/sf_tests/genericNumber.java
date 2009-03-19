@@ -23,7 +23,7 @@ public class genericNumber extends genericElement {
 		values.add(new checkValue("100,", constants.IT_IS_INVALID_VALUE));  // check 3
 		
 // TODO I should implement function, that will validate shouldBeDisplayed field of checkValue in accordance with decimalPlaces
-// before we will use them
+// and in accordance to triplets delimiter "," before we will use them
 		
 		values.add(new checkValue(" 00 00 123", constants.IT_IS_VALID_VALUE,"","123"));  // check 2
 		values.add(new checkValue("4,5,6", constants.IT_IS_VALID_VALUE,"","456"));   // check 3
@@ -110,8 +110,8 @@ public class genericNumber extends genericElement {
 	       	 testString = validChar+testString;
 	        }
 	        
-	        selInstance.type(elementLocator, testString);
-	        action.saveRecord(selInstance);
+	        action.typeText(selInstance, writeLocator, testString);
+	        action.pressButton(selInstance, constants.SAVE_RECORD_LOCATOR);
 	        if (action.isErrorPresent(selInstance, "Number is too large.")){
 	        	checkMaxLengthRunCount=2; // no need in next step of check
 	        	action.error("Real integer places numb of _"+ elementName + "_ is less than should be (should be "+intPlaces+")");
@@ -127,12 +127,12 @@ public class genericNumber extends genericElement {
 	        while (testString.length() < (intPlaces+1) ){
 	       	 testString = validChar+testString;
 	        }
-	        selInstance.type(elementLocator, testString);
-	        action.saveRecord(selInstance);
+	        action.typeText(selInstance, writeLocator, testString);
+	        action.pressButton(selInstance, constants.SAVE_RECORD_LOCATOR);
 	        if (action.isErrorPresent(selInstance, "Number is too large.")){
 	        	action.info("Real integer places numb of _"+ elementName + "_ is OK! ("+intPlaces+")");
 
-	        	checkDecimalPlacesCount(selInstance.getValue(elementLocator));
+	        	checkDecimalPlacesCount(action.readValue(selInstance, writeLocator));
 //  TODO maybe we should edit retValue depending on checkDecimalPlacesCount()	        	
 	        	return constants.RET_OK;        	
 	        } else {
@@ -163,10 +163,10 @@ public class genericNumber extends genericElement {
 	       	 testString = validChar+testString;
 	        }
 	        
-	        selInstance.type(elementLocator, testString);
-	        action.saveRecord(selInstance);
+	        action.typeText(selInstance, writeLocator, testString);
+	        action.pressButton(selInstance, constants.SAVE_RECORD_LOCATOR);
 	        if (action.isErrorPresent(selInstance, "Number is too large.")){
-	        	if (selInstance.getValue(elementLocator).equals("#Too Big!")){
+	        	if (action.readValue(selInstance, writeLocator).equals("#Too Big!")){
 	        		action.info("checkForTooBig of _"+ elementName + "_ is OK");
 		        	return constants.RET_OK;
 	        	}

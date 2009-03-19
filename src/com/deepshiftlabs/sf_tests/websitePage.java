@@ -1,8 +1,12 @@
+// TODO  add comments
+// TODO  do all TODO's
+// TODO  do some whole statistics (now all results are only in runtime log)
+// TODO  find errors after which there is not sense to continue current element test or all page test
+
 package com.deepshiftlabs.sf_tests;
 
 import org.testng.annotations.*;
 import com.thoughtworks.selenium.*;
-import org.testng.annotations.*;
 
 import java.util.*;
 import java.io.*;
@@ -12,20 +16,15 @@ public class websitePage {
     settings privateSettings;	
 	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));      
     
-    genericPage page = new genericPage ("Employment Website", "Employment Websites", "websitePage00001");
+    genericPage page = new genericPage ("Employment Websites", "websitePage00001", "Employment Website");
 
     public int addAllElements(){
-
-       page.addElement(new textElement("Employment Website Name", "//input[@id='Name']","Employment Website", constants.REQUIRED,80));
-       page.addElement(new urlElement("Web Address", "document.forms[3].elements[8]","Employment Website", constants.REQUIRED));
-       page.addElement(new currencyElement("Price Per Post", "document.forms[3].elements[9]" ,"Employment Website", constants.REQUIRED,5,2));
-       page.addElement(new currencyElement("Maximum Budget", "document.forms[3].elements[10]" ,"Employment Website", constants.REQUIRED,6,2));    
-
-/*     page.addElement(new textElement("Employment Website Name", "Name","Employment Website", constants.REQUIRED,80));
-       page.addElement(new urlElement("Web Address", "00N80000002suMr","Employment Website", constants.REQUIRED));
-       page.addElement(new currencyElement("Price Per Post", "00N80000002sumz" ,"Employment Website", constants.REQUIRED,5,2));
-       page.addElement(new currencyElement("Maximum Budget", "00N80000002sun3" ,"Employment Website", constants.REQUIRED,6,2));
-*/       
+       
+       page.addElement(new textElement("Employment Website Name", constants.RESERVED_PARAMETER, page.parentTabID, constants.REQUIRED,80));
+       page.addElement(new urlElement("Web Address", constants.RESERVED_PARAMETER, page.parentTabID, constants.REQUIRED));
+       page.addElement(new currencyElement("Price Per Post", constants.RESERVED_PARAMETER, page.parentTabID, constants.REQUIRED,5,2));
+       page.addElement(new currencyElement("Maximum Budget", constants.RESERVED_PARAMETER, page.parentTabID, constants.REQUIRED,6,2));    
+       
        return 0;
     }
 
@@ -41,16 +40,14 @@ public class websitePage {
         }
     	
     	addAllElements();
+    	
     	page.setDeterminingRecordIdField("Employment Website Name");
     	
     	page.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
     	page.login();    	
-    	page.createNewEmptyRecord();
-        page.checkElementsPresence();
-        page.fillElementsByValidValues();
-        
-        page.checkAllElements();
-
+    	
+    	page.checkAll();
+    	
         page.logout();
         page.freeBrowser();
         
@@ -60,6 +57,5 @@ public class websitePage {
         catch(IOException e) {};
         
     };
-}
-      
+}  
 

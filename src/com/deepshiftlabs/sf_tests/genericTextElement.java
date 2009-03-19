@@ -15,7 +15,7 @@ public class genericTextElement extends genericElement {
         values.add(new checkValue("test!@#", constants.IT_IS_VALID_VALUE));
         values.add(new checkValue("test··ar", constants.IT_IS_VALID_VALUE));
         values.add(new checkValue("test...!+=%$*()!@#$%^&*?{}[]", constants.IT_IS_VALID_VALUE));		
-        values.add(new checkValue("debug test to find if we corect work with lenghts of check values more than input maxsize (there are near 100 symbols here)", constants.IT_IS_VALID_VALUE));
+        values.add(new checkValue("debug test to find if we corect work with lenghts of check values more than input maxsize (there are near 100 symbols here)", constants.IT_IS_INVALID_VALUE));
 
     }    
     
@@ -58,14 +58,14 @@ public class genericTextElement extends genericElement {
         	 testString = validChar+testString;
          }
          
-         selInstance.type(elementLocator, testString);
-         realLength = selInstance.getValue(elementLocator).length();
+         action.typeText(selInstance, writeLocator, testString);
+         realLength = action.readValue(selInstance, writeLocator).length();
          if (realLength != inputLength){
              while (testString.length() < 256){
             	 testString = testString+testString;
              }
-             selInstance.type(elementLocator, testString);
-             realLength = selInstance.getValue(elementLocator).length();
+             action.typeText(selInstance, writeLocator, testString);
+             realLength = action.readValue(selInstance, writeLocator).length();
         	 action.error ("Real maxLenght of  _"+ elementName + "_ is "+realLength+" (should be "+inputLength+" )");
         	 action.getScreenshot(selInstance, true);        	 
          }

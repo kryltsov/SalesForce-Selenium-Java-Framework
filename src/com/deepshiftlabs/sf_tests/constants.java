@@ -9,6 +9,7 @@ public final class constants {
 	public static final int RET_OK = 0;
 	public static final int RET_SKIPPED = -100;
 	public static final int RET_ERROR = -1;
+	public static final String RET_ERROR_STRING = "e_rror_occured_";
 	public static final int RET_PAGE_BROKEN_OK = -3;
 	public static final int RET_PAGE_BROKEN_ERROR = -4;
 	public static final int RET_SOMETHING_STRANGE = -50;
@@ -21,6 +22,7 @@ public final class constants {
 	public static final boolean IT_IS_INVALID_VALUE = false;
 	public static final String ONLY_GENERAL_ERROR = "";
 	public static final String STANDARD_INVALID_VALUE_ERROR = "";	
+	public static final String RESERVED_PARAMETER = "reserved_parameter";
 	
 	
 //statuses
@@ -34,5 +36,11 @@ public final class constants {
 
 	// i can't understand why "Review all error messages below to correct your data." is not working in xpath
 	public static final String GENERAL_PAGE_ERROR = "Error: Invalid Data.";
-    public static final String SAVE_RECORD_LOCATOR = "save";	
+    public static final String SAVE_RECORD_LOCATOR = "save";
+    public static final String EDIT_RECORD_LOCATOR = "edit";
+    public static final String SAVE_AND_NEW_LOCATOR = "save_new";
+    public static final String CANCEL_LOCATOR = "cancel";
+    public static final String CLONE_LOCATOR = "clone";
+    public static final String DELETE_LOCATOR = "del";
+   
 }

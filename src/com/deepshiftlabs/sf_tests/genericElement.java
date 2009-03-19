@@ -13,7 +13,8 @@ public class genericElement {
     protected String elementSfId;
     protected String parentObjectType;
     protected String validValue;
-    protected String elementLocator;
+    protected String writeLocator;    
+    protected String readLocator;
     protected String lastEnteredValue;
     protected int inputLength;
     protected boolean isRequired;
@@ -27,10 +28,11 @@ public class genericElement {
     genericElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired) {
         elementName = a_elementName;
         parentObjectType = a_parentObjectType;
-        elementSfId = a_elementSfId;
+        elementSfId = a_elementSfId;  // now this is reserved param
         isRequired = a_isRequired;
 //        elementLocator = "//input[@id='"+elementSfId+"']";
-        elementLocator = elementSfId;
+        writeLocator = "//label[text()='"+a_elementName+"']/following::input";
+        readLocator = "//*[@class='labelCol' and text()='"+a_elementName+"']/following::*[@class]";
         lastEnteredValue = "";
         inputLength = 32000+100;
     }
@@ -48,13 +50,14 @@ public class genericElement {
     	recordId = a_recordId;
     }
     
+// you should use this func only on add/edit page becouse of writeLocator using     
     public int checkPresence (DefaultSelenium selInstance){
         
-        if (selInstance.isElementPresent(elementLocator)){
+        if (action.isElementPresent(selInstance, writeLocator)){
             action.info ("Element name = "+elementName + " is PRESENT");
             return constants.RET_OK;
         }
-        action.error ("Element name = "+elementName + " is NOT PRESENT. Locator was _"+elementLocator+"_");
+        action.error ("Element name = "+elementName + " is NOT PRESENT. Locator was _"+writeLocator+"_");
         return constants.RET_ERROR;
     }
     
@@ -63,19 +66,20 @@ public class genericElement {
         
         if (determinesRecordId) tempValidValue = recordId;
         
-        selInstance.type(elementLocator, tempValidValue);
+        action.typeText(selInstance, writeLocator, tempValidValue);
         lastEnteredValue = tempValidValue;
         action.infoV ("Filling Element _"+ elementName + "_ by valid value = _"+tempValidValue+"_");
        return constants.RET_OK;
     }
     
     public int fillByNull (DefaultSelenium selInstance){
-        selInstance.type(elementLocator, "");
+        action.typeText(selInstance, writeLocator, "");
         lastEnteredValue = "";
         action.infoV ("Filling Element _"+ elementName + "_ by NULL");
        return constants.RET_OK;
     }
 
+    // only template - each subclass will implement own 
     public boolean isValueValidForThisElementLength(checkValue theValue){
     	return true;
     }
@@ -107,7 +111,7 @@ public class genericElement {
     	checkRequiredRunCount++;
 	        action.infoV ("Starting checkRequired for _"+elementName+"_");
 	    	fillByNull(selInstance);
-	    	action.saveRecord(selInstance);
+	    	action.pressButton(selInstance, constants.SAVE_RECORD_LOCATOR);
 	    	
 	    	realRequired = action.isErrorPresent(selInstance, "You must enter a value");
 
@@ -142,10 +146,10 @@ public class genericElement {
     	boolean pageBroken = false;
     	
     	theValue.status = constants.CHECKED;
-    	selInstance.type (elementLocator, theValue.value);
+    	action.typeText(selInstance, writeLocator, theValue.value);
     	lastEnteredValue = theValue.value;
     	
-    	action.saveRecord(selInstance);
+    	action.pressButton(selInstance, constants.SAVE_RECORD_LOCATOR);
     	isValid = !(action.isErrorPresent(selInstance, theValue.shouldBeErrorMessage));
     	pageBroken = isValid;
     	
@@ -176,14 +180,24 @@ public class genericElement {
     }
 
     protected int checkIsDisplayedRight(DefaultSelenium selInstance, checkValue theValue){
-    	if (selInstance.isTextPresent(theValue.shouldBeDisplayed)){
-    		action.infoV("Value _"+theValue.value+"_ for element _"+elementName+"_ is displayed as _"+theValue.shouldBeDisplayed+"_ (OK)");
+    	String displayedText;
+    	
+    	displayedText = action.readText(selInstance, readLocator);
+    	if  ( displayedText == constants.RET_ERROR_STRING ){
+    		theValue.displayedRightResult = constants.CHECK_ERROR;
+        	action.error("Can't get text for element _"+elementName);
+        	action.getScreenshot(selInstance, true);
+        	return constants.RET_PAGE_BROKEN_ERROR;    		
+    	}
+    	
+    	if ( theValue.shouldBeDisplayed.equals(displayedText)){
+    		action.infoV("Value _"+theValue.value+"_ for element _"+elementName+"_ is displayed as _"+displayedText+"_ (OK)");
     		theValue.displayedRightResult = constants.CHECK_OK;
     		return constants.RET_PAGE_BROKEN_OK;
     	}
     	
     	theValue.displayedRightResult = constants.CHECK_ERROR;
-    	action.infoV("Value _"+theValue.value+"_ for element _"+elementName+"_ is NOT displayed as _"+theValue.shouldBeDisplayed+"_ (ERROR)");
+    	action.error("Value _"+theValue.value+"_ for element _"+elementName+"_ is displayed as _"+displayedText+"_ (should be _"+theValue.shouldBeDisplayed+"_)(ERROR)");
     	action.getScreenshot(selInstance, true);
     	return constants.RET_PAGE_BROKEN_ERROR;
     }

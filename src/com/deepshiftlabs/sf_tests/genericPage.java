@@ -8,19 +8,23 @@ import java.util.Iterator;
 
 
 public class genericPage {
-    String parentObjectType;
     String parentTabID;
     String myRecordId;    
+    
+    String defaultTitleSingular;
+    String defaultTitlePlural;
+    
     ArrayList elements = new ArrayList();
     commonActions action = new commonActions();
     DefaultSelenium sInstance;
     
     private int determiningRecordFieldIndex = -1;
     
-    genericPage(String a_parentObjectType, String a_parentTabID, String a_myRecordId ) {
-        parentObjectType = a_parentObjectType;
+    genericPage(String a_parentTabID, String a_myRecordId, String a_defaultTitleSingular ) {
         parentTabID = a_parentTabID;
         myRecordId = a_myRecordId;
+        defaultTitleSingular = a_defaultTitleSingular;
+        defaultTitlePlural = parentTabID;
     }
     
     public int prepareBrowser(String hub, int port, String browser, String url)
@@ -136,6 +140,105 @@ public class genericPage {
 	    return constants.RET_OK;
     }
     
+    public int checkTitle(String shouldBeTitle, String titleKind){
+    	String tempString;
+    	
+    	tempString = action.getTitle(sInstance);
+    	if (!shouldBeTitle.equals(tempString)){
+    		action.error(titleKind + " title of page _"+ parentTabID +"_ is _"+tempString+"_ (should be _"+shouldBeTitle+"_)");
+    		return constants.RET_ERROR;
+    	}      	
+    	action.info(titleKind + " title of page _"+ parentTabID +"_ is _"+tempString+" (OK)");
+    	return constants.RET_OK;
+    }
+    
+    public int checkTitles(){
+    	int retValue = constants.RET_OK;
+    	
+    	String homeTitle = defaultTitlePlural+": Home ~ Salesforce - Developer Edition";;
+    	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
+    	String editTitle = defaultTitleSingular+" Edit: "+ myRecordId+ " ~ Salesforce - Developer Edition";
+    	String afterSaveTitle = defaultTitleSingular+": "+ myRecordId+" ~ Salesforce - Developer Edition";
+    	String afterDeleteTitle = homeTitle;
+    	
+    	action.openTab(sInstance, parentTabID);
+    	
+    	retValue = checkTitle(homeTitle, "Home");
+    	
+    	if (action.createNewEmptyRecord(sInstance, parentTabID) == constants.RET_ERROR){
+    		action.error("Cant't create new record of _"+parentTabID+"_, checkTitles skipped");
+    		return constants.RET_ERROR;
+    	}
+    	
+    	retValue = checkTitle(newTitle, "New record");
+    	
+    	// TODO - should provide error if can't fill
+    	fillElementsByValidValues();
+    	
+    	action.isElementPresent(sInstance, constants.SAVE_AND_NEW_LOCATOR);    	
+    	action.isElementPresent(sInstance, constants.CANCEL_LOCATOR);
+    	
+
+    	if (action.pressButton(sInstance, constants.SAVE_RECORD_LOCATOR) == constants.RET_ERROR){
+    		return constants.RET_ERROR;
+    	}    	
+    	
+    	retValue = checkTitle(afterSaveTitle, "After save");
+
+    	action.isElementPresent(sInstance, constants.DELETE_LOCATOR);    	
+    	action.isElementPresent(sInstance, constants.CLONE_LOCATOR);
+
+    	if (action.pressButton(sInstance, constants.EDIT_RECORD_LOCATOR) == constants.RET_ERROR){
+    		return constants.RET_ERROR;
+    	}    	
+    	
+    	retValue = checkTitle(editTitle, "Edit title");
+
+    	action.isElementPresent(sInstance, constants.SAVE_RECORD_LOCATOR);    	
+    	action.isElementPresent(sInstance, constants.CANCEL_LOCATOR);
+    	
+    	if (action.pressButton(sInstance, constants.SAVE_AND_NEW_LOCATOR) == constants.RET_ERROR){
+    		return constants.RET_ERROR;
+    	}    	
+    	
+    	retValue = checkTitle(newTitle, "After SaveAndNew");
+    	
+    	if (action.pressButton(sInstance, constants.CANCEL_LOCATOR) == constants.RET_ERROR){
+    		return constants.RET_ERROR;
+    	}    	
+    	
+    	retValue = checkTitle(afterSaveTitle, "After cancel");    	
+    	
+    	if (action.pressButton(sInstance, constants.CLONE_LOCATOR) == constants.RET_ERROR){
+    		return constants.RET_ERROR;
+    	}    	
+    	
+    	retValue = checkTitle(newTitle, "After clone");
+    	
+    	if (action.pressButton(sInstance, constants.CANCEL_LOCATOR) == constants.RET_ERROR){
+    		return constants.RET_ERROR;
+    	}    	
+    	if (action.pressDelete(sInstance) == constants.RET_ERROR){
+    		return constants.RET_ERROR;
+    	}    	
+    	
+    	retValue = checkTitle(afterDeleteTitle, "After delete");
+    	
+    	return retValue;
+    }    
+    
+    public int checkAll(){
+    	checkTitles();
+    	
+    	createNewEmptyRecord();
+        checkElementsPresence();
+        fillElementsByValidValues();
+        
+        checkAllElements();    	
+    	
+    	return constants.RET_OK;
+    }
+    
     public int login(){
     	action.login(sInstance, settings.SF_LOGIN, settings.SF_PASSWORD);
     	return constants.RET_OK;
@@ -168,7 +271,7 @@ public class genericPage {
     }    
     
     public int saveRecord(){
-    	action.saveRecord(sInstance);
+    	action.pressButton(sInstance, constants.SAVE_RECORD_LOCATOR);
         return constants.RET_OK;
     }
 }  
