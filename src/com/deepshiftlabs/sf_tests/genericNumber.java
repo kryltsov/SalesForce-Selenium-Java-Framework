@@ -76,7 +76,7 @@ public class genericNumber extends genericElement {
     		int count = getDecimalPlacesCount(displayedValue);
     		checkDecimalPlacesCountRunCount++;
     		if (count==decimalPlaces){
-	        	action.infoV("Real decimal places numb of _"+ elementName + "_ is OK ("+decimalPlaces+" )");
+	        	action.info("Real decimal places numb of _"+ elementName + "_ is OK ("+decimalPlaces+")");
 	        	return constants.RET_OK;    			
     		}else{//
 	        	action.error("Real decimal places numb of _"+ elementName + "_ is "+count+" (ERROR). Should be "+decimalPlaces);

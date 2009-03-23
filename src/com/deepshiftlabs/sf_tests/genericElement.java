@@ -1,13 +1,16 @@
 package com.deepshiftlabs.sf_tests;
 
-
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import com.thoughtworks.selenium.*;
-//import org.testng.annotations.*;
 
+/** 
+ * @class genericElement
+ * This class is base for all other elements classes.
+ * It contains all common methods and properties
+ * @author Bear
+ * @author bear@deepshiftlabs.com
 
+*/
 public class genericElement {
     protected String elementName;
     protected String elementSfId;
@@ -30,7 +33,6 @@ public class genericElement {
         parentObjectType = a_parentObjectType;
         elementSfId = a_elementSfId;  // now this is reserved param
         isRequired = a_isRequired;
-//        elementLocator = "//input[@id='"+elementSfId+"']";
         writeLocator = "//label[text()='"+a_elementName+"']/following::input";
         readLocator = "//*[@class='labelCol' and text()='"+a_elementName+"']/following::*[@class]";
         lastEnteredValue = "";

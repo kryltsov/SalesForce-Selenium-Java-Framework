@@ -13,7 +13,6 @@ import java.io.*;
 
 public class websitePage {
 	
-    settings privateSettings;	
 	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));      
     
     genericPage page = new genericPage ("Employment Websites", "websitePage00001", "Employment Website");
@@ -31,7 +30,6 @@ public class websitePage {
     @Test(groups = {"default"}, description = "login_logout_test")
     @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
     public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
-        
         if (seleniumHost.equals("")){
             seleniumHost = settings.SELENIUM_HOST;
             seleniumPort = settings.SELENIUM_PORT;
