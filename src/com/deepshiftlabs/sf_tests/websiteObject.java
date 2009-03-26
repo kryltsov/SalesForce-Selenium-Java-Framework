@@ -11,18 +11,18 @@ import com.thoughtworks.selenium.*;
 import java.util.*;
 import java.io.*;
 
-public class websitePage {
+public class websiteObject {
 	
 	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));      
     
-    genericPage page = new genericPage ("Employment Websites", "websitePage00001", "Employment Website");
+	genericObject wwwObject = new genericObject ("Employment Websites", "websitePage00001", "Employment Website");
 
     public int addAllElements(){
        
-       page.addElement(new textElement("Employment Website Name", constants.RESERVED_PARAMETER, page.parentTabID, constants.REQUIRED,80));
-       page.addElement(new urlElement("Web Address", constants.RESERVED_PARAMETER, page.parentTabID, constants.REQUIRED));
-       page.addElement(new currencyElement("Price Per Post", constants.RESERVED_PARAMETER, page.parentTabID, constants.REQUIRED,5,2));
-       page.addElement(new currencyElement("Maximum Budget", constants.RESERVED_PARAMETER, page.parentTabID, constants.REQUIRED,6,2));    
+    	wwwObject.addElement(new textElement("Employment Website Name", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,80));
+    	wwwObject.addElement(new urlElement("Web Address", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED));
+    	wwwObject.addElement(new currencyElement("Price Per Post", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,5,2));
+    	wwwObject.addElement(new currencyElement("Maximum Budget", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,6,2));    
        
        return 0;
     }
@@ -39,15 +39,15 @@ public class websitePage {
     	
     	addAllElements();
     	
-    	page.setDeterminingRecordIdField("Employment Website Name");
+    	wwwObject.setDeterminingRecordIdField("Employment Website Name");
     	
-    	page.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
-    	page.login();    	
+    	wwwObject.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
+    	wwwObject.login();    	
     	
-    	page.checkAll();
+    	wwwObject.checkAll();
     	
-        page.logout();
-        page.freeBrowser();
+    	wwwObject.logout();
+    	wwwObject.freeBrowser();
         
         try{
         	System.out.println("------------------WAITING FOR ENTER-------------------");

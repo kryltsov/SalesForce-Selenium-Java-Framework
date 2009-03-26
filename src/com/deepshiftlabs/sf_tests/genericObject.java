@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 
-public class genericPage {
+public class genericObject {
     String parentTabID;
     String myRecordId;    
     
@@ -20,7 +20,7 @@ public class genericPage {
     
     private int determiningRecordFieldIndex = -1;
     
-    genericPage(String a_parentTabID, String a_myRecordId, String a_defaultTitleSingular ) {
+    genericObject(String a_parentTabID, String a_myRecordId, String a_defaultTitleSingular ) {
         parentTabID = a_parentTabID;
         myRecordId = a_myRecordId;
         defaultTitleSingular = a_defaultTitleSingular;
