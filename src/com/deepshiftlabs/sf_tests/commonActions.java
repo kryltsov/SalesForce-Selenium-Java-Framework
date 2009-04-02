@@ -300,7 +300,12 @@ public class commonActions {
 	public void error (String message){
 	        ut.error(message);
 	        Reporter.log(message);
-	    }    
+	    }
+	
+	public void fatal (String message){
+        ut.fatal(message);
+        Reporter.log("(FATAL)"+message);
+    }	
 	
 	public void infoV (String message){
 		if (!settings.LOG_VERBOSE) return;

@@ -27,5 +27,9 @@ public class utils {
         public void error (String message){
              logger.error("!!!---  "+message+"  ---!!!");
         }
+        
+        public void fatal (String message){
+            logger.error("!!!---  "+message+"  ---!!!");
+       }
 }
 
