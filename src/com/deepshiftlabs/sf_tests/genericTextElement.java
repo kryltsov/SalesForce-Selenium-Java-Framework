@@ -6,7 +6,7 @@ public class genericTextElement extends genericElement {
 	
     public genericTextElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired, int a_maxLength){
         super(a_elementName, a_elementSfId,a_parentObjectType, a_isRequired);
-        validValue = "1";
+        validValue = "a";
         setInputLength(a_maxLength);
 
 // there we can't place symbols <> and "  because urlElement can't display them 		

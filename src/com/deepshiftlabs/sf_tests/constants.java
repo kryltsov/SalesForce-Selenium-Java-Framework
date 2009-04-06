@@ -42,5 +42,8 @@ public final class constants {
     public static final String CANCEL_LOCATOR = "cancel";
     public static final String CLONE_LOCATOR = "clone";
     public static final String DELETE_LOCATOR = "del";
-   
+    
+    public static final String LOGIN_FAILED_ERROR = "Your login attempt has failed";
+    public static final String HOME_PAGE_TITLE = "Salesforce - Developer Edition";
+  
 }

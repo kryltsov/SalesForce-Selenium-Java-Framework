@@ -25,11 +25,11 @@ public class utils {
              logger.warn(message);
         }
         public void error (String message){
-             logger.error("!!!---  "+message+"  ---!!!");
+             logger.error("(!)"+message+"(!)");
         }
         
         public void fatal (String message){
-            logger.error("!!!---  "+message+"  ---!!!");
+            logger.fatal("(!!!)"+message+"(!!!)");
        }
 }
 

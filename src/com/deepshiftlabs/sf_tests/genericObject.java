@@ -18,6 +18,7 @@ public class genericObject {
     commonActions action = new commonActions();
     DefaultSelenium sInstance;
     
+    private boolean isThereUndeletedRecord=false;
     private int determiningRecordFieldIndex = -1;
     
     genericObject(String a_parentTabID, String a_myRecordId, String a_defaultTitleSingular ) {
@@ -27,9 +28,12 @@ public class genericObject {
         defaultTitlePlural = parentTabID;
     }
     
-    public int prepareBrowser(String hub, int port, String browser, String url)
+    public int prepareBrowser(String hub, int port, String browser, String url) throws sftestException
     {
         sInstance = action.getSelenium(hub, port, browser, url);
+        if (sInstance==null){
+        	throw new sftestException("Can't connect to selenium server!");
+        }
         return constants.RET_OK;
     };
     
@@ -40,6 +44,7 @@ public class genericObject {
     public int freeBrowser()
     {
         action.freeSelenium(sInstance);
+        sInstance = null;
         return constants.RET_OK;
     };    
         
@@ -112,7 +117,9 @@ public class genericObject {
         Iterator iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (genericElement)iterator.next();
-		     tempElement.fillByValidValue(sInstance);
+		     if (tempElement.fillByValidValue(sInstance)==constants.RET_ERROR){
+		    	 return constants.RET_ERROR;
+		     }
 	    }
 	    return constants.RET_OK;
     }
@@ -122,6 +129,9 @@ public class genericObject {
         int returnedValue;
 
         Iterator iterator = elements.iterator();
+        
+    	createNewEmptyRecord();
+        fillElementsByValidValues();
 	    
 	    while (iterator.hasNext()) {
 	    	 fillElementsByValidValues();	    	
@@ -140,6 +150,54 @@ public class genericObject {
 	    return constants.RET_OK;
     }
     
+    public int checkIsRecordSavable() throws sftestException{
+    	String afterSaveTitle = defaultTitleSingular+": "+ myRecordId+" ~ Salesforce - Developer Edition";
+    	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
+    	int retValue;
+    	
+    	if (action.createNewEmptyRecord(sInstance, parentTabID) == constants.RET_ERROR){
+    		action.fatal("Cant't create new record of _"+parentTabID+"_, can't perform check IsRecordSavable");
+    		action.getScreenshot(sInstance, true);
+    		throw new sftestException("Can't create or save new record.");
+    	}
+    	
+    	if ((checkTitle(newTitle, "New record")==constants.RET_ERROR) ||
+    	    	(!action.isElementPresent(sInstance, constants.SAVE_RECORD_LOCATOR))) {
+    		action.fatal("Cant't create new record of _"+parentTabID+"_, can't perform check IsRecordSavable");
+    		action.getScreenshot(sInstance, true);    		
+    		throw new sftestException("Can't create or save new record.");
+    	}    	
+    	
+    	retValue=checkElementsPresence();
+    	if (retValue>0){
+    		action.fatal("Can't find "+retValue+" element(s), can't perform check IsRecordSavable");
+    		action.getScreenshot(sInstance, true);    		
+    		throw new sftestException("Can't create or save new record.");    		
+    	}
+    	
+    	if (fillElementsByValidValues()==constants.RET_ERROR){
+    		action.fatal("Cant't fill all elements in _"+parentTabID+"_, can't perform check IsRecordSavable");
+    		action.getScreenshot(sInstance, true);    		
+    		throw new sftestException("Can't create or save new record.");
+    	}
+    	
+    	if (action.pressButton(sInstance, constants.SAVE_RECORD_LOCATOR) == constants.RET_ERROR){
+    		action.getScreenshot(sInstance, true);    		
+    		throw new sftestException("Can't create or save new record.");
+    	}    	
+
+    	if (checkTitle(afterSaveTitle, "After save")==constants.RET_ERROR){ 
+    		action.fatal("Cant't save new record of _"+parentTabID+"_, can't end check IsRecordSavable. Check if all elements are in object and all of them have right type (see screenshot for details).");
+    		action.getScreenshot(sInstance, true);    		
+    		throw new sftestException("Can't create or save new record.");
+    	}       	
+    	
+// TODO should check if delete is successful
+    	action.deleteRecord(sInstance, parentTabID, getIdOfStoredRecord());    	
+        
+        return constants.RET_OK;
+    }
+    
     public int checkTitle(String shouldBeTitle, String titleKind){
     	String tempString;
     	
@@ -152,12 +210,12 @@ public class genericObject {
     	return constants.RET_OK;
     }
     
-    public int checkTitles(){
+    public int checkSequence(){
     	int retValue = constants.RET_OK;
     	
     	String homeTitle = defaultTitlePlural+": Home ~ Salesforce - Developer Edition";;
     	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
-    	String editTitle = defaultTitleSingular+" Edit: "+ myRecordId+ " ~ Salesforce - Developer Edition";
+    	String editTitle = defaultTitleSingular+" Edit: "+ myRecordId+ " ~ Salesfo1rce - Developer Edition";
     	String afterSaveTitle = defaultTitleSingular+": "+ myRecordId+" ~ Salesforce - Developer Edition";
     	String afterDeleteTitle = homeTitle;
     	
@@ -183,8 +241,10 @@ public class genericObject {
     		return constants.RET_ERROR;
     	}    	
     	
-    	retValue = checkTitle(afterSaveTitle, "After save");
-
+    	if (checkTitle(afterSaveTitle, "After save")==constants.RET_ERROR)
+    			return constants.RET_ERROR;
+    	isThereUndeletedRecord = true;
+    	
     	action.isElementPresent(sInstance, constants.DELETE_LOCATOR);    	
     	action.isElementPresent(sInstance, constants.CLONE_LOCATOR);
 
@@ -192,7 +252,8 @@ public class genericObject {
     		return constants.RET_ERROR;
     	}    	
     	
-    	retValue = checkTitle(editTitle, "Edit title");
+    	if (checkTitle(editTitle, "Edit title")==constants.RET_ERROR)
+    			return constants.RET_ERROR;
 
     	action.isElementPresent(sInstance, constants.SAVE_RECORD_LOCATOR);    	
     	action.isElementPresent(sInstance, constants.CANCEL_LOCATOR);
@@ -201,19 +262,22 @@ public class genericObject {
     		return constants.RET_ERROR;
     	}    	
     	
-    	retValue = checkTitle(newTitle, "After SaveAndNew");
+    	if (checkTitle(newTitle, "After SaveAndNew")==constants.RET_ERROR)
+    			return constants.RET_ERROR;
     	
     	if (action.pressButton(sInstance, constants.CANCEL_LOCATOR) == constants.RET_ERROR){
     		return constants.RET_ERROR;
     	}    	
     	
-    	retValue = checkTitle(afterSaveTitle, "After cancel");    	
+    	if (checkTitle(afterSaveTitle, "After cancel")==constants.RET_ERROR)
+    			return constants.RET_ERROR;
     	
     	if (action.pressButton(sInstance, constants.CLONE_LOCATOR) == constants.RET_ERROR){
     		return constants.RET_ERROR;
     	}    	
     	
-    	retValue = checkTitle(newTitle, "After clone");
+    	if (checkTitle(newTitle, "After clone")==constants.RET_ERROR)
+    			return constants.RET_ERROR;
     	
     	if (action.pressButton(sInstance, constants.CANCEL_LOCATOR) == constants.RET_ERROR){
     		return constants.RET_ERROR;
@@ -222,25 +286,34 @@ public class genericObject {
     		return constants.RET_ERROR;
     	}    	
     	
-    	retValue = checkTitle(afterDeleteTitle, "After delete");
+    	if (checkTitle(afterDeleteTitle, "After delete")==constants.RET_ERROR)
+    			return constants.RET_ERROR;
+    	isThereUndeletedRecord=false;
     	
     	return retValue;
     }    
     
-    public int checkAll(){
-    	checkTitles();
+    public int checkAll() throws sftestException{
+    	checkIsRecordSavable();
     	
-    	createNewEmptyRecord();
-        checkElementsPresence();
-        fillElementsByValidValues();
+    	if (checkSequence()==constants.RET_ERROR){
+    		action.error("Non-fatal error while checking common sequense.");
+    		action.getScreenshot(sInstance, true);
+    		if (isThereUndeletedRecord){
+    			action.deleteRecord(sInstance, parentTabID, getIdOfStoredRecord());
+    			isThereUndeletedRecord = false;
+    		}
+    	}
         
         checkAllElements();    	
     	
     	return constants.RET_OK;
     }
     
-    public int login(){
-    	action.login(sInstance, settings.SF_LOGIN, settings.SF_PASSWORD);
+    public int login()throws sftestException{
+    	if (action.login(sInstance, settings.SF_LOGIN, settings.SF_PASSWORD) == constants.RET_ERROR){
+    		throw new sftestException("Login failed.");
+    	}
     	return constants.RET_OK;
     }
     

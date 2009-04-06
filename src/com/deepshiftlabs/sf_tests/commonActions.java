@@ -27,9 +27,17 @@ public class commonActions {
 
     protected DefaultSelenium getSelenium(String seleniumHost, int seleniumPort, String browser, String webSite){
         DefaultSelenium seleniumInstance = new DefaultSelenium(seleniumHost, seleniumPort, browser, webSite);
-        warn("--------SESSION STARTED--------");
-        seleniumInstance.start();
-        seleniumInstance.setTimeout(settings.TIMEOUT);        
+        
+        try {
+        	seleniumInstance.start();
+        	warn("--------SESSION STARTED--------");        	
+        } 
+        catch (Exception e){
+        	fatal("Can't establish connection to Selenium Hub. Check if Hub or RC is present.");
+        	return null;
+        };
+        
+    	seleniumInstance.setTimeout(settings.TIMEOUT);        
         warn("--------BROWSER STARTED--------");
         return seleniumInstance;
    }
@@ -43,6 +51,7 @@ public class commonActions {
 
 	protected int login(DefaultSelenium seleniumInstance, String a_login, String a_password) {            
 			String tempLocator = "//input[@id='Login']";
+			String title = "";
 	        info("Login started");
 	        seleniumInstance.open("/");
 	        seleniumInstance.waitForPageToLoad(settings.TIMEOUT);
@@ -51,11 +60,29 @@ public class commonActions {
 	        
 	        
 			if (click(seleniumInstance, tempLocator)==constants.RET_ERROR){
-				error("Can't login - cant click on locator _"+tempLocator+"_ ");
+				fatal("Can't login - cant click on locator _"+tempLocator+"_ ");
 				return constants.RET_ERROR;				
-			}	        
+			}
+			
 	        seleniumInstance.waitForPageToLoad(settings.TIMEOUT);
-	        info("Login done: logged to "+ seleniumInstance.getTitle());
+	        
+			if (isElementPresent(seleniumInstance, "//*[contains(text(),'"+constants.LOGIN_FAILED_ERROR+"')]"))
+			{
+				fatal("Can't login - may be your login or password are incorrect.");
+				getScreenshot(seleniumInstance, true);
+				return constants.RET_ERROR;				
+			}
+			
+			title = seleniumInstance.getTitle();
+			
+			if (!title.equals(constants.HOME_PAGE_TITLE))
+			{
+				fatal("Can't login - invalid home page title. See screenshot for details.");
+				getScreenshot(seleniumInstance, true);
+				return constants.RET_ERROR;				
+			}				
+			
+	        info("Login done: logged to "+ title);
 	        return constants.RET_OK;
 	    }
 	    

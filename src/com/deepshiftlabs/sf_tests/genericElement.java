@@ -68,7 +68,9 @@ public class genericElement {
         
         if (determinesRecordId) tempValidValue = recordId;
         
-        action.typeText(selInstance, writeLocator, tempValidValue);
+        if (action.typeText(selInstance, writeLocator, tempValidValue) == constants.RET_ERROR){
+        	return constants.RET_ERROR;
+        }
         lastEnteredValue = tempValidValue;
         action.infoV ("Filling Element _"+ elementName + "_ by valid value = _"+tempValidValue+"_");
        return constants.RET_OK;

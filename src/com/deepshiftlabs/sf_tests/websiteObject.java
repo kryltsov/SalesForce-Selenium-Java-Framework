@@ -2,6 +2,7 @@
 // TODO  do all TODO's
 // TODO  do some whole statistics (now all results are only in runtime log)
 // TODO  find errors after which there is not sense to continue current element test or all page test
+// TODO  before starting of record creating we should check if there the same record  already
 
 package com.deepshiftlabs.sf_tests;
 
@@ -39,20 +40,27 @@ public class websiteObject {
     	
     	addAllElements();
     	
-    	wwwObject.setDeterminingRecordIdField("Employment Website Name");
-    	
-    	wwwObject.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
-    	wwwObject.login();    	
-    	
-    	wwwObject.checkAll();
-    	
-    	wwwObject.logout();
-    	wwwObject.freeBrowser();
+    	try {
+	    	wwwObject.setDeterminingRecordIdField("Employment Website Name");
+	    	wwwObject.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
+	    	wwwObject.login();    	
+	    	wwwObject.checkAll();
+	    	wwwObject.logout();
+	    	wwwObject.freeBrowser();
+    	}
+    	catch (sftestException E)
+    	{
+    		wwwObject.action.fatal("Test stopped after fatal error. "+E);
+
+    		if (wwwObject.sInstance!=null)
+    			wwwObject.freeBrowser();
+    	}
         
-        try{
+/*        try{
         	System.out.println("------------------WAITING FOR ENTER-------------------");
         	stdin.read();}
-        catch(IOException e) {};
+        catch(IOException e) {}; 
+        */
         
     };
 }  
