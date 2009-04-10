@@ -15,6 +15,11 @@ public class genericObject {
     String defaultTitlePlural;
     
     ArrayList elements = new ArrayList();
+	ArrayList <String> writeLocatorsList = new ArrayList <String>();	
+	String waitCondition = "";
+	String tempLocator = "//input[@id='Login']";
+	String title = "";
+    
     commonActions action = new commonActions();
     DefaultSelenium sInstance;
     
@@ -48,6 +53,17 @@ public class genericObject {
         return constants.RET_OK;
     };    
         
+    public void updateLocatorsLists(){
+    	writeLocatorsList.clear();
+    	genericElement tempElement;
+    	for (int i=0; i<elements.size();i++){
+    		tempElement = (genericElement)elements.get(i);
+    		writeLocatorsList.add(utils.prepareForJavaScript(tempElement.writeLocator));
+    	}
+    	waitCondition = utils.prepareCondition(writeLocatorsList);
+    }
+    	
+    
     public int addElement(genericElement el){
         elements.add(el);
         return elements.size();
@@ -111,27 +127,26 @@ public class genericObject {
 	    return missed;
     }
     
-    public int fillElementsByValidValues(){
+    public int fillElementsByValidValues() throws sftestException {
         genericElement tempElement;
 
         Iterator iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (genericElement)iterator.next();
 		     if (tempElement.fillByValidValue(sInstance)==constants.RET_ERROR){
-		    	 return constants.RET_ERROR;
+		    	 throw new sftestException("Can't fill all elements by valid values.");
 		     }
 	    }
 	    return constants.RET_OK;
     }
     
-    public int checkAllElements(){
+    public int checkAllElements() throws sftestException {
         genericElement tempElement;
         int returnedValue;
 
         Iterator iterator = elements.iterator();
         
-    	createNewEmptyRecord();
-        fillElementsByValidValues();
+    	createNewEmptyRecordFast();
 	    
 	    while (iterator.hasNext()) {
 	    	 fillElementsByValidValues();	    	
@@ -150,7 +165,7 @@ public class genericObject {
 	    return constants.RET_OK;
     }
     
-    public int checkIsRecordSavable() throws sftestException{
+    public int checkIsRecordSavable() throws sftestException {
     	String afterSaveTitle = defaultTitleSingular+": "+ myRecordId+" ~ Salesforce - Developer Edition";
     	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
     	int retValue;
@@ -210,7 +225,7 @@ public class genericObject {
     	return constants.RET_OK;
     }
     
-    public int checkSequence(){
+    public int checkSequence() throws sftestException {
     	int retValue = constants.RET_OK;
     	
     	String homeTitle = defaultTitlePlural+": Home ~ Salesforce - Developer Edition";;
@@ -317,10 +332,19 @@ public class genericObject {
     	return constants.RET_OK;
     }
     
-    public int createNewEmptyRecord(){
-    	action.createNewEmptyRecord(sInstance, parentTabID);
+    public int createNewEmptyRecord() throws sftestException {
+    	if (action.createNewEmptyRecord(sInstance, parentTabID)==constants.RET_ERROR){
+    		throw new sftestException("Can't create new record.");
+    	}
     	return constants.RET_OK;    	
     }
+    
+    public int createNewEmptyRecordFast() throws sftestException {
+    	if (action.createNewEmptyRecordFast(sInstance, parentTabID, waitCondition)==constants.RET_ERROR){
+    		throw new sftestException("Can't create new record (fast).");
+    	}
+    	return constants.RET_OK;    	
+    }    
     
     String getIdOfStoredRecord(){
         genericElement tempElement;    	
@@ -337,9 +361,9 @@ public class genericObject {
         }
     }
     
-    public int recreateRecord(){
+    public int recreateRecord()throws sftestException {
     	action.deleteRecord(sInstance, parentTabID, getIdOfStoredRecord());
-    	action.createNewEmptyRecord(sInstance, parentTabID);    	
+    	createNewEmptyRecordFast();    	
         return constants.RET_OK;
     }    
     

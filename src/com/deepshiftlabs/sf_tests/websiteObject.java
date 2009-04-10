@@ -23,7 +23,8 @@ public class websiteObject {
     	wwwObject.addElement(new textElement("Employment Website Name", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,80));
     	wwwObject.addElement(new urlElement("Web Address", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED));
     	wwwObject.addElement(new currencyElement("Price Per Post", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,5,2));
-    	wwwObject.addElement(new currencyElement("Maximum Budget", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,6,2));    
+    	wwwObject.addElement(new currencyElement("Maximum Budget", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,6,2));
+    	wwwObject.updateLocatorsLists();
        
        return 0;
     }

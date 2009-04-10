@@ -52,7 +52,7 @@ public class genericElement {
     	recordId = a_recordId;
     }
     
-// you should use this func only on add/edit page becouse of writeLocator using     
+// you should use this func only on add/edit page because of writeLocator using     
     public int checkPresence (DefaultSelenium selInstance){
         
         if (action.isElementPresent(selInstance, writeLocator)){
@@ -77,7 +77,9 @@ public class genericElement {
     }
     
     public int fillByNull (DefaultSelenium selInstance){
-        action.typeText(selInstance, writeLocator, "");
+        if (action.typeText(selInstance, writeLocator, "") == constants.RET_ERROR){
+        	return constants.RET_ERROR;
+        }
         lastEnteredValue = "";
         action.infoV ("Filling Element _"+ elementName + "_ by NULL");
        return constants.RET_OK;

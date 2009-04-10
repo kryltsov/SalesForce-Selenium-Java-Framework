@@ -6,6 +6,8 @@ import org.testng.annotations.Test;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -33,7 +35,7 @@ public class commonActions {
         	warn("--------SESSION STARTED--------");        	
         } 
         catch (Exception e){
-        	fatal("Can't establish connection to Selenium Hub. Check if Hub or RC is present.");
+        	fatal("Can't establish connection to Selenium Hub. Check if Hub or RC with requested environment is present.");
         	return null;
         };
         
@@ -49,12 +51,35 @@ public class commonActions {
         warn("--------SESSION ENDED--------");        
     }
 
-	protected int login(DefaultSelenium seleniumInstance, String a_login, String a_password) {            
+	protected int login(DefaultSelenium seleniumInstance, String a_login, String a_password) {
+			ArrayList <String> locatorsList = new ArrayList <String>();		
 			String tempLocator = "//input[@id='Login']";
 			String title = "";
+	        locatorsList.add("username");
+	        locatorsList.add("password");
+//	        locatorsList.add("//label[text()=\\'Maximum Budget\\']");
+	      
+			
 	        info("Login started");
+
 	        seleniumInstance.open("/");
-	        seleniumInstance.waitForPageToLoad(settings.TIMEOUT);
+/*
+// for waitForListOfElements testing
+
+ 	        seleniumInstance.open("http://www.salesforce.com/aloha.jsp");
+	        click(seleniumInstance, "//*[@href='https://login.salesforce.com/']");
+*/	        
+	        
+// TODO change timeout to constant	        
+	        if (waitForListOfElements(seleniumInstance, locatorsList, settings.TIMEOUT)){
+	        	infoV("Inputs for login found before page load.");
+	        }
+	        else
+	        {
+				fatal("Can't login - cant found inputs!");
+				return constants.RET_ERROR;	
+	        }
+	        
 	        typeText(seleniumInstance, "username",a_login);
 	        typeText(seleniumInstance, "password",a_password);
 	        
@@ -259,11 +284,34 @@ public class commonActions {
 			return constants.RET_ERROR;				
 		}	 		
 		
-		seleniumInstance.waitForPageToLoad("30000") ;
+		seleniumInstance.waitForPageToLoad(settings.TIMEOUT) ;
 	    
 		info("New record on tab _"+tabName+"_ created, waiting for input.");
 	    return constants.RET_OK;
 	}
+	
+	public int createNewEmptyRecordFast(DefaultSelenium seleniumInstance, String tabName, String condition){
+		String tempLocator =  "//input[@name='new']";
+		
+		openTab(seleniumInstance, tabName);
+
+		if (click(seleniumInstance,tempLocator)==constants.RET_ERROR){
+			error("Can't createNewEmptyRecord - cant click on New, locator _"+tempLocator+"_ ");
+			return constants.RET_ERROR;				
+		}	 		
+		
+        if (waitForCondition(seleniumInstance, condition, settings.TIMEOUT)){
+        	infoV("All inputs on new record page found before page load.");
+        }
+        else
+        {
+			fatal("Can't createNewEmptyRecordFast  - cant found all locators!");
+			return constants.RET_ERROR;	
+        }		
+	    
+		info("New record on tab _"+tabName+"_ created, waiting for input.");
+	    return constants.RET_OK;
+	}	
 
 	protected int deleteRecord(DefaultSelenium seleniumInstance, String tabName, String recordId) {            
     	String tempLocator;
@@ -312,6 +360,33 @@ public class commonActions {
 		}
 		return isPresent;
 	}
+	
+	public boolean waitForListOfElements(DefaultSelenium seleniumInstance, ArrayList <String> locators, String timeout){
+		String tempScript = "var result = false; ";
+		
+		if (locators.size()>0) {
+			tempScript = tempScript+ "result = selenium.isElementPresent('"+locators.get(0)+"');";
+		}
+		for (int i=1; i<locators.size(); i++){
+			tempScript = tempScript+ "result = result && selenium.isElementPresent('"+locators.get(i)+"');";
+		}
+		
+		try {
+			seleniumInstance.waitForCondition(tempScript, timeout);
+		} catch (Exception E){
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean waitForCondition(DefaultSelenium seleniumInstance, String condition, String timeout){
+		try {
+			seleniumInstance.waitForCondition(condition, timeout);
+		} catch (Exception E){
+			return false;
+		}
+		return true;
+	}	
 
 	public void info (String message){
 			if (!settings.LOG_INFOS) return;

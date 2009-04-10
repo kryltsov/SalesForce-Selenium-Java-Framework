@@ -1,6 +1,8 @@
 package com.deepshiftlabs.sf_tests;
 
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 //import org.apache.log4j.Level;
 //import org.apache.log4j.SimpleLayout;
@@ -31,5 +33,24 @@ public class utils {
         public void fatal (String message){
             logger.fatal("(!!!)"+message+"(!!!)");
        }
+        
+        static public String prepareForJavaScript(String tempString){
+
+        	tempString = tempString.replace("'", "\\'");
+        	
+        	return tempString;
+        }
+        
+        static public String prepareCondition (ArrayList <String> locators){        
+			String tempScript = "var result = false; ";
+			
+			if (locators.size()>0) {
+				tempScript = tempScript+ "result = selenium.isElementPresent('"+locators.get(0)+"');";
+			}
+			for (int i=1; i<locators.size(); i++){
+				tempScript = tempScript+ "result = result && selenium.isElementPresent('"+locators.get(i)+"');";
+			}
+			return tempScript;
+        }
 }
 
