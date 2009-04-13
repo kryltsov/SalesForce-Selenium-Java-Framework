@@ -42,8 +42,15 @@ public final class constants {
     public static final String CANCEL_LOCATOR = "cancel";
     public static final String CLONE_LOCATOR = "clone";
     public static final String DELETE_LOCATOR = "del";
+    public static final String LOGIN_LOCATOR = "//input[@id='Login']";
+    public static final String LOGOUT_LOCATOR = "//a[contains(@href, '/secur/logout.jsp')]";
     
     public static final String LOGIN_FAILED_ERROR = "Your login attempt has failed";
+    public static final String BAD_IP_ERROR = "You are attempting to access salesforce.com from an unrecognized computer.";
     public static final String HOME_PAGE_TITLE = "Salesforce - Developer Edition";
-  
+    
+    public static final String INVALID_LOGIN_VALUE = "IN-v(al!d login value";
+    
+    public static final String TITLE_LOGIN_PAGE = "Salesforce.com - Customer Secure Login Page";
+    public static final String TITLE_LOGOUT_PAGE = "Salesforce - Developer Edition";
 }

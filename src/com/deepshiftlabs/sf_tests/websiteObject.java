@@ -1,4 +1,5 @@
 // TODO  add comments
+// TODO when passing some parameters to selenium driver (like type()) we should check if parameters!=null
 // TODO  do all TODO's
 // TODO  do some whole statistics (now all results are only in runtime log)
 // TODO  find errors after which there is not sense to continue current element test or all page test
@@ -7,7 +8,6 @@
 package com.deepshiftlabs.sf_tests;
 
 import org.testng.annotations.*;
-import com.thoughtworks.selenium.*;
 
 import java.util.*;
 import java.io.*;
@@ -29,7 +29,7 @@ public class websiteObject {
        return 0;
     }
 
-    @Test(groups = {"default"}, description = "login_logout_test")
+    @Test(groups = {"default"}, description = "Website object test")
     @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
     public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
         if (seleniumHost.equals("")){

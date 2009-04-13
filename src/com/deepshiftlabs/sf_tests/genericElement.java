@@ -16,6 +16,7 @@ public class genericElement {
     protected String elementSfId;
     protected String parentObjectType;
     protected String validValue;
+    protected String invalidValue;
     protected String writeLocator;    
     protected String readLocator;
     protected String lastEnteredValue;
@@ -45,6 +46,14 @@ public class genericElement {
     
     public String getLastEnteredValue(){
     	return lastEnteredValue;
+    }
+    
+    public void setValidValue(String a_validValue){
+    	validValue = a_validValue;
+    }
+    
+    public void setInvalidValue(String a_invalidValue){
+    	invalidValue = a_invalidValue;
     }    
     
     public void forceToDetermineRecordID(String a_recordId){
@@ -75,6 +84,20 @@ public class genericElement {
         action.infoV ("Filling Element _"+ elementName + "_ by valid value = _"+tempValidValue+"_");
        return constants.RET_OK;
     }
+    
+    public int fillByInvalidValue (DefaultSelenium selInstance){
+        String tempInvalidValue = invalidValue;
+        
+        if (determinesRecordId) tempInvalidValue = recordId;
+        
+        if (action.typeText(selInstance, writeLocator, tempInvalidValue) == constants.RET_ERROR){
+        	return constants.RET_ERROR;
+        }
+// TODO: in future next string may became wrong 
+        lastEnteredValue = tempInvalidValue;
+        action.infoV ("Filling Element _"+ elementName + "_ by invalid value = _"+tempInvalidValue+"_");
+       return constants.RET_OK;
+    }    
     
     public int fillByNull (DefaultSelenium selInstance){
         if (action.typeText(selInstance, writeLocator, "") == constants.RET_ERROR){

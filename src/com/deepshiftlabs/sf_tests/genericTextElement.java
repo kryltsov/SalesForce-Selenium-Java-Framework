@@ -16,7 +16,6 @@ public class genericTextElement extends genericElement {
         values.add(new checkValue("test··ar", constants.IT_IS_VALID_VALUE));
         values.add(new checkValue("test...!+=%$*()!@#$%^&*?{}[]", constants.IT_IS_VALID_VALUE));		
         values.add(new checkValue("debug test to find if we corect work with lenghts of check values more than input maxsize (there are near 100 symbols here)", constants.IT_IS_INVALID_VALUE));
-
     }    
     
     public void setInputLength (int a_length){

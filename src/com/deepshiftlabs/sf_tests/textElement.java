@@ -1,7 +1,5 @@
 package com.deepshiftlabs.sf_tests;
 
-import com.thoughtworks.selenium.DefaultSelenium;
-
 public class textElement extends genericTextElement{
 	private boolean isUnique=false;
 	private boolean isUniqueCaseSensitive=false;

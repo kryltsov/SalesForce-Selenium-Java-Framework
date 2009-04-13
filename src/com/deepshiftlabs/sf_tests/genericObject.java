@@ -1,7 +1,6 @@
 package com.deepshiftlabs.sf_tests;
 
 import com.thoughtworks.selenium.*;
-import org.testng.annotations.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,7 +13,7 @@ public class genericObject {
     String defaultTitleSingular;
     String defaultTitlePlural;
     
-    ArrayList elements = new ArrayList();
+    ArrayList <genericElement> elements = new ArrayList <genericElement>();
 	ArrayList <String> writeLocatorsList = new ArrayList <String>();	
 	String waitCondition = "";
 	String tempLocator = "//input[@id='Login']";
@@ -63,7 +62,6 @@ public class genericObject {
     	waitCondition = utils.prepareCondition(writeLocatorsList);
     }
     	
-    
     public int addElement(genericElement el){
         elements.add(el);
         return elements.size();
@@ -73,12 +71,13 @@ public class genericObject {
         genericElement tempElement;
         int index = 0;
 
-        Iterator iterator = elements.iterator();
+        Iterator <genericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (genericElement)iterator.next();
 		     if (tempElement.getElementName().equals(elementName)){
 		        return index;
 		    }
+		    index++;
 	    }
 	    return constants.RET_ERROR;
     }
@@ -117,7 +116,7 @@ public class genericObject {
         genericElement tempElement;
         int missed = 0;
 
-        Iterator iterator = elements.iterator();
+        Iterator <genericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (genericElement)iterator.next();
 		     if (tempElement.checkPresence(sInstance)==constants.RET_ERROR){
@@ -130,7 +129,7 @@ public class genericObject {
     public int fillElementsByValidValues() throws sftestException {
         genericElement tempElement;
 
-        Iterator iterator = elements.iterator();
+        Iterator <genericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (genericElement)iterator.next();
 		     if (tempElement.fillByValidValue(sInstance)==constants.RET_ERROR){
@@ -140,11 +139,24 @@ public class genericObject {
 	    return constants.RET_OK;
     }
     
+    public int fillElementsByInvalidValues() throws sftestException {
+        genericElement tempElement;
+
+        Iterator <genericElement> iterator = elements.iterator();
+	    while (iterator.hasNext()) {
+		     tempElement = (genericElement)iterator.next();
+		     if (tempElement.fillByInvalidValue(sInstance)==constants.RET_ERROR){
+		    	 throw new sftestException("Can't fill all elements by invalid values.");
+		     }
+	    }
+	    return constants.RET_OK;
+    }    
+    
     public int checkAllElements() throws sftestException {
         genericElement tempElement;
         int returnedValue;
 
-        Iterator iterator = elements.iterator();
+        Iterator <genericElement> iterator = elements.iterator();
         
     	createNewEmptyRecordFast();
 	    
@@ -230,7 +242,7 @@ public class genericObject {
     	
     	String homeTitle = defaultTitlePlural+": Home ~ Salesforce - Developer Edition";;
     	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
-    	String editTitle = defaultTitleSingular+" Edit: "+ myRecordId+ " ~ Salesfo1rce - Developer Edition";
+    	String editTitle = defaultTitleSingular+" Edit: "+ myRecordId+ " ~ Salesforce - Developer Edition";
     	String afterSaveTitle = defaultTitleSingular+": "+ myRecordId+" ~ Salesforce - Developer Edition";
     	String afterDeleteTitle = homeTitle;
     	
