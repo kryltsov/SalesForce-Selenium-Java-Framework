@@ -23,6 +23,7 @@ public final class constants {
 	public static final String ONLY_GENERAL_ERROR = "";
 	public static final String STANDARD_INVALID_VALUE_ERROR = "";	
 	public static final String RESERVED_PARAMETER = "reserved_parameter";
+	public static final String MIN_SELENIUM_TIMEOUT = "1";
 	
 	
 //statuses

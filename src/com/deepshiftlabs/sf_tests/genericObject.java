@@ -324,7 +324,7 @@ public class genericObject {
     	checkIsRecordSavable();
     	
     	if (checkSequence()==constants.RET_ERROR){
-    		action.error("Non-fatal error while checking common sequense.");
+    		action.error("Non-fatal error while checking common sequense (unfinished actions was skipped).");
     		action.getScreenshot(sInstance, true);
     		if (isThereUndeletedRecord){
     			action.deleteRecord(sInstance, parentTabID, getIdOfStoredRecord());

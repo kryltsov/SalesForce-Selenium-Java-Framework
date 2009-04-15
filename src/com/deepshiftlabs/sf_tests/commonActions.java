@@ -53,7 +53,13 @@ public class commonActions {
     
     public int open (DefaultSelenium seleniumInstance, String url){
     	infoV("Opening url _"+url+"_");
+        try {
     	seleniumInstance.open(url);
+        } 
+        catch (Exception e){
+        	error("Error while opening url. Exception is: _"+e+"_");
+        	return constants.RET_ERROR;
+        };    	
     	return constants.RET_OK;
     }
 
@@ -66,15 +72,10 @@ public class commonActions {
 			
 	        info("Login started");
 
-	        seleniumInstance.open("/");
-/*
-// for waitForListOfElements testing
-
- 	        seleniumInstance.open("http://www.salesforce.com/aloha.jsp");
-	        click(seleniumInstance, "//*[@href='https://login.salesforce.com/']");
-*/	        
+	        seleniumInstance.setTimeout(constants.MIN_SELENIUM_TIMEOUT);
+	        open(seleniumInstance, "/");
+	        seleniumInstance.setTimeout(settings.TIMEOUT);
 	        
-// TODO change timeout to constant	        
 	        if (waitForListOfElements(seleniumInstance, locatorsList, settings.TIMEOUT)){
 	        	infoV("Inputs for login found before page load.");
 	        }
