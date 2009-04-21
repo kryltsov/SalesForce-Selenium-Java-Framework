@@ -1,14 +1,14 @@
 package com.deepshiftlabs.sf_tests;
 
-public class loginLogout extends genericObject {
+public class LoginLogout extends GenericObject {
 
-	public loginLogout (String a_parentTabID, String a_myRecordId, String a_defaultTitleSingular ) {
+	public LoginLogout (String a_parentTabID, String a_myRecordId, String a_defaultTitleSingular ) {
 		super(a_parentTabID, a_myRecordId, a_defaultTitleSingular);
     }
 
 	public int initValues(){
-		genericElement username;
-		genericElement password;
+		GenericElement username;
+		GenericElement password;
 		
 		int usernameId;
 		int passwordId;
@@ -16,87 +16,87 @@ public class loginLogout extends genericObject {
 		usernameId = findElementIndexByName("User Name");
 		passwordId = findElementIndexByName("Password");
 		
-		if (usernameId==constants.RET_ERROR || 
-				passwordId==constants.RET_ERROR){
-			return constants.RET_ERROR;
+		if (usernameId==Constants.RET_ERROR || 
+				passwordId==Constants.RET_ERROR){
+			return Constants.RET_ERROR;
 		}
 
 		// we should remember this is only links to elements in array		
 		username = elements.get(usernameId);
 		password = elements.get(passwordId);
 		
-		username.setValidValue(settings.SF_LOGIN);
-		password.setValidValue(settings.SF_PASSWORD);
+		username.setValidValue(Settings.SF_LOGIN);
+		password.setValidValue(Settings.SF_PASSWORD);
 		
-		username.setInvalidValue(constants.INVALID_LOGIN_VALUE);
-		password.setInvalidValue(constants.INVALID_LOGIN_VALUE);
+		username.setInvalidValue(Constants.INVALID_LOGIN_VALUE);
+		password.setInvalidValue(Constants.INVALID_LOGIN_VALUE);
 		
-		return constants.RET_OK;		
+		return Constants.RET_OK;		
 	}
 	
-	public int checkWrongValues()throws sftestException{
+	public int checkWrongValues()throws SftestException{
 		
 		fillElementsByInvalidValues();
-		if (action.pressButton(sInstance, constants.LOGIN_LOCATOR)==constants.RET_ERROR){
+		if (action.pressButton(sInstance, Constants.LOGIN_LOCATOR)==Constants.RET_ERROR){
 			action.fatal("Can't press on login button.");
-    		throw new sftestException("Can't press login button.");
+    		throw new SftestException("Can't press login button.");
 		}
-		if (!action.isTextPresent(sInstance, constants.LOGIN_FAILED_ERROR)){
+		if (!action.isTextPresent(sInstance, Constants.LOGIN_FAILED_ERROR)){
 			// TODO maybe it's fatal situation?
 			action.error("Error when doing checkWrongValues - there is no error message on page!");
-			return constants.RET_OK;
+			return Constants.RET_OK;
 		}
 		action.info("Login with wrong values failed (OK)");
-		return constants.RET_OK;
+		return Constants.RET_OK;
 	}
 	
-	public int checkLoginLogout()throws sftestException{
+	public int checkLoginLogout()throws SftestException{
 		fillElementsByValidValues();
-		if (action.pressButton(sInstance, constants.LOGIN_LOCATOR)==constants.RET_ERROR){
+		if (action.pressButton(sInstance, Constants.LOGIN_LOCATOR)==Constants.RET_ERROR){
 			action.fatal("Can't press on login button.");
-    		throw new sftestException("Can't press login button.");
+    		throw new SftestException("Can't press login button.");
 		}
-		if (action.isElementPresent(sInstance, constants.LOGIN_FAILED_ERROR)){
+		if (action.isElementPresent(sInstance, Constants.LOGIN_FAILED_ERROR)){
 			action.fatal("Error when logging in with valid values - there is error message on page!");
-			throw new sftestException("Unwaited error.");
+			throw new SftestException("Unwaited error.");
 		}
-		if (action.isTextPresent(sInstance, constants.BAD_IP_ERROR)){
+		if (action.isTextPresent(sInstance, Constants.BAD_IP_ERROR)){
 			action.fatal("Error when logging in with valid values - your IP is not approved.");
-			throw new sftestException("Salesforce Bad IP error.");
+			throw new SftestException("Salesforce Bad IP error.");
 		}
-		if (checkTitle(constants.HOME_PAGE_TITLE, "Home")==constants.RET_ERROR){
+		if (checkTitle(Constants.HOME_PAGE_TITLE, "Home")==Constants.RET_ERROR){
 			action.fatal("Error when logging in with valid values - title is wrong.");
-			throw new sftestException("Bad login.");
+			throw new SftestException("Bad login.");
 		}
-		if (action.click(sInstance, constants.LOGOUT_LOCATOR)==constants.RET_ERROR){
+		if (action.click(sInstance, Constants.LOGOUT_LOCATOR)==Constants.RET_ERROR){
 			action.fatal("Can't press on logout.");
-    		throw new sftestException("Can't pres logout link.");
+    		throw new SftestException("Can't pres logout link.");
 		}
-		if (checkTitle(constants.TITLE_LOGOUT_PAGE, "Logged out")==constants.RET_ERROR){
+		if (checkTitle(Constants.TITLE_LOGOUT_PAGE, "Logged out")==Constants.RET_ERROR){
 			action.fatal("Error when logging out with valid values - title is wrong.");
-			throw new sftestException("Bad logout.");
+			throw new SftestException("Bad logout.");
 		}		
-		return constants.RET_OK;
+		return Constants.RET_OK;
 	}
 	
-	public void openWithElementsAndTitleCheck() throws sftestException{
+	public void openWithElementsAndTitleCheck() throws SftestException{
     	action.open(sInstance, "/");
     	if (checkElementsPresence()>0){
     		action.fatal("Can't find all inputs to login!");
-    		throw new sftestException("Can't find inputs.");
+    		throw new SftestException("Can't find inputs.");
     	}
     	
-    	if (checkTitle(constants.TITLE_LOGIN_PAGE, "Login") == constants.RET_ERROR){
+    	if (checkTitle(Constants.TITLE_LOGIN_PAGE, "Login") == Constants.RET_ERROR){
     		action.fatal("Bad title of login page!");
-    		throw new sftestException("Bad title of login page.");
+    		throw new SftestException("Bad title of login page.");
     	}		
 	}
 	
-    public int checkAll() throws sftestException{
+    public int checkAll() throws SftestException{
    
-    	if (initValues() == constants.RET_ERROR){
-    		action.fatal("loginLogout class has no appropriate username and password elements!");
-    		throw new sftestException("Wrong loginLogout class configuration.");
+    	if (initValues() == Constants.RET_ERROR){
+    		action.fatal("LoginLogout class has no appropriate username and password elements!");
+    		throw new SftestException("Wrong LoginLogout class configuration.");
     	}
     	openWithElementsAndTitleCheck();
     	checkWrongValues();
@@ -104,6 +104,6 @@ public class loginLogout extends genericObject {
     	openWithElementsAndTitleCheck();    	
     	checkLoginLogout();
     	
-    	return constants.RET_OK;
+    	return Constants.RET_OK;
     }
 }

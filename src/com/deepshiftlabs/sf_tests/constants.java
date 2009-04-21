@@ -1,6 +1,6 @@
 package com.deepshiftlabs.sf_tests;
 
-public final class constants {
+public final class Constants {
 
 // TODO when working with xpath we should not use ' in locators	
 	
@@ -9,6 +9,7 @@ public final class constants {
 	public static final int RET_OK = 0;
 	public static final int RET_SKIPPED = -100;
 	public static final int RET_ERROR = -1;
+	// for functions which returns strings:
 	public static final String RET_ERROR_STRING = "e_rror_occured_";
 	public static final int RET_PAGE_BROKEN_OK = -3;
 	public static final int RET_PAGE_BROKEN_ERROR = -4;
@@ -33,7 +34,7 @@ public final class constants {
 	public static final boolean CHECK_OK = true;
 	public static final boolean CHECK_ERROR = false;
 
-// SF constants
+// SF Constants
 
 	// i can't understand why "Review all error messages below to correct your data." is not working in xpath
 	public static final String GENERAL_PAGE_ERROR = "Error: Invalid Data.";

@@ -14,11 +14,11 @@ import org.apache.log4j.Logger;
  */
  
 
-public class utils {
+public class Utils {
         public static Logger logger = null;
 
-        protected utils(){
-            logger = Logger.getLogger(utils.class);
+        protected Utils(){
+            logger = Logger.getLogger(Utils.class);
         }
         public void info (String message){
              logger.info(message);

@@ -12,18 +12,18 @@ import org.testng.annotations.*;
 import java.util.*;
 import java.io.*;
 
-public class websiteObject {
+public class WebsiteObject {
 	
 	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));      
     
-	genericObject wwwObject = new genericObject ("Employment Websites", "websitePage00001", "Employment Website");
+	GenericObject wwwObject = new GenericObject ("Employment Websites", "websitePage00001", "Employment Website");
 
     public int addAllElements(){
        
-    	wwwObject.addElement(new textElement("Employment Website Name", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,80));
-    	wwwObject.addElement(new urlElement("Web Address", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED));
-    	wwwObject.addElement(new currencyElement("Price Per Post", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,5,2));
-    	wwwObject.addElement(new currencyElement("Maximum Budget", constants.RESERVED_PARAMETER, wwwObject.parentTabID, constants.REQUIRED,6,2));
+    	wwwObject.addElement(new TextElement("Employment Website Name", Constants.RESERVED_PARAMETER, wwwObject.parentTabID, Constants.REQUIRED,80));
+    	wwwObject.addElement(new UrlElement("Web Address", Constants.RESERVED_PARAMETER, wwwObject.parentTabID, Constants.REQUIRED));
+    	wwwObject.addElement(new CurrencyElement("Price Per Post", Constants.RESERVED_PARAMETER, wwwObject.parentTabID, Constants.REQUIRED,5,2));
+    	wwwObject.addElement(new CurrencyElement("Maximum Budget", Constants.RESERVED_PARAMETER, wwwObject.parentTabID, Constants.REQUIRED,6,2));
     	wwwObject.updateLocatorsLists();
        
        return 0;
@@ -33,10 +33,10 @@ public class websiteObject {
     @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
     public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
         if (seleniumHost.equals("")){
-            seleniumHost = settings.SELENIUM_HOST;
-            seleniumPort = settings.SELENIUM_PORT;
-            browser = settings.BROWSER;
-            webSite = settings.WEB_SITE;
+            seleniumHost = Settings.SELENIUM_HOST;
+            seleniumPort = Settings.SELENIUM_PORT;
+            browser = Settings.BROWSER;
+            webSite = Settings.WEB_SITE;
         }
     	
     	addAllElements();
@@ -49,13 +49,15 @@ public class websiteObject {
 	    	wwwObject.logout();
 	    	wwwObject.freeBrowser();
     	}
-    	catch (sftestException E)
+    	catch (SftestException E)
     	{
     		wwwObject.action.fatal("Test stopped after fatal error. "+E);
 
     		if (wwwObject.sInstance!=null)
     			wwwObject.freeBrowser();
     	}
+    	
+    	wwwObject.printErrorsSummary();
         
 /*        try{
         	System.out.println("------------------WAITING FOR ENTER-------------------");

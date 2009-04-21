@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import com.thoughtworks.selenium.*;
 
 /** 
- * @class genericElement
+ * @class GenericElement
  * This class is base for all other elements classes.
  * It contains all common methods and properties
  * @author Bear
  * @author bear@deepshiftlabs.com
 
 */
-public class genericElement {
+public class GenericElement {
     protected String elementName;
     protected String elementSfId;
     protected String parentObjectType;
@@ -23,13 +23,14 @@ public class genericElement {
     protected int inputLength;
     protected boolean isRequired;
     protected boolean determinesRecordId = false;
+    protected int errorsCount = -1;
     
-    protected ArrayList <checkValue> values = new ArrayList <checkValue> ();
+    protected ArrayList <CheckValue> values = new ArrayList <CheckValue> ();
     
     String recordId = "";
-    commonActions action = new commonActions();
+    CommonActions action = new CommonActions();
     
-    genericElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired) {
+    GenericElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired) {
         elementName = a_elementName;
         parentObjectType = a_parentObjectType;
         elementSfId = a_elementSfId;  // now this is reserved param
@@ -54,7 +55,11 @@ public class genericElement {
     
     public void setInvalidValue(String a_invalidValue){
     	invalidValue = a_invalidValue;
-    }    
+    }
+    
+    public int getErrorsCount(){
+    	return errorsCount;
+    }        
     
     public void forceToDetermineRecordID(String a_recordId){
     	determinesRecordId = true;
@@ -66,10 +71,11 @@ public class genericElement {
         
         if (action.isElementPresent(selInstance, writeLocator)){
             action.info ("Element name = "+elementName + " is PRESENT");
-            return constants.RET_OK;
+            return Constants.RET_OK;
         }
         action.error ("Element name = "+elementName + " is NOT PRESENT. Locator was _"+writeLocator+"_");
-        return constants.RET_ERROR;
+        errorsCount++;
+        return Constants.RET_ERROR;
     }
     
     public int fillByValidValue (DefaultSelenium selInstance){
@@ -77,12 +83,13 @@ public class genericElement {
         
         if (determinesRecordId) tempValidValue = recordId;
         
-        if (action.typeText(selInstance, writeLocator, tempValidValue) == constants.RET_ERROR){
-        	return constants.RET_ERROR;
+        if (action.typeText(selInstance, writeLocator, tempValidValue) == Constants.RET_ERROR){
+        	errorsCount++;
+        	return Constants.RET_ERROR;
         }
         lastEnteredValue = tempValidValue;
         action.infoV ("Filling Element _"+ elementName + "_ by valid value = _"+tempValidValue+"_");
-       return constants.RET_OK;
+       return Constants.RET_OK;
     }
     
     public int fillByInvalidValue (DefaultSelenium selInstance){
@@ -90,26 +97,28 @@ public class genericElement {
         
         if (determinesRecordId) tempInvalidValue = recordId;
         
-        if (action.typeText(selInstance, writeLocator, tempInvalidValue) == constants.RET_ERROR){
-        	return constants.RET_ERROR;
+        if (action.typeText(selInstance, writeLocator, tempInvalidValue) == Constants.RET_ERROR){
+        	errorsCount++;
+        	return Constants.RET_ERROR;
         }
 // TODO: in future next string may became wrong 
         lastEnteredValue = tempInvalidValue;
         action.infoV ("Filling Element _"+ elementName + "_ by invalid value = _"+tempInvalidValue+"_");
-       return constants.RET_OK;
+       return Constants.RET_OK;
     }    
     
     public int fillByNull (DefaultSelenium selInstance){
-        if (action.typeText(selInstance, writeLocator, "") == constants.RET_ERROR){
-        	return constants.RET_ERROR;
+        if (action.typeText(selInstance, writeLocator, "") == Constants.RET_ERROR){
+        	errorsCount++;
+        	return Constants.RET_ERROR;
         }
         lastEnteredValue = "";
         action.infoV ("Filling Element _"+ elementName + "_ by NULL");
-       return constants.RET_OK;
+       return Constants.RET_OK;
     }
 
     // only template - each subclass will implement own 
-    public boolean isValueValidForThisElementLength(checkValue theValue){
+    public boolean isValueValidForThisElementLength(CheckValue theValue){
     	return true;
     }
     
@@ -118,16 +127,16 @@ public class genericElement {
         action.infoV ("Starting checking all for element _"+elementName+"_");
 
         returnedValue = checkRequired(selInstance); 
-        if ((returnedValue == constants.RET_PAGE_BROKEN_OK)||
-    			(returnedValue== constants.RET_PAGE_BROKEN_ERROR)) 
+        if ((returnedValue == Constants.RET_PAGE_BROKEN_OK)||
+    			(returnedValue== Constants.RET_PAGE_BROKEN_ERROR)) 
     		return returnedValue;
 
         returnedValue = checkAllValues(selInstance); 
-        if ((returnedValue == constants.RET_PAGE_BROKEN_OK)||
-    			(returnedValue== constants.RET_PAGE_BROKEN_ERROR)) 
+        if ((returnedValue == Constants.RET_PAGE_BROKEN_OK)||
+    			(returnedValue== Constants.RET_PAGE_BROKEN_ERROR)) 
     		return returnedValue;
 
-        return constants.RET_OK;
+        return Constants.RET_OK;
     }
    
     private int checkRequiredRunCount=0;
@@ -135,12 +144,12 @@ public class genericElement {
     	boolean realRequired = false;
     	if (checkRequiredRunCount>0) {
     		action.infoV("CheckRequired for element _"+elementName+"_ already was performed, skipping");
-    		return constants.RET_SKIPPED;
+    		return Constants.RET_SKIPPED;
     	}
     	checkRequiredRunCount++;
 	        action.infoV ("Starting checkRequired for _"+elementName+"_");
 	    	fillByNull(selInstance);
-	    	action.pressButton(selInstance, constants.SAVE_RECORD_LOCATOR);
+	    	action.pressButton(selInstance, Constants.SAVE_RECORD_LOCATOR);
 	    	
 	    	realRequired = action.isErrorPresent(selInstance, "You must enter a value");
 
@@ -148,43 +157,45 @@ public class genericElement {
 	    		if (isRequired==true){
 	    	    	action.info("Element _"+ elementName + "_ is required!(OK)");
 	    			action.getScreenshot(selInstance, false);
-	    			return constants.RET_OK;
+	    			return Constants.RET_OK;
 	    		}else{
 	    			action.error("Element _"+ elementName + "_ is required!(ERROR)");
 	    			action.getScreenshot(selInstance, true);
-	    			return constants.RET_ERROR;
+	    			errorsCount++;
+	    			return Constants.RET_ERROR;
 	    		}
 	    	}
 	    	else{
 	    		if (isRequired==false){
 	    	    	action.info("Element _"+ elementName + "_ is NOT required!(OK)");
 	    			action.getScreenshot(selInstance, false);
-	    			return constants.RET_PAGE_BROKEN_OK;
+	    			return Constants.RET_PAGE_BROKEN_OK;
 	    		}else{
 	    			action.error("Element _"+ elementName + "_ is NOT required!(ERROR)");
 	    			action.getScreenshot(selInstance, true);
-	    			return constants.RET_PAGE_BROKEN_ERROR;
+	    			errorsCount++;
+	    			return Constants.RET_PAGE_BROKEN_ERROR;
 	    		}
 	    	}
     }
     
  // TODO - Text element we should check if theValue.value.length()>maxLength and then skip this value
-    private int checkOneValue(DefaultSelenium selInstance, checkValue theValue){
+    private int checkOneValue(DefaultSelenium selInstance, CheckValue theValue){
     	boolean isValid = false;
     	boolean isValueOK = false;
     	boolean pageBroken = false;
     	
-    	theValue.status = constants.CHECKED;
+    	theValue.status = Constants.CHECKED;
     	action.typeText(selInstance, writeLocator, theValue.value);
     	lastEnteredValue = theValue.value;
     	
-    	action.pressButton(selInstance, constants.SAVE_RECORD_LOCATOR);
+    	action.pressButton(selInstance, Constants.SAVE_RECORD_LOCATOR);
     	isValid = !(action.isErrorPresent(selInstance, theValue.shouldBeErrorMessage));
     	pageBroken = isValid;
     	
     	isValueOK = (isValid==theValue.shouldBeValid);
-    	if (isValueOK) theValue.validCheckResult= constants.CHECK_OK;
-    	else theValue.validCheckResult = constants.CHECK_ERROR;
+    	if (isValueOK) theValue.validCheckResult= Constants.CHECK_OK;
+    	else theValue.validCheckResult = Constants.CHECK_ERROR;
 
 // logging
 		String isValidInRealString = "invalid";
@@ -194,59 +205,65 @@ public class genericElement {
     	if (isValueOK)
     		action.info("Value _"+theValue.value+"_ for element _"+elementName+"_ is "+isValidInRealString+" (OK)");
     	else {
+    		errorsCount++;
     		action.error("Value _"+theValue.value+"_ for element _"+elementName+"_ is "+isValidInRealString+" (ERROR)");
     		action.getScreenshot(selInstance, true);
     	}
 // end logging    	
     	
     	if (pageBroken){
-    		if (isValueOK) return constants.RET_PAGE_BROKEN_OK;
-    		else return constants.RET_PAGE_BROKEN_ERROR;
+    		if (isValueOK) return Constants.RET_PAGE_BROKEN_OK;
+    		else return Constants.RET_PAGE_BROKEN_ERROR;
     	}
 
-    	if (isValueOK) return constants.RET_OK;
-    	else return constants.RET_ERROR;
+    	if (isValueOK) return Constants.RET_OK;
+    	else {
+    		errorsCount++;
+    		return Constants.RET_ERROR;
+    	}
     }
 
-    protected int checkIsDisplayedRight(DefaultSelenium selInstance, checkValue theValue){
+    protected int checkIsDisplayedRight(DefaultSelenium selInstance, CheckValue theValue){
     	String displayedText;
     	
     	displayedText = action.readText(selInstance, readLocator);
-    	if  ( displayedText == constants.RET_ERROR_STRING ){
-    		theValue.displayedRightResult = constants.CHECK_ERROR;
-        	action.error("Can't get text for element _"+elementName);
+    	if  ( displayedText == Constants.RET_ERROR_STRING ){
+    		theValue.displayedRightResult = Constants.CHECK_ERROR;
+    		errorsCount++;
+    		action.error("Can't get text for element _"+elementName);
         	action.getScreenshot(selInstance, true);
-        	return constants.RET_PAGE_BROKEN_ERROR;    		
+        	return Constants.RET_PAGE_BROKEN_ERROR;    		
     	}
     	
     	if ( theValue.shouldBeDisplayed.equals(displayedText)){
     		action.infoV("Value _"+theValue.value+"_ for element _"+elementName+"_ is displayed as _"+displayedText+"_ (OK)");
-    		theValue.displayedRightResult = constants.CHECK_OK;
-    		return constants.RET_PAGE_BROKEN_OK;
+    		theValue.displayedRightResult = Constants.CHECK_OK;
+    		return Constants.RET_PAGE_BROKEN_OK;
     	}
     	
-    	theValue.displayedRightResult = constants.CHECK_ERROR;
+    	theValue.displayedRightResult = Constants.CHECK_ERROR;
+    	errorsCount++;
     	action.error("Value _"+theValue.value+"_ for element _"+elementName+"_ is displayed as _"+displayedText+"_ (should be _"+theValue.shouldBeDisplayed+"_)(ERROR)");
     	action.getScreenshot(selInstance, true);
-    	return constants.RET_PAGE_BROKEN_ERROR;
+    	return Constants.RET_PAGE_BROKEN_ERROR;
     }
     
     private int checkAllValuesRunCount=0;
     public int checkAllValues (DefaultSelenium selInstance){
     	int retValue;
-    	checkValue tempCheckValue;
+    	CheckValue tempCheckValue;
     	int countOfValuesToRun = 0;
     	
     	countOfValuesToRun = values.size();
     	
     	if (checkAllValuesRunCount>countOfValuesToRun-1) {
     		action.infoV("checkAllValues _"+elementName+"_ already was performed, skipping");
-    		return constants.RET_SKIPPED;
+    		return Constants.RET_SKIPPED;
     	}
     	
-    	if (settings.LIMIT_CHECK_VALUES_COUNT_TO > 0 &&
-    			settings.LIMIT_CHECK_VALUES_COUNT_TO<countOfValuesToRun){
-        			countOfValuesToRun = settings.LIMIT_CHECK_VALUES_COUNT_TO;
+    	if (Settings.LIMIT_CHECK_VALUES_COUNT_TO > 0 &&
+    			Settings.LIMIT_CHECK_VALUES_COUNT_TO<countOfValuesToRun){
+        			countOfValuesToRun = Settings.LIMIT_CHECK_VALUES_COUNT_TO;
         			action.warn("CountOfValuesToRun is limited to " + countOfValuesToRun);
         	}    	
 
@@ -258,15 +275,15 @@ public class genericElement {
 //TODO implement function to divide long entries
     		}else{
 		    	retValue = checkOneValue(selInstance, tempCheckValue);
-		    	if (retValue==constants.RET_PAGE_BROKEN_OK)
+		    	if (retValue==Constants.RET_PAGE_BROKEN_OK)
 		    		retValue = checkIsDisplayedRight(selInstance, tempCheckValue);
 	
 		    	checkAllValuesRunCount++;
-		    	if (retValue==constants.RET_PAGE_BROKEN_ERROR || retValue==constants.RET_PAGE_BROKEN_OK)
+		    	if (retValue==Constants.RET_PAGE_BROKEN_ERROR || retValue==Constants.RET_PAGE_BROKEN_OK)
 		    		return retValue;
     		}
     	}
-    	return constants.RET_OK;
+    	return Constants.RET_OK;
     }
 }
       

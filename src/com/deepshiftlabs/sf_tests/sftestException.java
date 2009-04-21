@@ -1,9 +1,9 @@
 package com.deepshiftlabs.sf_tests;
 
-public class sftestException extends Exception {
+public class SftestException extends Exception {
 	private String message; 
 
-	sftestException(String a_message) { 
+	SftestException(String a_message) { 
 		message = a_message; 
 	}
 	

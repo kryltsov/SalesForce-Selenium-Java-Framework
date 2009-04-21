@@ -1,15 +1,15 @@
 package com.deepshiftlabs.sf_tests;
 
-public class numberElement extends genericNumber {
+public class NumberElement extends GenericNumber {
 
-	public numberElement(String name, String sfId, String objectType,
+	public NumberElement(String name, String sfId, String objectType,
 			 boolean a_isRequired, int a_intPlaces, int a_decimalPlaces) {
 		super(name, sfId, objectType, a_isRequired, a_intPlaces, a_decimalPlaces);
         
 		for (int i=0; i<values.size();i++){
-        	checkValue tempValue;
+        	CheckValue tempValue;
         	tempValue = values.get(i);
-        	if (tempValue.shouldBeValid==constants.IT_IS_INVALID_VALUE &&
+        	if (tempValue.shouldBeValid==Constants.IT_IS_INVALID_VALUE &&
         			tempValue.shouldBeErrorMessage=="")
         		tempValue.shouldBeErrorMessage="Invalid number";
         }		
