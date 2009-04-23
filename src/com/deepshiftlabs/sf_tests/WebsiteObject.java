@@ -13,10 +13,10 @@ import java.util.*;
 import java.io.*;
 
 public class WebsiteObject {
-	
-	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));      
+	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+	CommonActions action = new CommonActions();
     
-	GenericObject wwwObject = new GenericObject ("Employment Websites", "websitePage00001", "Employment Website");
+	GenericObject wwwObject;
 
     public int addAllElements(){
        
@@ -38,9 +38,10 @@ public class WebsiteObject {
             browser = Settings.BROWSER;
             webSite = Settings.WEB_SITE;
         }
-    	
+        
+        wwwObject = new GenericObject ("Employment Websites", "websitePage00001", "Employment Website");
+        wwwObject.init(action);
     	addAllElements();
-    	
     	try {
 	    	wwwObject.setDeterminingRecordIdField("Employment Website Name");
 	    	wwwObject.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);

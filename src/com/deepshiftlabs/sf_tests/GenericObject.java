@@ -19,7 +19,7 @@ public class GenericObject {
 	String tempLocator = "//input[@id='Login']";
 	String title = "";
     
-    CommonActions action = new CommonActions();
+    CommonActions action;
     DefaultSelenium sInstance;
     
     private boolean isThereUndeletedRecord=false;
@@ -32,6 +32,10 @@ public class GenericObject {
         defaultTitlePlural = parentTabID;
     }
     
+    public void init(CommonActions a_action){
+    	action = a_action;
+    }
+    
     public int prepareBrowser(String hub, int port, String browser, String url) throws SftestException
     {
         sInstance = action.getSelenium(hub, port, browser, url);
@@ -42,12 +46,12 @@ public class GenericObject {
     };
     
     public int logout(){
-    	action.logout(sInstance);
+    	action.logout();
         return Constants.RET_OK;    	
     }
     public int freeBrowser()
     {
-        action.freeSelenium(sInstance);
+        action.freeSelenium();
         sInstance = null;
         return Constants.RET_OK;
     };    
@@ -63,6 +67,7 @@ public class GenericObject {
     }
     	
     public int addElement(GenericElement el){
+    	el.init(action);
         elements.add(el);
         return elements.size();
     }
@@ -119,7 +124,7 @@ public class GenericObject {
         Iterator <GenericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (GenericElement)iterator.next();
-		     if (tempElement.checkPresence(sInstance)==Constants.RET_ERROR){
+		     if (tempElement.checkPresence()==Constants.RET_ERROR){
 		        missed++;
 		    }
 	    }
@@ -132,7 +137,7 @@ public class GenericObject {
         Iterator <GenericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (GenericElement)iterator.next();
-		     if (tempElement.fillByValidValue(sInstance)==Constants.RET_ERROR){
+		     if (tempElement.fillByValidValue()==Constants.RET_ERROR){
 		    	 throw new SftestException("Can't fill all elements by valid values.");
 		     }
 	    }
@@ -145,7 +150,7 @@ public class GenericObject {
         Iterator <GenericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (GenericElement)iterator.next();
-		     if (tempElement.fillByInvalidValue(sInstance)==Constants.RET_ERROR){
+		     if (tempElement.fillByInvalidValue()==Constants.RET_ERROR){
 		    	 throw new SftestException("Can't fill all elements by invalid values.");
 		     }
 	    }
@@ -166,10 +171,10 @@ public class GenericObject {
 
 		     returnedValue = Constants.RET_ERROR;
 		     while (returnedValue!=Constants.RET_OK){
-		    	 returnedValue = tempElement.checkAll(sInstance);
+		    	 returnedValue = tempElement.checkAll();
 		    	 if (tempElement.getErrorsCount()>=Settings.FATAL_ELEMENT_ERRORS_COUNT){
 		     		action.fatal("Too many errors per element _"+tempElement.getElementName()+"_ ("+tempElement.getErrorsCount()+")");
-		    		action.getScreenshot(sInstance, true);    		
+		    		action.getScreenshot(true);    		
 		    		throw new SftestException("Too many errors per element!");		    		 
 		    	 }
 		    	 if (returnedValue==Constants.RET_PAGE_BROKEN_ERROR || 
@@ -187,45 +192,45 @@ public class GenericObject {
     	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
     	int retValue;
     	
-    	if (action.createNewEmptyRecord(sInstance, parentTabID) == Constants.RET_ERROR){
+    	if (action.createNewEmptyRecord(parentTabID) == Constants.RET_ERROR){
     		action.fatal("Cant't create new record of _"+parentTabID+"_, can't perform check IsRecordSavable");
-    		action.getScreenshot(sInstance, true);
+    		action.getScreenshot(true);
     		throw new SftestException("Can't create or save new record.");
     	}
     	
     	if ((checkTitle(newTitle, "New record")==Constants.RET_ERROR) ||
-    	    	(!action.isElementPresent(sInstance, Constants.SAVE_RECORD_LOCATOR))) {
+    	    	(!action.isElementPresent(Constants.SAVE_RECORD_LOCATOR))) {
     		action.fatal("Cant't create new record of _"+parentTabID+"_, can't perform check IsRecordSavable");
-    		action.getScreenshot(sInstance, true);    		
+    		action.getScreenshot(true);    		
     		throw new SftestException("Can't create or save new record.");
     	}    	
     	
     	retValue=checkElementsPresence();
     	if (retValue>0){
     		action.fatal("Can't find "+retValue+" element(s), can't perform check IsRecordSavable");
-    		action.getScreenshot(sInstance, true);    		
+    		action.getScreenshot(true);    		
     		throw new SftestException("Can't create or save new record.");    		
     	}
     	
     	if (fillElementsByValidValues()==Constants.RET_ERROR){
     		action.fatal("Cant't fill all elements in _"+parentTabID+"_, can't perform check IsRecordSavable");
-    		action.getScreenshot(sInstance, true);    		
+    		action.getScreenshot(true);    		
     		throw new SftestException("Can't create or save new record.");
     	}
     	
-    	if (action.pressButton(sInstance, Constants.SAVE_RECORD_LOCATOR) == Constants.RET_ERROR){
-    		action.getScreenshot(sInstance, true);    		
+    	if (action.pressButton(Constants.SAVE_RECORD_LOCATOR) == Constants.RET_ERROR){
+    		action.getScreenshot(true);    		
     		throw new SftestException("Can't create or save new record.");
     	}    	
 
     	if (checkTitle(afterSaveTitle, "After save")==Constants.RET_ERROR){ 
     		action.fatal("Cant't save new record of _"+parentTabID+"_, can't end check IsRecordSavable. Check if all elements are in object and all of them have right type (see screenshot for details).");
-    		action.getScreenshot(sInstance, true);    		
+    		action.getScreenshot(true);    		
     		throw new SftestException("Can't create or save new record.");
     	}       	
     	
 // TODO should check if delete is successful
-    	action.deleteRecord(sInstance, parentTabID, getIdOfStoredRecord());    	
+    	action.deleteRecord(parentTabID, getIdOfStoredRecord());    	
         
         return Constants.RET_OK;
     }
@@ -233,7 +238,7 @@ public class GenericObject {
     public int checkTitle(String shouldBeTitle, String titleKind){
     	String tempString;
     	
-    	tempString = action.getTitle(sInstance);
+    	tempString = action.getTitle();
     	if (!shouldBeTitle.equals(tempString)){
     		action.error(titleKind + " title of page _"+ parentTabID +"_ is _"+tempString+"_ (should be _"+shouldBeTitle+"_)");
     		return Constants.RET_ERROR;
@@ -251,11 +256,11 @@ public class GenericObject {
     	String afterSaveTitle = defaultTitleSingular+": "+ myRecordId+" ~ Salesforce - Developer Edition";
     	String afterDeleteTitle = homeTitle;
     	
-    	action.openTab(sInstance, parentTabID);
+    	action.openTab(parentTabID);
     	
     	if (checkTitle(homeTitle, "Home")==Constants.RET_ERROR)
 			return Constants.RET_ERROR;    	
-    	if (action.createNewEmptyRecord(sInstance, parentTabID) == Constants.RET_ERROR){
+    	if (action.createNewEmptyRecord(parentTabID) == Constants.RET_ERROR){
     		action.error("Cant't create new record of _"+parentTabID+"_, checkTitles skipped");
     		return Constants.RET_ERROR;
     	}
@@ -265,48 +270,48 @@ public class GenericObject {
     	// TODO - should provide error if can't fill
     	fillElementsByValidValues();
     	
-    	action.isElementPresent(sInstance, Constants.SAVE_AND_NEW_LOCATOR);    	
-    	action.isElementPresent(sInstance, Constants.CANCEL_LOCATOR);
+    	action.isElementPresent(Constants.SAVE_AND_NEW_LOCATOR);    	
+    	action.isElementPresent(Constants.CANCEL_LOCATOR);
     	
 
-    	if (action.pressButton(sInstance, Constants.SAVE_RECORD_LOCATOR) == Constants.RET_ERROR){
+    	if (action.pressButton(Constants.SAVE_RECORD_LOCATOR) == Constants.RET_ERROR){
     		return Constants.RET_ERROR;
     	}    	
     	if (checkTitle(afterSaveTitle, "After save")==Constants.RET_ERROR)
     			return Constants.RET_ERROR;
     	isThereUndeletedRecord = true;
     	
-    	action.isElementPresent(sInstance, Constants.DELETE_LOCATOR);    	
-    	action.isElementPresent(sInstance, Constants.CLONE_LOCATOR);
+    	action.isElementPresent(Constants.DELETE_LOCATOR);    	
+    	action.isElementPresent(Constants.CLONE_LOCATOR);
 
-    	if (action.pressButton(sInstance, Constants.EDIT_RECORD_LOCATOR) == Constants.RET_ERROR){
+    	if (action.pressButton(Constants.EDIT_RECORD_LOCATOR) == Constants.RET_ERROR){
     		return Constants.RET_ERROR;
     	}    	
     	if (checkTitle(editTitle, "Edit title")==Constants.RET_ERROR)
     			return Constants.RET_ERROR;
 
-    	action.isElementPresent(sInstance, Constants.SAVE_RECORD_LOCATOR);    	
-    	action.isElementPresent(sInstance, Constants.CANCEL_LOCATOR);
+    	action.isElementPresent(Constants.SAVE_RECORD_LOCATOR);    	
+    	action.isElementPresent(Constants.CANCEL_LOCATOR);
     	
-    	if (action.pressButton(sInstance, Constants.SAVE_AND_NEW_LOCATOR) == Constants.RET_ERROR){
+    	if (action.pressButton(Constants.SAVE_AND_NEW_LOCATOR) == Constants.RET_ERROR){
     		return Constants.RET_ERROR;
     	}    	
     	if (checkTitle(newTitle, "After SaveAndNew")==Constants.RET_ERROR)
     			return Constants.RET_ERROR;
-    	if (action.pressButton(sInstance, Constants.CANCEL_LOCATOR) == Constants.RET_ERROR){
+    	if (action.pressButton(Constants.CANCEL_LOCATOR) == Constants.RET_ERROR){
     		return Constants.RET_ERROR;
     	}    	
     	if (checkTitle(afterSaveTitle, "After cancel")==Constants.RET_ERROR)
     			return Constants.RET_ERROR;
-    	if (action.pressButton(sInstance, Constants.CLONE_LOCATOR) == Constants.RET_ERROR){
+    	if (action.pressButton(Constants.CLONE_LOCATOR) == Constants.RET_ERROR){
     		return Constants.RET_ERROR;
     	}    	
     	if (checkTitle(newTitle, "After clone")==Constants.RET_ERROR)
     			return Constants.RET_ERROR;
-    	if (action.pressButton(sInstance, Constants.CANCEL_LOCATOR) == Constants.RET_ERROR){
+    	if (action.pressButton(Constants.CANCEL_LOCATOR) == Constants.RET_ERROR){
     		return Constants.RET_ERROR;
     	}    	
-    	if (action.pressDelete(sInstance) == Constants.RET_ERROR){
+    	if (action.pressDelete() == Constants.RET_ERROR){
     		return Constants.RET_ERROR;
     	}    	
     	if (checkTitle(afterDeleteTitle, "After delete")==Constants.RET_ERROR)
@@ -325,9 +330,9 @@ public class GenericObject {
     			throw new SftestException("Check sequence error!"); 
     		}
     		action.error("Non-fatal error while checking common sequense (unfinished actions was skipped).");
-    		action.getScreenshot(sInstance, true);
+    		action.getScreenshot(true);
     		if (isThereUndeletedRecord){
-    			action.deleteRecord(sInstance, parentTabID, getIdOfStoredRecord());
+    			action.deleteRecord(parentTabID, getIdOfStoredRecord());
     			isThereUndeletedRecord = false;
     		}
     	}
@@ -349,7 +354,7 @@ public class GenericObject {
     }
     
     public int login()throws SftestException{
-    	if (action.login(sInstance, Settings.SF_LOGIN, Settings.SF_PASSWORD) == Constants.RET_ERROR){
+    	if (action.login(Settings.SF_LOGIN, Settings.SF_PASSWORD) == Constants.RET_ERROR){
     		throw new SftestException("Login failed.");
     	}
     	return Constants.RET_OK;
@@ -358,9 +363,9 @@ public class GenericObject {
     public int createNewEmptyRecord() throws SftestException {
     	int retValue;
     	if (Settings.USE_FAST_NEW_RECORD){
-    		retValue = action.createNewEmptyRecordFast(sInstance, parentTabID, waitCondition); 
+    		retValue = action.createNewEmptyRecordFast(parentTabID, waitCondition); 
     	} else {
-    		retValue = action.createNewEmptyRecord(sInstance, parentTabID); 
+    		retValue = action.createNewEmptyRecord(parentTabID); 
     	}
     	
     	if (retValue == Constants.RET_ERROR){
@@ -385,13 +390,13 @@ public class GenericObject {
     }
     
     public int recreateRecord()throws SftestException {
-    	action.deleteRecord(sInstance, parentTabID, getIdOfStoredRecord());
+    	action.deleteRecord(parentTabID, getIdOfStoredRecord());
     	createNewEmptyRecord();    	
         return Constants.RET_OK;
     }    
     
     public int saveRecord(){
-    	action.pressButton(sInstance, Constants.SAVE_RECORD_LOCATOR);
+    	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
         return Constants.RET_OK;
     }
 }  

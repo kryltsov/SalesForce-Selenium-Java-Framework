@@ -37,11 +37,11 @@ public class LoginLogout extends GenericObject {
 	public int checkWrongValues()throws SftestException{
 		
 		fillElementsByInvalidValues();
-		if (action.pressButton(sInstance, Constants.LOGIN_LOCATOR)==Constants.RET_ERROR){
+		if (action.pressButton(Constants.LOGIN_LOCATOR)==Constants.RET_ERROR){
 			action.fatal("Can't press on login button.");
     		throw new SftestException("Can't press login button.");
 		}
-		if (!action.isTextPresent(sInstance, Constants.LOGIN_FAILED_ERROR)){
+		if (!action.isTextPresent(Constants.LOGIN_FAILED_ERROR)){
 			// TODO maybe it's fatal situation?
 			action.error("Error when doing checkWrongValues - there is no error message on page!");
 			return Constants.RET_OK;
@@ -52,15 +52,15 @@ public class LoginLogout extends GenericObject {
 	
 	public int checkLoginLogout()throws SftestException{
 		fillElementsByValidValues();
-		if (action.pressButton(sInstance, Constants.LOGIN_LOCATOR)==Constants.RET_ERROR){
+		if (action.pressButton(Constants.LOGIN_LOCATOR)==Constants.RET_ERROR){
 			action.fatal("Can't press on login button.");
     		throw new SftestException("Can't press login button.");
 		}
-		if (action.isElementPresent(sInstance, Constants.LOGIN_FAILED_ERROR)){
+		if (action.isElementPresent(Constants.LOGIN_FAILED_ERROR)){
 			action.fatal("Error when logging in with valid values - there is error message on page!");
 			throw new SftestException("Unwaited error.");
 		}
-		if (action.isTextPresent(sInstance, Constants.BAD_IP_ERROR)){
+		if (action.isTextPresent(Constants.BAD_IP_ERROR)){
 			action.fatal("Error when logging in with valid values - your IP is not approved.");
 			throw new SftestException("Salesforce Bad IP error.");
 		}
@@ -68,7 +68,7 @@ public class LoginLogout extends GenericObject {
 			action.fatal("Error when logging in with valid values - title is wrong.");
 			throw new SftestException("Bad login.");
 		}
-		if (action.click(sInstance, Constants.LOGOUT_LOCATOR)==Constants.RET_ERROR){
+		if (action.click(Constants.LOGOUT_LOCATOR)==Constants.RET_ERROR){
 			action.fatal("Can't press on logout.");
     		throw new SftestException("Can't pres logout link.");
 		}
@@ -80,7 +80,7 @@ public class LoginLogout extends GenericObject {
 	}
 	
 	public void openWithElementsAndTitleCheck() throws SftestException{
-    	action.open(sInstance, "/");
+    	action.open("/");
     	if (checkElementsPresence()>0){
     		action.fatal("Can't find all inputs to login!");
     		throw new SftestException("Can't find inputs.");

@@ -86,7 +86,7 @@ public class GenericNumber extends GenericElement {
     }
     
     public int checkMaxLengthRunCount=0;
-    public int checkMaxLength(DefaultSelenium selInstance){
+    public int checkMaxLength(){
         String testString;
         char validChar;
     	
@@ -110,12 +110,12 @@ public class GenericNumber extends GenericElement {
 	       	 testString = validChar+testString;
 	        }
 	        
-	        action.typeText(selInstance, writeLocator, testString);
-	        action.pressButton(selInstance, Constants.SAVE_RECORD_LOCATOR);
-	        if (action.isErrorPresent(selInstance, "Number is too large.")){
+	        action.typeText(writeLocator, testString);
+	        action.pressButton(Constants.SAVE_RECORD_LOCATOR);
+	        if (action.isErrorPresent("Number is too large.")){
 	        	checkMaxLengthRunCount=2; // no need in next step of check
 	        	action.error("Real integer places numb of _"+ elementName + "_ is less than should be (should be "+intPlaces+")");
-	        	action.getScreenshot(selInstance, true);
+	        	action.getScreenshot(true);
 	        	action.warn("Because of error count of decimal plases will not be checked.");	        	
 	        	return Constants.RET_ERROR;
 	        } else {
@@ -127,17 +127,17 @@ public class GenericNumber extends GenericElement {
 	        while (testString.length() < (intPlaces+1) ){
 	       	 testString = validChar+testString;
 	        }
-	        action.typeText(selInstance, writeLocator, testString);
-	        action.pressButton(selInstance, Constants.SAVE_RECORD_LOCATOR);
-	        if (action.isErrorPresent(selInstance, "Number is too large.")){
+	        action.typeText(writeLocator, testString);
+	        action.pressButton(Constants.SAVE_RECORD_LOCATOR);
+	        if (action.isErrorPresent("Number is too large.")){
 	        	action.info("Real integer places numb of _"+ elementName + "_ is OK! ("+intPlaces+")");
 
-	        	checkDecimalPlacesCount(action.readValue(selInstance, writeLocator));
+	        	checkDecimalPlacesCount(action.readValue(writeLocator));
 //  TODO maybe we should edit retValue depending on checkDecimalPlacesCount()	        	
 	        	return Constants.RET_OK;        	
 	        } else {
 	        	action.error("Real integer places numb of _"+ elementName + "_ is more than should be (should be "+intPlaces+")");
-	        	action.getScreenshot(selInstance, true);
+	        	action.getScreenshot(true);
 	        	action.warn("Because of error count of decimal plasec will not be checked.");	        	
 	        	return Constants.RET_PAGE_BROKEN_ERROR;
 	        }        	
@@ -145,7 +145,7 @@ public class GenericNumber extends GenericElement {
     }
 
     public int checkForTooBigRunCount=0;    
-    public int checkForTooBig(DefaultSelenium selInstance){
+    public int checkForTooBig(){
         String testString;
         char validChar;
     	
@@ -163,35 +163,35 @@ public class GenericNumber extends GenericElement {
 	       	 testString = validChar+testString;
 	        }
 	        
-	        action.typeText(selInstance, writeLocator, testString);
-	        action.pressButton(selInstance, Constants.SAVE_RECORD_LOCATOR);
-	        if (action.isErrorPresent(selInstance, "Number is too large.")){
-	        	if (action.readValue(selInstance, writeLocator).equals("#Too Big!")){
+	        action.typeText(writeLocator, testString);
+	        action.pressButton(Constants.SAVE_RECORD_LOCATOR);
+	        if (action.isErrorPresent("Number is too large.")){
+	        	if (action.readValue(writeLocator).equals("#Too Big!")){
 	        		action.info("checkForTooBig of _"+ elementName + "_ is OK");
 		        	return Constants.RET_OK;
 	        	}
 	        	action.info("checkForTooBig of _"+ elementName + "_ is ERROR");
-	        	action.getScreenshot(selInstance, true);
+	        	action.getScreenshot(true);
 	        	return Constants.RET_ERROR;
 	        }
         	action.info("checkForTooBig of _"+ elementName + "_ is ERROR");
-        	action.getScreenshot(selInstance, true);
+        	action.getScreenshot(true);
         	return Constants.RET_PAGE_BROKEN_ERROR;	        
     }
     
-    public int  checkAll (DefaultSelenium selInstance){
+    public int  checkAll (){
 	   	int returnedValue;
 	
-	   	returnedValue = super.checkAll(selInstance);
+	   	returnedValue = super.checkAll();
 	   	if (returnedValue!=Constants.RET_OK)
 	   		return returnedValue;
 	
-	   	returnedValue = checkMaxLength(selInstance);   	
+	   	returnedValue = checkMaxLength();   	
 	   	if ((returnedValue==Constants.RET_PAGE_BROKEN_OK) ||
 	   			(returnedValue==Constants.RET_PAGE_BROKEN_ERROR))
 	   		return returnedValue;
 	   	
-	   	returnedValue = checkForTooBig(selInstance);   	
+	   	returnedValue = checkForTooBig();   	
 	   	if (returnedValue==Constants.RET_PAGE_BROKEN_ERROR)
 	   		return returnedValue;	   	
 	

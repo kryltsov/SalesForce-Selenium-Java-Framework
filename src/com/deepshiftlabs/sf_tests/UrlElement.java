@@ -20,20 +20,20 @@ public class UrlElement extends GenericTextElement {
         values.add(new CheckValue("https://do\"ma\"in", Constants.IT_IS_VALID_VALUE, "", "https://domain"));
     }
     
-	protected int checkIsDisplayedRight(DefaultSelenium selInstance, CheckValue theValue){
+	protected int checkIsDisplayedRight(CheckValue theValue){
 		int retValue;
 		
-		retValue = super.checkIsDisplayedRight(selInstance, theValue);
+		retValue = super.checkIsDisplayedRight(theValue);
      	if (retValue!=Constants.RET_PAGE_BROKEN_OK){
      		action.warn("Check if url field displayed as url SKIPPED for element _"+elementName+"_ because checkIsDisplayedRight FAILED)");
      		return retValue;
      	}
-     	if ( action.isElementPresent(selInstance, "link="+ theValue.shouldBeDisplayed)){
+     	if ( action.isElementPresent("link="+ theValue.shouldBeDisplayed)){
     		action.info("Value _"+theValue.shouldBeDisplayed+"_ for element (URL) _"+elementName+"_ is displayed as URL (OK)");
     		return Constants.RET_PAGE_BROKEN_OK;
     	} else {
     		action.error("Value _"+theValue.shouldBeDisplayed+"_ for element (URL) _"+elementName+"_ is NOT displayed as URL (ERROR)");
-    		action.getScreenshot(selInstance, true);
+    		action.getScreenshot(true);
     		return Constants.RET_PAGE_BROKEN_ERROR;
     	}
     }

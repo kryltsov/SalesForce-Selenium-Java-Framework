@@ -40,6 +40,10 @@ public class GenericElement {
         lastEnteredValue = "";
         inputLength = 32000+100;
     }
+    
+    public void init(CommonActions a_action){
+    	action = a_action;
+    }
         
     public String getElementName(){
     	return elementName;
@@ -67,9 +71,9 @@ public class GenericElement {
     }
     
 // you should use this func only on add/edit page because of writeLocator using     
-    public int checkPresence (DefaultSelenium selInstance){
+    public int checkPresence (){
         
-        if (action.isElementPresent(selInstance, writeLocator)){
+        if (action.isElementPresent(writeLocator)){
             action.info ("Element name = "+elementName + " is PRESENT");
             return Constants.RET_OK;
         }
@@ -78,12 +82,12 @@ public class GenericElement {
         return Constants.RET_ERROR;
     }
     
-    public int fillByValidValue (DefaultSelenium selInstance){
+    public int fillByValidValue (){
         String tempValidValue = validValue;
         
         if (determinesRecordId) tempValidValue = recordId;
         
-        if (action.typeText(selInstance, writeLocator, tempValidValue) == Constants.RET_ERROR){
+        if (action.typeText(writeLocator, tempValidValue) == Constants.RET_ERROR){
         	errorsCount++;
         	return Constants.RET_ERROR;
         }
@@ -92,12 +96,12 @@ public class GenericElement {
        return Constants.RET_OK;
     }
     
-    public int fillByInvalidValue (DefaultSelenium selInstance){
+    public int fillByInvalidValue (){
         String tempInvalidValue = invalidValue;
         
         if (determinesRecordId) tempInvalidValue = recordId;
         
-        if (action.typeText(selInstance, writeLocator, tempInvalidValue) == Constants.RET_ERROR){
+        if (action.typeText(writeLocator, tempInvalidValue) == Constants.RET_ERROR){
         	errorsCount++;
         	return Constants.RET_ERROR;
         }
@@ -107,8 +111,8 @@ public class GenericElement {
        return Constants.RET_OK;
     }    
     
-    public int fillByNull (DefaultSelenium selInstance){
-        if (action.typeText(selInstance, writeLocator, "") == Constants.RET_ERROR){
+    public int fillByNull (){
+        if (action.typeText(writeLocator, "") == Constants.RET_ERROR){
         	errorsCount++;
         	return Constants.RET_ERROR;
         }
@@ -122,16 +126,16 @@ public class GenericElement {
     	return true;
     }
     
-    public int  checkAll (DefaultSelenium selInstance){
+    public int  checkAll (){
     	int returnedValue;
         action.infoV ("Starting checking all for element _"+elementName+"_");
 
-        returnedValue = checkRequired(selInstance); 
+        returnedValue = checkRequired(); 
         if ((returnedValue == Constants.RET_PAGE_BROKEN_OK)||
     			(returnedValue== Constants.RET_PAGE_BROKEN_ERROR)) 
     		return returnedValue;
 
-        returnedValue = checkAllValues(selInstance); 
+        returnedValue = checkAllValues(); 
         if ((returnedValue == Constants.RET_PAGE_BROKEN_OK)||
     			(returnedValue== Constants.RET_PAGE_BROKEN_ERROR)) 
     		return returnedValue;
@@ -140,7 +144,7 @@ public class GenericElement {
     }
    
     private int checkRequiredRunCount=0;
-    public int checkRequired (DefaultSelenium selInstance){
+    public int checkRequired (){
     	boolean realRequired = false;
     	if (checkRequiredRunCount>0) {
     		action.infoV("CheckRequired for element _"+elementName+"_ already was performed, skipping");
@@ -148,19 +152,19 @@ public class GenericElement {
     	}
     	checkRequiredRunCount++;
 	        action.infoV ("Starting checkRequired for _"+elementName+"_");
-	    	fillByNull(selInstance);
-	    	action.pressButton(selInstance, Constants.SAVE_RECORD_LOCATOR);
+	    	fillByNull();
+	    	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
 	    	
-	    	realRequired = action.isErrorPresent(selInstance, "You must enter a value");
+	    	realRequired = action.isErrorPresent("You must enter a value");
 
 	    	if (realRequired==true){
 	    		if (isRequired==true){
 	    	    	action.info("Element _"+ elementName + "_ is required!(OK)");
-	    			action.getScreenshot(selInstance, false);
+	    			action.getScreenshot(false);
 	    			return Constants.RET_OK;
 	    		}else{
 	    			action.error("Element _"+ elementName + "_ is required!(ERROR)");
-	    			action.getScreenshot(selInstance, true);
+	    			action.getScreenshot(true);
 	    			errorsCount++;
 	    			return Constants.RET_ERROR;
 	    		}
@@ -168,11 +172,11 @@ public class GenericElement {
 	    	else{
 	    		if (isRequired==false){
 	    	    	action.info("Element _"+ elementName + "_ is NOT required!(OK)");
-	    			action.getScreenshot(selInstance, false);
+	    			action.getScreenshot(false);
 	    			return Constants.RET_PAGE_BROKEN_OK;
 	    		}else{
 	    			action.error("Element _"+ elementName + "_ is NOT required!(ERROR)");
-	    			action.getScreenshot(selInstance, true);
+	    			action.getScreenshot(true);
 	    			errorsCount++;
 	    			return Constants.RET_PAGE_BROKEN_ERROR;
 	    		}
@@ -180,17 +184,16 @@ public class GenericElement {
     }
     
  // TODO - Text element we should check if theValue.value.length()>maxLength and then skip this value
-    private int checkOneValue(DefaultSelenium selInstance, CheckValue theValue){
+    private int checkOneValue(CheckValue theValue){
     	boolean isValid = false;
     	boolean isValueOK = false;
     	boolean pageBroken = false;
-    	
     	theValue.status = Constants.CHECKED;
-    	action.typeText(selInstance, writeLocator, theValue.value);
+    	action.typeText(writeLocator, theValue.value);
     	lastEnteredValue = theValue.value;
     	
-    	action.pressButton(selInstance, Constants.SAVE_RECORD_LOCATOR);
-    	isValid = !(action.isErrorPresent(selInstance, theValue.shouldBeErrorMessage));
+    	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
+    	isValid = !(action.isErrorPresent(theValue.shouldBeErrorMessage));
     	pageBroken = isValid;
     	
     	isValueOK = (isValid==theValue.shouldBeValid);
@@ -207,7 +210,7 @@ public class GenericElement {
     	else {
     		errorsCount++;
     		action.error("Value _"+theValue.value+"_ for element _"+elementName+"_ is "+isValidInRealString+" (ERROR)");
-    		action.getScreenshot(selInstance, true);
+    		action.getScreenshot(true);
     	}
 // end logging    	
     	
@@ -223,15 +226,15 @@ public class GenericElement {
     	}
     }
 
-    protected int checkIsDisplayedRight(DefaultSelenium selInstance, CheckValue theValue){
+    protected int checkIsDisplayedRight(CheckValue theValue){
     	String displayedText;
     	
-    	displayedText = action.readText(selInstance, readLocator);
+    	displayedText = action.readText(readLocator);
     	if  ( displayedText == Constants.RET_ERROR_STRING ){
     		theValue.displayedRightResult = Constants.CHECK_ERROR;
     		errorsCount++;
     		action.error("Can't get text for element _"+elementName);
-        	action.getScreenshot(selInstance, true);
+        	action.getScreenshot(true);
         	return Constants.RET_PAGE_BROKEN_ERROR;    		
     	}
     	
@@ -244,12 +247,12 @@ public class GenericElement {
     	theValue.displayedRightResult = Constants.CHECK_ERROR;
     	errorsCount++;
     	action.error("Value _"+theValue.value+"_ for element _"+elementName+"_ is displayed as _"+displayedText+"_ (should be _"+theValue.shouldBeDisplayed+"_)(ERROR)");
-    	action.getScreenshot(selInstance, true);
+    	action.getScreenshot(true);
     	return Constants.RET_PAGE_BROKEN_ERROR;
     }
     
     private int checkAllValuesRunCount=0;
-    public int checkAllValues (DefaultSelenium selInstance){
+    public int checkAllValues (){
     	int retValue;
     	CheckValue tempCheckValue;
     	int countOfValuesToRun = 0;
@@ -274,9 +277,9 @@ public class GenericElement {
     			checkAllValuesRunCount++;
 //TODO implement function to divide long entries
     		}else{
-		    	retValue = checkOneValue(selInstance, tempCheckValue);
+		    	retValue = checkOneValue(tempCheckValue);
 		    	if (retValue==Constants.RET_PAGE_BROKEN_OK)
-		    		retValue = checkIsDisplayedRight(selInstance, tempCheckValue);
+		    		retValue = checkIsDisplayedRight(tempCheckValue);
 	
 		    	checkAllValuesRunCount++;
 		    	if (retValue==Constants.RET_PAGE_BROKEN_ERROR || retValue==Constants.RET_PAGE_BROKEN_OK)

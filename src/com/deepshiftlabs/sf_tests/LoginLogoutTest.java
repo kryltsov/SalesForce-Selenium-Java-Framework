@@ -5,10 +5,10 @@ import org.testng.annotations.*;
 import java.io.*;
 
 public class LoginLogoutTest {
-	
+	CommonActions action = new CommonActions();	
 	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));      
  
-	GenericObject wwwObject = new LoginLogout ("Loginlogout", "smth", "smth2");
+	GenericObject wwwObject;
 
  public int addAllElements(){
  	    wwwObject.addElement(new GenericElement("User Name", Constants.RESERVED_PARAMETER, Constants.RESERVED_PARAMETER, Constants.REQUIRED));	 
@@ -16,7 +16,7 @@ public class LoginLogoutTest {
     return 0;
  }
 
- @Test(groups = {"default1"}, description = "login_logout_test")
+ @Test(groups = {"default"}, description = "login_logout_test")
  @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
  public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
      if (seleniumHost.equals("")){
@@ -26,6 +26,8 @@ public class LoginLogoutTest {
          webSite = Settings.WEB_SITE;
      }
  	
+    wwwObject = new LoginLogout ("Loginlogout", "smth", "smth2");
+    wwwObject.init(action);
  	addAllElements();
  	
  	try {

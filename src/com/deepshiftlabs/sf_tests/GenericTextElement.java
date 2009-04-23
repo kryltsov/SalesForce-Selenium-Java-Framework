@@ -57,26 +57,26 @@ public class GenericTextElement extends GenericElement {
         	 testString = validChar+testString;
          }
          
-         action.typeText(selInstance, writeLocator, testString);
-         realLength = action.readValue(selInstance, writeLocator).length();
+         action.typeText(writeLocator, testString);
+         realLength = action.readValue(writeLocator).length();
          if (realLength != inputLength){
              while (testString.length() < 256){
             	 testString = testString+testString;
              }
-             action.typeText(selInstance, writeLocator, testString);
-             realLength = action.readValue(selInstance, writeLocator).length();
+             action.typeText(writeLocator, testString);
+             realLength = action.readValue(writeLocator).length();
         	 action.error ("Real maxLenght of  _"+ elementName + "_ is "+realLength+" (should be "+inputLength+" )");
-        	 action.getScreenshot(selInstance, true);        	 
+        	 action.getScreenshot(true);        	 
          }
         action.info ("Real maxLenght for _"+ elementName + "_ is OK.");
-        action.getScreenshot(selInstance, false);        
+        action.getScreenshot(false);        
         return Constants.RET_OK;
      }
     
      public int  checkAll (DefaultSelenium selInstance){
     	int returnedValue;
 
-    	returnedValue = super.checkAll(selInstance);
+    	returnedValue = super.checkAll();
     	if (returnedValue!=Constants.RET_OK)
     		return returnedValue;
     	
