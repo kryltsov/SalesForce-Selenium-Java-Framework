@@ -163,6 +163,7 @@ public class EventProcessor {
 		return scrLinks;
 	}
 	
+// 204.14.234.33 = sfIP
 
 	public void eventToHtmlString(Event a_event, int a_level, int a_parentStartId){
 		String color = getHtmlColor(a_event.logLevel);
