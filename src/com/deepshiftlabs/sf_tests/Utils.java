@@ -35,11 +35,11 @@ public class Utils {
              logger.warn(message);
         }
         public void error (String message){
-             logger.error("(!)"+message+"(!)");
+             logger.error(message);
         }
         
         public void fatal (String message){
-            logger.fatal("(!!!)"+message+"(!!!)");
+            logger.fatal(message);
        }
         
         static public String prepareForJavaScript(String tempString){
@@ -68,7 +68,7 @@ public class Utils {
 			
 			DateFormat df = new SimpleDateFormat(Settings.SCREENSHOTS_POSTFIX_FORMAT);
 			
-			if (isError) status="(ERR)"; else {status="OK";}
+			if (isError) status="(ERR)"; else {status="";}
 			
 			filename = (Settings.SCREENSHOTS_PREFIX+df.format(d)+status+".png");
 			return filename;

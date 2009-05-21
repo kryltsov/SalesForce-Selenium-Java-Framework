@@ -46,7 +46,7 @@ public class WebsiteObject {
         wwwObject = new GenericObject ("Employment Websites", "websitePage00001", "Employment Website");
         wwwObject.init(action);
     	addAllElements();
-    
+    	// TODO  add comments!!!!!!!!!!!!!!!!!!! CHECK ALL STRINGS COMPARATIONS WITH ""!!!!!
     	try {
 	    	wwwObject.setDeterminingRecordIdField("Employment Website Name");
 	    	wwwObject.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);

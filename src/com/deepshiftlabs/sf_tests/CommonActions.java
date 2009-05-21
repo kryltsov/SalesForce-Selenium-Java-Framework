@@ -60,11 +60,14 @@ public class CommonActions {
    }
 
     public void freeSelenium() {
-    	Event event = startEvent("freeSelenium", seleniumInstance.toString());
-    	if (seleniumInstance!=null){
+    	Event event;
+    	if (seleniumInstance==null){
+    		event = startEvent("freeSelenium", "null driver");
+    	}
+    	else {
+    		event = startEvent("freeSelenium", seleniumInstance.toString());
 	        seleniumInstance.stop();
 	        seleniumInstance = null;
-	        warn("--------SESSION ENDED--------");
     	}
     	closeEventOk(event);
     }
@@ -531,6 +534,7 @@ public class CommonActions {
 		Event tempEvent = new Event(eventName, target);
 		events.add(tempEvent);
 		tempEvent.beforeScreenshot = lastScreenshotFilename;
+		logEvent (tempEvent);
 		return tempEvent;
 	}
 	
@@ -542,6 +546,7 @@ public class CommonActions {
 	
 	public void closeEvent(Event a_event, int a_logLevel, String a_message){
 		a_event.close(a_logLevel, a_message, lastScreenshotFilename);
+		logEvent (a_event);
 	}
 	
 	public void closeEventOk(Event a_event){
@@ -571,14 +576,15 @@ public class CommonActions {
 	// action.closeEventOk(event);
 	
 	public void logEvent(Event a_event){
-		switch( a_event.type )
+		switch( a_event.logLevel )
 	    {
-	      case 0: info(a_event.toString()); break;
-	      case 1: info(a_event.toString()); break;
-	      case 2: info(a_event.toString()); break;
-	      case 3: warn(a_event.toString()); break;
-	      case 4: error(a_event.toString()); break;
-	      case 5: fatal(a_event.toString()); break;
+	      case Constants.STARTED: infoV(a_event.toConsole()); break;
+	      case Constants.OK: info(a_event.toConsole()); break;
+	      case Constants.INFOV: infoV(a_event.toConsole()); break;
+	      case Constants.INFO: info(a_event.toConsole()); break;
+	      case Constants.WARN: warn(a_event.toConsole()); break;
+	      case Constants.ERROR: error(a_event.toConsole()); break;
+	      case Constants.FATAL: fatal(a_event.toConsole()); break;
 	    }
 	}
 	
@@ -593,7 +599,7 @@ public class CommonActions {
 		ut.warn("			Report:			");
 		for (int i=0; i<events.size(); i++){
 			tempEvent = events.get(i);
-			if (tempEvent.type>=Settings.LOG_LEVEL)
+			if (tempEvent.logLevel>=Settings.LOG_LEVEL)
 				logEvent(tempEvent);
 		}
 	}	

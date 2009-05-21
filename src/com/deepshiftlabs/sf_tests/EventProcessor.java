@@ -87,34 +87,68 @@ public class EventProcessor {
 		return color;
 	}
 	
-	public String eventToString(Event a_event, int a_level){
-		String color = getHtmlColor(a_event.logLevel);		
-		String s="";
-		 	
-		s = String.format(Constants.HTML_STRING_FORMAT, a_level*20, color, a_event.eventName, a_event.targetName);
-
-		return s;
+	public String getTabs(int logLevel){
+		String tabs ="";
+		for (int i = 0; i<logLevel; i++){
+			tabs = tabs+"\t";
+		}
+		return tabs;
 	}
 	
-	public String eventToLink(Event a_event, int a_level){
-		String htmlId = "id"+a_event.getStartId();
-		String color = getHtmlColor(a_event.logLevel);		
-		String s="";
-		 	
-		s = String.format(Constants.HTML_LINK_FORMAT, htmlId, a_level*20, color, a_event.eventName, a_event.targetName);
-		return s;
+	public String getStyle (int a_level){
+		String style = String.format(Constants.HTML_STYLE, a_level*20);
+		return style;		
 	}
 	
-	public String openSubBlock(Event a_event, int a_level){
-		String htmlId = "id"+a_event.getStartId();
-		String s="";
-		 	
-		s = String.format(Constants.HTML_SUBBLOCK_OPEN, htmlId, a_level*20);
-		return s;
+	public String getStyleColor (String a_color){
+		String style = String.format(Constants.HTML_STYLE_COLOR, a_color);
+		return style;		
+	}
+	
+	public String getStyleDetails (int a_level){
+		String style = String.format(Constants.HTML_STYLE_DETAILS, a_level*20);
+		return style;
 	}	
 	
-	public String closeSubBlock(){
-		return Constants.HTML_SUBBLOCK_CLOSE;
+	public void openSubBlock(String a_htmlId, int a_level, String style){
+		String s = String.format(Constants.HTML_SUBBLOCK_OPEN, getTabs(a_level), a_htmlId, style);
+		writeToFile (s);
+	}	
+	
+	public void closeSubBlock(int a_level){
+		writeToFile (String.format(Constants.HTML_SUBBLOCK_CLOSE, getTabs(a_level)));
+	}	
+	
+	public void eventToHtmlString(Event a_event, int a_level){
+		String color = getHtmlColor(a_event.logLevel);
+		String htmlId = "id"+a_event.getStartId();
+		String detailsHtmlId = "idDetails"+a_event.getStartId();
+		String linkStyle = getStyleColor(color);
+		String detailsLinkStyle = getStyleColor(Constants.HTML_DEFAULT_COLOR);
+		String details = a_event.toHtmlDetail();
+		
+		String s = getTabs(a_level);
+		
+		if (a_event.getStartId() == a_event.getEndId()){
+			s = s + "<"+color+">"+a_event.eventName + "</"+color+">";
+		}
+		else {
+			s = s + String.format(Constants.HTML_OPEN_CHILD_LINK, htmlId, linkStyle, a_event.eventName);
+		}
+
+		s = s+" Target: "+a_event.targetName+"\n";
+
+		if ( !details.equals("") ){
+			s = s + String.format(Constants.HTML_OPEN_CHILD_LINK, detailsHtmlId, detailsLinkStyle, Constants.HTML_DETAILS_LINK_NAME);
+		}
+		s = s + "<br>\n"; 	
+		writeToFile (s);
+
+		if ( !details.equals("") ){
+			openSubBlock(detailsHtmlId, a_level+1, getStyleDetails(a_level+2));
+			writeToFile (details);
+			closeSubBlock(a_level+1);
+		}
 	}	
 	
 	public int eventToHtml(int a_startId, int level){
@@ -133,26 +167,22 @@ public class EventProcessor {
 				tempEvent.fixEndId();
 		}
 		
-		if (tempEvent.getStartId() == tempEvent.getEndId()){
-			simpleEventToHtml(tempEvent, level);
-		}
-		else {
-			writeToFile(eventToLink(tempEvent, level));
-			writeToFile(openSubBlock(tempEvent, level));
+		eventToHtmlString(tempEvent, level);
+		
+		if (tempEvent.getStartId() != tempEvent.getEndId()){
+			String htmlId = "id"+tempEvent.getStartId();
+			String style = getStyle(level+1);
+			openSubBlock(htmlId, level+1, style);
 			
 			lastProcessed = tempEvent.getStartId();
 			while (lastProcessed<tempEvent.getEndId()){
 				lastProcessed = eventToHtml(lastProcessed+1, level+1);			
 			}
-			writeToFile(closeSubBlock());
+			closeSubBlock(level+1);
 		}
 
 		lastProcessed = tempEvent.getEndId();
 		return lastProcessed;
-	}
-	
-	public void simpleEventToHtml(Event a_event, int level){
-		writeToFile(eventToString(a_event, level));
 	}
 	
 	int eventsToHtml(String masterName){
@@ -164,7 +194,11 @@ public class EventProcessor {
 			return Constants.RET_ERROR;
 		}
 
-		writeToFile(Constants.HTML_HEADER);
+		writeToFile(Constants.HTML_HEADER_START);
+		writeToFile(Constants.HTML_STYLE_BLACK);
+		writeToFile(Constants.HTML_STYLE_RED);
+		writeToFile(Constants.HTML_HEADER_END);
+		writeToFile(Constants.HTML_BODY_START);
 		writeToFile(Constants.HTML_SCRIPT);
 
 		nextEventToProcess = lastProcessedEvent+1;
@@ -173,6 +207,7 @@ public class EventProcessor {
 			nextEventToProcess = lastProcessedEvent+1;
 		}		
 
+		writeToFile(Constants.HTML_BODY_END);
 		writeToFile(Constants.HTML_FOOTER);
 		closeFile();
 		return Constants.RET_OK;

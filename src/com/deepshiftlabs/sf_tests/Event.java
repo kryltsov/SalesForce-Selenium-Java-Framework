@@ -8,28 +8,28 @@ public class Event {
 	
 	private int startId=0;
 	private int endId=0;
-	int type=0;
-	private Date time = new Date();
+	private Date startTime = new Date();
+	private Date endTime = new Date();
 
 	boolean isClosed = false;
 	String eventName = "";
 	String resultMessage = "";
 	String advice = "";
-	String exceptionMessage;
+	String exceptionMessage = "";
 	String beforeScreenshot = "";
 	String afterScreenshot = "";
-//	String method;
 	String targetName = "";
 	String value = "";
 	String waitedValue = "";
 	String realValue = "";
 	int codeLevel = 0;
-	int logLevel = 0;
+	int logLevel = Constants.TOP_IERARCHY_LEVEL;
 	
 	public Event(String a_eventName, String a_targetName){
 		eventName = a_eventName;
 		targetName = a_targetName;
-		time.getTime();
+		logLevel = Constants.STARTED;
+		startTime.getTime();
 		startId = ++idGen;
 	}	
 	
@@ -42,8 +42,8 @@ public class Event {
 		tempString = "EVENT:\n";
 		tempString = tempString+prepareOneValue("startId", new Integer(startId).toString());
 		tempString = tempString+prepareOneValue("endId", new Integer(endId).toString());
-		tempString = tempString+prepareOneValue("type", new Integer(type).toString());
-		tempString = tempString+prepareOneValue("time", time.toString());
+		tempString = tempString+prepareOneValue("Start time", startTime.toString());
+		tempString = tempString+prepareOneValue("End time", endTime.toString());
 		tempString = tempString+prepareOneValue("isClosed", new Boolean(isClosed).toString());
 		tempString = tempString+prepareOneValue("eventName", eventName);
 		tempString = tempString+prepareOneValue("resultMessage", resultMessage);
@@ -62,11 +62,171 @@ public class Event {
 		return tempString;
 	}
 	
+	private String logLevelToString(int logLevel){
+		String tempString = "";
+		switch( logLevel)
+	    {
+	    	case Constants.STARTED: tempString = "STARTED"; break;
+	    	case Constants.OK: tempString = "OK"; break; 
+	    	case Constants.INFOV: tempString = "INFOV"; break;
+	    	case Constants.INFO: tempString = "INFO"; break;
+	    	case Constants.WARN: tempString = "WARN"; break;
+	    	case Constants.ERROR: tempString = "ERROR"; break;
+	    	case Constants.FATAL: tempString = "FATAL"; break;
+	    }
+		return tempString;
+	}
+	
+	public String toConsole(){
+		String formatString = "";
+		String returnString = "";
+
+		if ( logLevel== Constants.STARTED){
+			formatString = "EVENT (%s): %s, target: %s";
+			formatString = formatString + "\n";
+			returnString = String.format(formatString, logLevelToString(logLevel), eventName, targetName); 
+		}
+		else {
+			formatString = "EVENT (%s): %s, target: %s";
+			if (resultMessage=="")
+				formatString = formatString + "%s";
+			else 
+				formatString = formatString + "\nResult: %s. ";
+			
+			if (advice=="")
+				formatString = formatString + "%s";
+			else 
+				formatString = formatString + " %s";
+			
+			if (value=="" && waitedValue=="" && realValue=="")
+			{
+				formatString = formatString + "%s%s%s";
+			}
+			else {
+				formatString = formatString + "\nValues: \t";
+				if (value=="")
+					formatString = formatString + "%s";
+				else 
+					formatString = formatString + "Value: %s; \t";
+				
+				if (waitedValue=="")
+					formatString = formatString + "%s";
+				else 
+					formatString = formatString + "Waited: %s; \t";
+				
+				if (realValue=="")
+					formatString = formatString + "%s";
+				else 
+					formatString = formatString + "Real: %s; \t";
+			}
+			
+			if (beforeScreenshot=="" && afterScreenshot=="")
+			{
+				formatString = formatString + "%s%s";
+			}
+			else {
+				formatString = formatString + "\nScreenshots: ";
+				if (beforeScreenshot=="")
+					formatString = formatString + "%s";
+				else 
+					formatString = formatString + "%s (before) \t";
+				
+				if (afterScreenshot=="")
+					formatString = formatString + "%s";
+				else 
+					formatString = formatString + "%s (after)";
+			}
+
+			if (exceptionMessage=="")
+				formatString = formatString + "%s";
+			else 
+				formatString = formatString + "\nException message: %s.";
+			
+			formatString = formatString + "\n";
+			
+			returnString = String.format(formatString, logLevelToString(logLevel), eventName, targetName, resultMessage, advice, 
+											value, waitedValue, realValue,
+											beforeScreenshot,  afterScreenshot,
+											exceptionMessage);
+		}
+		return returnString;
+	}
+	
+	public String toHtmlDetail(){
+		String formatString = "";
+		String returnString = "";
+
+		if (resultMessage=="")
+			formatString = formatString + "%s";
+		else 
+			formatString = formatString + "Result: %s.<br>\n";
+		
+		if (advice=="")
+			formatString = formatString + "%s";
+		else 
+			formatString = formatString + " %s.<br>\n";
+		
+		if (value=="" && waitedValue=="" && realValue=="")
+		{
+			formatString = formatString + "%s%s%s";
+		}
+		else {
+			formatString = formatString + "Values: \t";
+			if (value=="")
+				formatString = formatString + "%s";
+			else 
+				formatString = formatString + "Value: %s; \t";
+			
+			if (waitedValue=="")
+				formatString = formatString + "%s";
+			else 
+				formatString = formatString + "Waited: %s; \t";
+			
+			if (realValue=="")
+				formatString = formatString + "%s";
+			else 
+				formatString = formatString + "Real: %s; \t";
+			
+			formatString = formatString + "<br>\n";
+		}
+		
+		if (beforeScreenshot=="" && afterScreenshot=="")
+		{
+			formatString = formatString + "%s%s";
+		}
+		else {
+			formatString = formatString + "Screenshots: ";
+			if (beforeScreenshot=="")
+				formatString = formatString + "%s";
+			else 
+				formatString = formatString + "%s (before) \t";
+			
+			if (afterScreenshot=="")
+				formatString = formatString + "%s";
+			else 
+				formatString = formatString + "%s (after)";
+			
+			formatString = formatString + "<br>\n";
+		}
+
+		if (exceptionMessage=="")
+			formatString = formatString + "%s";
+		else 
+			formatString = formatString + "\nException message: %s.";
+		
+		returnString = String.format(formatString, resultMessage, advice, 
+										value, waitedValue, realValue,
+										beforeScreenshot,  afterScreenshot,
+										exceptionMessage);
+		return returnString;
+	}	
+	
 
 	public void close(int a_logLevel, String a_message, String a_screenshot){
 		logLevel = a_logLevel;		
 		resultMessage = a_message;
 		afterScreenshot = a_screenshot;
+		endTime.getTime();
 		endId = getLastId();
 		isClosed = true;
 	}

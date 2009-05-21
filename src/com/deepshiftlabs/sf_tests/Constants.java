@@ -36,17 +36,16 @@ public final class Constants {
 	
 // event levels	
 	
-	public static final int OK = 0;
-	public static final int INFOV = 1;
-    public static final int INFO = 2;
-    public static final int WARN = 3;
-    public static final int ERROR = 4;
-    public static final int FATAL = 5;	
+	public static final int STARTED = 0;
+	public static final int OK = 1;
+	public static final int INFOV = 2;
+    public static final int INFO = 3;
+    public static final int WARN = 4;
+    public static final int ERROR = 5;
+    public static final int FATAL = 6;	
 
 // event constants 
     
-    public static final int START = 101;
-    public static final int END = 102;
     public static final int TOP_IERARCHY_LEVEL = 0;
 
 // SF Constants
@@ -72,13 +71,27 @@ public final class Constants {
     public static final String TITLE_LOGOUT_PAGE = "Salesforce - Developer Edition";
     
 // HTML constants
-    public static final String HTML_HEADER = "<HTML> <HEAD><TITLE>Îò÷¸ò</TITLE></HEAD><BODY>\n";
-    public static final String HTML_FOOTER = "</BODY></HTML>";
-    public static final String HTML_SCRIPT = "<script>function change(textId){\nvar obj=document.getElementById(textId);\nif(obj.style.display=='none'){\n obj.style.display='block';\n}else {\nobj.style.display='none';\n}\n}</script>\n";
-    public static final String HTML_LINK_FORMAT = "\n<DIV><a href=\"javascript:change('%s')\" Style='text-indent:15pt;display:block;padding-left: %dpx; color: %s'>%s (target: %s)</a></DIV>\n";
-    public static final String HTML_STRING_FORMAT = "<DIV Style='text-indent:15pt;display:block;padding-left: %dpx; color: %s'>%s (target: %s)</DIV>\n";
-    public static final String HTML_SUBBLOCK_OPEN = "<DIV ID=%s Style='text-indent:15pt;display:none;padding-left: %dpx'>\n";
-    public static final String HTML_SUBBLOCK_CLOSE = "</DIV>\n";
+    public static final String HTML_HEADER_START = "<HTML><HEAD>\n";
+    public static final String HTML_HEADER_END = "</HEAD>\n";
+    public static final String HTML_BODY_START = "<BODY>\n";
+    public static final String HTML_BODY_END = "</BODY>\n";
+    public static final String TITLE = "<TITLE>Îò÷¸ò</TITLE>\n";
+    public static final String HTML_FOOTER = "</HTML>";
+    public static final String HTML_SCRIPT = "<script>function change(textId){\nvar obj=document.getElementById(textId);\nif(obj.style.display=='none'){\n obj.style.display='block';\n}else {\nobj.style.display='none';\n}\n}</script>\n\n\n";
+    public static final String HTML_OPEN_CHILD_LINK = "<a href=\"javascript:change('%s')\" %s>%s</a>";
+    public static final String HTML_STYLE = "Style='display:none;padding-left: %dpx'";
+    public static final String HTML_STYLE_COLOR = "Style='color: %s'";
+    public static final String HTML_SUBBLOCK_COLOR_OPEN = "\n%s<DIV %s>";
+    public static final String HTML_SUBBLOCK_OPEN = "\n%s<DIV ID=%s %s>\n";
+    public static final String HTML_SUBBLOCK_CLOSE = "%s</DIV>\n";
+    public static final String HTML_DEFAULT_COLOR = "black";
+    public static final String HTML_DETAILS_LINK_NAME = "...";
+    
+    
+    public static final String HTML_STYLE_DETAILS = "Style='display:none;padding-left: %dpx;background: #F9F9A2;border: 2px solid blue;'";
+    
+    public static final String HTML_STYLE_RED = " <style type=\"text/css\">\nred{color: red}</style>";
+    public static final String HTML_STYLE_BLACK = " <style type=\"text/css\">\nblack{color: black}</style>";
     
     
 }
