@@ -33,6 +33,21 @@ public final class Constants {
 	
 	public static final boolean CHECK_OK = true;
 	public static final boolean CHECK_ERROR = false;
+	
+// event levels	
+	
+	public static final int OK = 0;
+	public static final int INFOV = 1;
+    public static final int INFO = 2;
+    public static final int WARN = 3;
+    public static final int ERROR = 4;
+    public static final int FATAL = 5;	
+
+// event constants 
+    
+    public static final int START = 101;
+    public static final int END = 102;
+    public static final int TOP_IERARCHY_LEVEL = 0;
 
 // SF Constants
 
@@ -55,4 +70,15 @@ public final class Constants {
     
     public static final String TITLE_LOGIN_PAGE = "Salesforce.com - Customer Secure Login Page";
     public static final String TITLE_LOGOUT_PAGE = "Salesforce - Developer Edition";
+    
+// HTML constants
+    public static final String HTML_HEADER = "<HTML> <HEAD><TITLE>Îò÷¸ò</TITLE></HEAD><BODY>\n";
+    public static final String HTML_FOOTER = "</BODY></HTML>";
+    public static final String HTML_SCRIPT = "<script>function change(textId){\nvar obj=document.getElementById(textId);\nif(obj.style.display=='none'){\n obj.style.display='block';\n}else {\nobj.style.display='none';\n}\n}</script>\n";
+    public static final String HTML_LINK_FORMAT = "\n<DIV><a href=\"javascript:change('%s')\" Style='text-indent:15pt;display:block;padding-left: %dpx; color: %s'>%s (target: %s)</a></DIV>\n";
+    public static final String HTML_STRING_FORMAT = "<DIV Style='text-indent:15pt;display:block;padding-left: %dpx; color: %s'>%s (target: %s)</DIV>\n";
+    public static final String HTML_SUBBLOCK_OPEN = "<DIV ID=%s Style='text-indent:15pt;display:none;padding-left: %dpx'>\n";
+    public static final String HTML_SUBBLOCK_CLOSE = "</DIV>\n";
+    
+    
 }

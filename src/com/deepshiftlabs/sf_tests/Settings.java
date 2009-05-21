@@ -4,8 +4,8 @@ public final class Settings {
 	
 
 // login options
-	public static final String SF_LOGIN = "your_SF_login";
-	public static final String SF_PASSWORD = "your_SF_password";
+	public static final String SF_LOGIN = "bearoffl_dev@rambler.ru";
+	public static final String SF_PASSWORD = "bear1221";
 	
 // selenium params
     public static final String TIMEOUT = "180000";
@@ -15,15 +15,18 @@ public final class Settings {
 	public static final String WEB_SITE = "https://login.salesforce.com";    
 
 // tests options
-     public static final int LIMIT_CHECK_VALUES_COUNT_TO = -1;  // set -1 to run all values
+     public static final int LIMIT_CHECK_VALUES_COUNT_TO = -1;  // set -1 to run all values, don't set to 0
      public static final Boolean USE_FAST_NEW_RECORD = false;
      
      
 // log options
-     public static final String SCREENSHOTS_PATH = "C:\\trillium\\logs\\";
-     public static final Boolean USE_SCREENSHOTS = true;
+     public static final String SCREENSHOTS_PATH = "logs\\screenshots\\";
+     public static final String REPORT_PATH = "logs\\html\\";
+     
+//     public static final Boolean USE_SCREENSHOTS = true;
+     public static final int LOG_LEVEL = 0;     
      public static final Boolean LOG_INFOS = true;
-     public static final Boolean LOG_VERBOSE = false;
+     public static final Boolean LOG_VERBOSE = true;
      
      public static final String SCREENSHOTS_PREFIX = "screen_";
      public static final String SCREENSHOTS_POSTFIX_FORMAT = "HHmmssSSS_ddMMyy";

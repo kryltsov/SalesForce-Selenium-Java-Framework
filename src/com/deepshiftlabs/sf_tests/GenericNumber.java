@@ -60,7 +60,7 @@ public class GenericNumber extends GenericElement {
     		}
     	}
     	if (count>intPlaces){
-    		action.error("Length of int places in  _"+theValue.value+"_ is greater then in element _"+elementName+"_ max size ("+inputLength+"), value skipped.");
+    		action.error("Length of int places in  _"+theValue.value+"_ is greater then in element _"+name+"_ max size ("+inputLength+"), value skipped.");
     		return false;
     	}
     	return true;
@@ -73,14 +73,18 @@ public class GenericNumber extends GenericElement {
        		action.info("checkDecimalPlacesCount for element _"+elementSfId+"_ already was performed, skipping");      		
          		return Constants.RET_SKIPPED;
          	}
+    		Event event = action.startEvent(name, "checkDecimalPlacesCount");
+    		
     		int count = getDecimalPlacesCount(displayedValue);
     		checkDecimalPlacesCountRunCount++;
     		if (count==decimalPlaces){
-	        	action.info("Real decimal places numb of _"+ elementName + "_ is OK ("+decimalPlaces+")");
+	        	action.info("Real decimal places numb of _"+ name + "_ is OK ("+decimalPlaces+")");
+	        	action.closeEventOk(event);
 	        	return Constants.RET_OK;    			
     		}else{//
-	        	action.error("Real decimal places numb of _"+ elementName + "_ is "+count+" (ERROR). Should be "+decimalPlaces);
+	        	action.error("Real decimal places numb of _"+ name + "_ is "+count+" (ERROR). Should be "+decimalPlaces);
 //TODO here I don't get screenshot
+	        	action.closeEventError(event);
 	        	return Constants.RET_ERROR;    			
     		}
     }
@@ -96,14 +100,18 @@ public class GenericNumber extends GenericElement {
      	}
      	checkMaxLengthRunCount++;
      	
+     	Event event = action.startEvent(name, "checkMaxLength");     	
+     	
         if (validValue.length()>1){
           	 action.error("Can't perform checkMaxLength because validValue is not one digit.");
+          	 action.closeEventError(event);
           	 return Constants.RET_ERROR;
         }     	
 
         validChar = validValue.charAt(0);
         testString = validValue;
-        
+ 
+// TODO this IF is ALWAYS true - check this function
         if (checkMaxLengthRunCount==1){
         	// while got the exact number of intPlaces in testString
 	        while (testString.length() < (intPlaces) ){
@@ -114,12 +122,14 @@ public class GenericNumber extends GenericElement {
 	        action.pressButton(Constants.SAVE_RECORD_LOCATOR);
 	        if (action.isErrorPresent("Number is too large.")){
 	        	checkMaxLengthRunCount=2; // no need in next step of check
-	        	action.error("Real integer places numb of _"+ elementName + "_ is less than should be (should be "+intPlaces+")");
+	        	action.error("Real integer places numb of _"+ name + "_ is less than should be (should be "+intPlaces+")");
 	        	action.getScreenshot(true);
-	        	action.warn("Because of error count of decimal plases will not be checked.");	        	
+	        	action.warn("Because of error count of decimal plases will not be checked.");
+	        	action.closeEventError(event);
 	        	return Constants.RET_ERROR;
 	        } else {
-	        	action.info("Real integer places numb of _"+ elementName + "_ is not less than should be("+intPlaces+")");
+	        	action.info("Real integer places numb of _"+ name + "_ is not less than should be("+intPlaces+")");
+	        	action.closeEventOk(event);
 	        	return Constants.RET_PAGE_BROKEN_OK;        	
 	        }
         }else{
@@ -130,15 +140,17 @@ public class GenericNumber extends GenericElement {
 	        action.typeText(writeLocator, testString);
 	        action.pressButton(Constants.SAVE_RECORD_LOCATOR);
 	        if (action.isErrorPresent("Number is too large.")){
-	        	action.info("Real integer places numb of _"+ elementName + "_ is OK! ("+intPlaces+")");
+	        	action.info("Real integer places numb of _"+ name + "_ is OK! ("+intPlaces+")");
 
 	        	checkDecimalPlacesCount(action.readValue(writeLocator));
-//  TODO maybe we should edit retValue depending on checkDecimalPlacesCount()	        	
+//  TODO maybe we should edit retValue depending on checkDecimalPlacesCount()
+	        	action.closeEventOk(event);
 	        	return Constants.RET_OK;        	
 	        } else {
-	        	action.error("Real integer places numb of _"+ elementName + "_ is more than should be (should be "+intPlaces+")");
+	        	action.error("Real integer places numb of _"+ name + "_ is more than should be (should be "+intPlaces+")");
 	        	action.getScreenshot(true);
-	        	action.warn("Because of error count of decimal plasec will not be checked.");	        	
+	        	action.warn("Because of error count of decimal plasec will not be checked.");
+	        	action.closeEventError(event);
 	        	return Constants.RET_PAGE_BROKEN_ERROR;
 	        }        	
         }
@@ -154,6 +166,8 @@ public class GenericNumber extends GenericElement {
      		return Constants.RET_SKIPPED;
      	}
     	checkForTooBigRunCount++;
+    	
+    	Event event = action.startEvent(name, "checkForTooBig");
      	
         validChar = validValue.charAt(0);
         testString = validValue;
@@ -167,21 +181,27 @@ public class GenericNumber extends GenericElement {
 	        action.pressButton(Constants.SAVE_RECORD_LOCATOR);
 	        if (action.isErrorPresent("Number is too large.")){
 	        	if (action.readValue(writeLocator).equals("#Too Big!")){
-	        		action.info("checkForTooBig of _"+ elementName + "_ is OK");
+	        		action.info("checkForTooBig of _"+ name + "_ is OK");
+	        		action.closeEventOk(event);
 		        	return Constants.RET_OK;
 	        	}
-	        	action.info("checkForTooBig of _"+ elementName + "_ is ERROR");
+	        	action.info("checkForTooBig of _"+ name + "_ is ERROR");
 	        	action.getScreenshot(true);
+	        	action.closeEventError(event);
 	        	return Constants.RET_ERROR;
 	        }
-        	action.info("checkForTooBig of _"+ elementName + "_ is ERROR");
+        	action.info("checkForTooBig of _"+ name + "_ is ERROR");
         	action.getScreenshot(true);
+        	action.closeEventError(event);
         	return Constants.RET_PAGE_BROKEN_ERROR;	        
     }
     
+    private Event checkAllEventNumber = null;    
     public int  checkAll (){
+    	if (checkAllEventNumber==null){
+    		checkAllEventNumber = action.startEvent(name, "checkAll"); 
+    	}
 	   	int returnedValue;
-	
 	   	returnedValue = super.checkAll();
 	   	if (returnedValue!=Constants.RET_OK)
 	   		return returnedValue;
@@ -195,6 +215,7 @@ public class GenericNumber extends GenericElement {
 	   	if (returnedValue==Constants.RET_PAGE_BROKEN_ERROR)
 	   		return returnedValue;	   	
 	
+	   	action.closeEventOk(checkAllEventNumber);	   	
 	   	return Constants.RET_OK;
     }             
 }

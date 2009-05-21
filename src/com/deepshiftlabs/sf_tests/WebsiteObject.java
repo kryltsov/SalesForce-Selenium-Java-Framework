@@ -17,6 +17,9 @@ public class WebsiteObject {
 	CommonActions action = new CommonActions();
     
 	GenericObject wwwObject;
+	
+	int actID = 0;
+	String name = "Website object";
 
     public int addAllElements(){
        
@@ -32,16 +35,22 @@ public class WebsiteObject {
     @Test(groups = {"default"}, description = "Website object test")
     @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
     public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
+    	Event event = action.startEvent(name, "runAllPageTests");
+    	action.init();
+    	
         if (seleniumHost.equals("")){
             seleniumHost = Settings.SELENIUM_HOST;
             seleniumPort = Settings.SELENIUM_PORT;
             browser = Settings.BROWSER;
             webSite = Settings.WEB_SITE;
         }
-        
         wwwObject = new GenericObject ("Employment Websites", "websitePage00001", "Employment Website");
         wwwObject.init(action);
     	addAllElements();
+    
+    	Utils.generateScreenshotName(false);
+    	Utils.generateScreenshotName(false);
+    	
     	try {
 	    	wwwObject.setDeterminingRecordIdField("Employment Website Name");
 	    	wwwObject.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
@@ -49,16 +58,22 @@ public class WebsiteObject {
 	    	wwwObject.checkAll();
 	    	wwwObject.logout();
 	    	wwwObject.freeBrowser();
+	    	action.closeEventOk(event);
     	}
     	catch (SftestException E)
     	{
     		wwwObject.action.fatal("Test stopped after fatal error. "+E);
-
-    		if (wwwObject.sInstance!=null)
-    			wwwObject.freeBrowser();
+    		wwwObject.freeBrowser();
+    		action.closeEventFatal(event, "Test stopped after fatal error. "+E);
+    	}
+    	catch (Exception E){
+    		wwwObject.action.fatal("Test stopped after outer fatal error. "+E);
+    		action.closeEventFatal(event, "Test stopped after fatal error. "+E);
     	}
     	
     	wwwObject.printErrorsSummary();
+    	action.generateReport();
+    	action.eventsToHtml(name);     	
         
 /*        try{
         	System.out.println("------------------WAITING FOR ENTER-------------------");

@@ -18,9 +18,9 @@ public class GenericObject {
 	String waitCondition = "";
 	String tempLocator = "//input[@id='Login']";
 	String title = "";
+	String name = "";
     
     CommonActions action;
-    DefaultSelenium sInstance;
     
     private boolean isThereUndeletedRecord=false;
     private int determiningRecordFieldIndex = -1;
@@ -30,6 +30,7 @@ public class GenericObject {
         myRecordId = a_myRecordId;
         defaultTitleSingular = a_defaultTitleSingular;
         defaultTitlePlural = parentTabID;
+        name = defaultTitleSingular;
     }
     
     public void init(CommonActions a_action){
@@ -38,10 +39,12 @@ public class GenericObject {
     
     public int prepareBrowser(String hub, int port, String browser, String url) throws SftestException
     {
-        sInstance = action.getSelenium(hub, port, browser, url);
-        if (sInstance==null){
+    	Event event = action.startEvent(name, "prepareBrowser");    	
+        if (action.startSelenium(hub, port, browser, url)==Constants.RET_ERROR){
+        	action.closeEventFatal(event, "Can't connect to selenium server!");
         	throw new SftestException("Can't connect to selenium server!");
         }
+        action.closeEventOk(event);
         return Constants.RET_OK;
     };
     
@@ -52,7 +55,6 @@ public class GenericObject {
     public int freeBrowser()
     {
         action.freeSelenium();
-        sInstance = null;
         return Constants.RET_OK;
     };    
         
@@ -118,6 +120,7 @@ public class GenericObject {
     }       
     
     public int checkElementsPresence (){
+    	Event event = action.startEvent(name, "checkElementsPresence");
         GenericElement tempElement;
         int missed = 0;
 
@@ -128,127 +131,156 @@ public class GenericObject {
 		        missed++;
 		    }
 	    }
+	    action.closeEventOk(event);
 	    return missed;
     }
     
-    public int fillElementsByValidValues() throws SftestException {
+    public int fillElementsByValidValues(){
+    	Event event = action.startEvent(name, "fillElementsByValidValues");
         GenericElement tempElement;
 
         Iterator <GenericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (GenericElement)iterator.next();
 		     if (tempElement.fillByValidValue()==Constants.RET_ERROR){
-		    	 throw new SftestException("Can't fill all elements by valid values.");
+		    	 action.closeEventError(event, "Can't fill all elements by valid values.");
+		    	 return Constants.RET_ERROR;
 		     }
 	    }
+	    action.closeEventOk(event);
 	    return Constants.RET_OK;
     }
     
-    public int fillElementsByInvalidValues() throws SftestException {
+    public int fillElementsByInvalidValues() {
+    	Event event = action.startEvent(name, "fillElementsByInvalidValues");
         GenericElement tempElement;
 
         Iterator <GenericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (GenericElement)iterator.next();
 		     if (tempElement.fillByInvalidValue()==Constants.RET_ERROR){
-		    	 throw new SftestException("Can't fill all elements by invalid values.");
+		    	 action.closeEventFatal(event, "Can't fill all elements by invalid values.");
+		    	 return Constants.RET_ERROR;
 		     }
 	    }
+	    action.closeEventOk(event);
 	    return Constants.RET_OK;
     }    
     
-    public int checkAllElements() throws SftestException {
+    public int checkAllElements(){
+    	Event event = action.startEvent(name, "checkAllElements");
         GenericElement tempElement;
         int returnedValue;
 
         Iterator <GenericElement> iterator = elements.iterator();
         
-    	createNewEmptyRecord();
-	    
-	    while (iterator.hasNext()) {
-	    	 fillElementsByValidValues();	    	
-		     tempElement = (GenericElement)iterator.next();
-
-		     returnedValue = Constants.RET_ERROR;
-		     while (returnedValue!=Constants.RET_OK){
-		    	 returnedValue = tempElement.checkAll();
-		    	 if (tempElement.getErrorsCount()>=Settings.FATAL_ELEMENT_ERRORS_COUNT){
-		     		action.fatal("Too many errors per element _"+tempElement.getElementName()+"_ ("+tempElement.getErrorsCount()+")");
-		    		action.getScreenshot(true);    		
-		    		throw new SftestException("Too many errors per element!");		    		 
+	    	if (createNewEmptyRecord() == Constants.RET_ERROR){
+	    		action.closeEventFatal(event, "Can't create new empty record");
+	    		return Constants.RET_ERROR;
+	    	}
+		    
+		    while (iterator.hasNext()) {
+		    	 if (fillElementsByValidValues() == Constants.RET_ERROR){
+		    		 action.closeEventFatal(event, "Can't fill all elements by valid values!");
+		    		 return Constants.RET_ERROR;	    	
 		    	 }
-		    	 if (returnedValue==Constants.RET_PAGE_BROKEN_ERROR || 
-		    			 returnedValue==Constants.RET_PAGE_BROKEN_OK){
-		    		recreateRecord();
-		    	 	fillElementsByValidValues();
-		    	 }
-		     }
-	    }
+			     tempElement = (GenericElement)iterator.next();
+	
+			     returnedValue = Constants.RET_ERROR;
+			     while (returnedValue!=Constants.RET_OK){
+			    	 returnedValue = tempElement.checkAll();
+			    	 if (tempElement.getErrorsCount()>=Settings.FATAL_ELEMENT_ERRORS_COUNT){
+			     		action.fatal("Too many errors per element _"+tempElement.getElementName()+"_ ("+tempElement.getErrorsCount()+")");
+			     		action.closeEventFatal(event, "Too many errors per element _"+tempElement.getElementName()+"_ ("+tempElement.getErrorsCount()+")");
+			     		return Constants.RET_ERROR;		    		 
+			    	 }
+			    	 if (returnedValue==Constants.RET_PAGE_BROKEN_ERROR || 
+			    			 returnedValue==Constants.RET_PAGE_BROKEN_OK){
+				    	if (recreateRecord() == Constants.RET_ERROR){
+				    		action.closeEventFatal(event, "Can't recreate record");
+				    		return Constants.RET_ERROR;
+				    	}
+				    	if (fillElementsByValidValues() == Constants.RET_ERROR){
+				    		action.closeEventFatal(event, "Can't fill all elements by valid values!");
+				    		return Constants.RET_ERROR;
+				    	}
+			    	 }
+			     }
+		    }
+        
+	    action.closeEventOk(event);
 	    return Constants.RET_OK;
     }
     
-    public int checkIsRecordSavable() throws SftestException {
+    public int checkIsRecordSavable(){
+    	Event event = action.startEvent(name, "checkIsRecordSavable");
+    	
     	String afterSaveTitle = defaultTitleSingular+": "+ myRecordId+" ~ Salesforce - Developer Edition";
     	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
     	int retValue;
     	
-    	if (action.createNewEmptyRecord(parentTabID) == Constants.RET_ERROR){
+    	if (createNewEmptyRecord() == Constants.RET_ERROR){
     		action.fatal("Cant't create new record of _"+parentTabID+"_, can't perform check IsRecordSavable");
-    		action.getScreenshot(true);
-    		throw new SftestException("Can't create or save new record.");
+    		action.closeEventFatal(event, "Cant't create new record");
+    		return Constants.RET_ERROR;
     	}
     	
     	if ((checkTitle(newTitle, "New record")==Constants.RET_ERROR) ||
     	    	(!action.isElementPresent(Constants.SAVE_RECORD_LOCATOR))) {
     		action.fatal("Cant't create new record of _"+parentTabID+"_, can't perform check IsRecordSavable");
-    		action.getScreenshot(true);    		
-    		throw new SftestException("Can't create or save new record.");
+    		action.closeEventFatal(event, "Cant't create new record");
+    		return Constants.RET_ERROR;
     	}    	
     	
     	retValue=checkElementsPresence();
     	if (retValue>0){
     		action.fatal("Can't find "+retValue+" element(s), can't perform check IsRecordSavable");
-    		action.getScreenshot(true);    		
-    		throw new SftestException("Can't create or save new record.");    		
+    		action.closeEventFatal(event, "Can't find "+retValue+" element(s)");
+    		return Constants.RET_ERROR;    		
     	}
     	
     	if (fillElementsByValidValues()==Constants.RET_ERROR){
     		action.fatal("Cant't fill all elements in _"+parentTabID+"_, can't perform check IsRecordSavable");
-    		action.getScreenshot(true);    		
-    		throw new SftestException("Can't create or save new record.");
+    		action.closeEventFatal(event, "Cant't fill all elements");
+    		return Constants.RET_ERROR;
     	}
     	
     	if (action.pressButton(Constants.SAVE_RECORD_LOCATOR) == Constants.RET_ERROR){
-    		action.getScreenshot(true);    		
-    		throw new SftestException("Can't create or save new record.");
+    		action.closeEventFatal(event, "Can't create or save new record.");
+    		return Constants.RET_ERROR;
     	}    	
 
     	if (checkTitle(afterSaveTitle, "After save")==Constants.RET_ERROR){ 
     		action.fatal("Cant't save new record of _"+parentTabID+"_, can't end check IsRecordSavable. Check if all elements are in object and all of them have right type (see screenshot for details).");
-    		action.getScreenshot(true);    		
-    		throw new SftestException("Can't create or save new record.");
+    		action.closeEventFatal(event, "Can't save new record.");
+    		return Constants.RET_ERROR;
     	}       	
     	
 // TODO should check if delete is successful
     	action.deleteRecord(parentTabID, getIdOfStoredRecord());    	
         
+    	action.closeEventOk(event);
         return Constants.RET_OK;
     }
     
     public int checkTitle(String shouldBeTitle, String titleKind){
+    	Event event = action.startEvent(name, "checkTitle");
+    	event.setWaitedValue(shouldBeTitle);
     	String tempString;
     	
     	tempString = action.getTitle();
     	if (!shouldBeTitle.equals(tempString)){
     		action.error(titleKind + " title of page _"+ parentTabID +"_ is _"+tempString+"_ (should be _"+shouldBeTitle+"_)");
+    		event.badValue(tempString);
     		return Constants.RET_ERROR;
     	}      	
     	action.info(titleKind + " title of page _"+ parentTabID +"_ is _"+tempString+" (OK)");
+    	action.closeEventOk(event);
     	return Constants.RET_OK;
     }
     
-    public int checkSequence() throws SftestException {
-    	int retValue = Constants.RET_OK;
+    public int checkSequence(){
+    	Event event = action.startEvent(name, "checkSequence");
     	
     	String homeTitle = defaultTitlePlural+": Home ~ Salesforce - Developer Edition";;
     	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
@@ -260,73 +292,106 @@ public class GenericObject {
     	
     	if (checkTitle(homeTitle, "Home")==Constants.RET_ERROR)
 			return Constants.RET_ERROR;    	
-    	if (action.createNewEmptyRecord(parentTabID) == Constants.RET_ERROR){
+    	if (createNewEmptyRecord() == Constants.RET_ERROR){
     		action.error("Cant't create new record of _"+parentTabID+"_, checkTitles skipped");
+    		action.closeEventError(event, "Cant't create new record, checkSequence skipped");
     		return Constants.RET_ERROR;
     	}
-    	if (checkTitle(newTitle, "New record")==Constants.RET_ERROR)
+    	if (checkTitle(newTitle, "New record")==Constants.RET_ERROR){
+    		action.closeEventError(event);
 			return Constants.RET_ERROR;    	
+    	}
     	
     	// TODO - should provide error if can't fill
-    	fillElementsByValidValues();
+    	if (fillElementsByValidValues() == Constants.RET_ERROR){
+    		action.closeEventError(event, "Can't fill all elements by valid values!");
+    		return Constants.RET_ERROR;	    	
+    	}
     	
     	action.isElementPresent(Constants.SAVE_AND_NEW_LOCATOR);    	
     	action.isElementPresent(Constants.CANCEL_LOCATOR);
     	
 
     	if (action.pressButton(Constants.SAVE_RECORD_LOCATOR) == Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
     		return Constants.RET_ERROR;
     	}    	
-    	if (checkTitle(afterSaveTitle, "After save")==Constants.RET_ERROR)
-    			return Constants.RET_ERROR;
+    	if (checkTitle(afterSaveTitle, "After save")==Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
+    		return Constants.RET_ERROR;
+    	}
     	isThereUndeletedRecord = true;
     	
     	action.isElementPresent(Constants.DELETE_LOCATOR);    	
     	action.isElementPresent(Constants.CLONE_LOCATOR);
 
     	if (action.pressButton(Constants.EDIT_RECORD_LOCATOR) == Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
     		return Constants.RET_ERROR;
     	}    	
-    	if (checkTitle(editTitle, "Edit title")==Constants.RET_ERROR)
-    			return Constants.RET_ERROR;
+    	if (checkTitle(editTitle, "Edit title")==Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
+    		return Constants.RET_ERROR;
+    	}
 
     	action.isElementPresent(Constants.SAVE_RECORD_LOCATOR);    	
     	action.isElementPresent(Constants.CANCEL_LOCATOR);
     	
     	if (action.pressButton(Constants.SAVE_AND_NEW_LOCATOR) == Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
     		return Constants.RET_ERROR;
     	}    	
-    	if (checkTitle(newTitle, "After SaveAndNew")==Constants.RET_ERROR)
-    			return Constants.RET_ERROR;
+    	if (checkTitle(newTitle, "After SaveAndNew")==Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
+    		return Constants.RET_ERROR;
+    	}
     	if (action.pressButton(Constants.CANCEL_LOCATOR) == Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
     		return Constants.RET_ERROR;
     	}    	
-    	if (checkTitle(afterSaveTitle, "After cancel")==Constants.RET_ERROR)
-    			return Constants.RET_ERROR;
+    	if (checkTitle(afterSaveTitle, "After cancel")==Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
+    		return Constants.RET_ERROR;
+    	}
     	if (action.pressButton(Constants.CLONE_LOCATOR) == Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
     		return Constants.RET_ERROR;
     	}    	
-    	if (checkTitle(newTitle, "After clone")==Constants.RET_ERROR)
-    			return Constants.RET_ERROR;
+    	if (checkTitle(newTitle, "After clone")==Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
+    		return Constants.RET_ERROR;
+    	}
     	if (action.pressButton(Constants.CANCEL_LOCATOR) == Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
     		return Constants.RET_ERROR;
     	}    	
     	if (action.pressDelete() == Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
     		return Constants.RET_ERROR;
     	}    	
-    	if (checkTitle(afterDeleteTitle, "After delete")==Constants.RET_ERROR)
-    			return Constants.RET_ERROR;
+    	if (checkTitle(afterDeleteTitle, "After delete")==Constants.RET_ERROR){
+    		action.closeEventError(event, "CheckSequence skipped");
+    		return Constants.RET_ERROR;
+    	}
     	isThereUndeletedRecord=false;
     	
-    	return retValue;
+    	action.closeEventOk(event);
+    	return Constants.RET_OK;
     }    
     
     public int checkAll() throws SftestException{
-    	checkIsRecordSavable();
+    	Event event = action.startEvent(name, "checkAll");
+    	
+        if (checkIsRecordSavable()==Constants.RET_ERROR){
+			action.fatal("can't save record with valid values");
+			action.closeEventFatal(event, "can't save record with valid values");
+			throw new SftestException("Saving record error");    	
+        }
     	
     	if (checkSequence()==Constants.RET_ERROR){
     		if (Settings.IS_CHECKSEQUENCE_FATAL){
-    			action.fatal("Fatal error while checking common sequense.");    			
+    			action.fatal("Fatal error while checking common sequense.");
+    			action.closeEventFatal(event, "Fatal error while checking common sequense.");
     			throw new SftestException("Check sequence error!"); 
     		}
     		action.error("Non-fatal error while checking common sequense (unfinished actions was skipped).");
@@ -337,8 +402,13 @@ public class GenericObject {
     		}
     	}
         
-        checkAllElements();    	
+        if (checkAllElements()==Constants.RET_ERROR){
+			action.fatal("Fatal error while checkAllElements.");
+			action.closeEventFatal(event, "Fatal error while checkAllElements.");
+			throw new SftestException("Check sequence error!");    	
+        }
     	
+        action.closeEventOk(event);
     	return Constants.RET_OK;
     }
     
@@ -354,14 +424,19 @@ public class GenericObject {
     }
     
     public int login()throws SftestException{
+    	Event event = action.startEvent(name, "login");
     	if (action.login(Settings.SF_LOGIN, Settings.SF_PASSWORD) == Constants.RET_ERROR){
+    		action.closeEventFatal(event, "Login failed.");
     		throw new SftestException("Login failed.");
     	}
+    	action.closeEventOk(event);
     	return Constants.RET_OK;
     }
     
-    public int createNewEmptyRecord() throws SftestException {
+    public int createNewEmptyRecord(){
+    	Event event = action.startEvent(name, "createNewEmptyRecord");
     	int retValue;
+    	
     	if (Settings.USE_FAST_NEW_RECORD){
     		retValue = action.createNewEmptyRecordFast(parentTabID, waitCondition); 
     	} else {
@@ -369,8 +444,11 @@ public class GenericObject {
     	}
     	
     	if (retValue == Constants.RET_ERROR){
-    		throw new SftestException("Can't create new record.");
+    		action.closeEventFatal(event, "Can't create new record.");
+    		return Constants.RET_ERROR;
     	}
+    	
+    	action.closeEventOk(event);
     	return Constants.RET_OK;    	
     }
     
@@ -389,14 +467,21 @@ public class GenericObject {
         }
     }
     
-    public int recreateRecord()throws SftestException {
+    public int recreateRecord() {
+    	Event event = action.startEvent(name, "recreateRecord");
     	action.deleteRecord(parentTabID, getIdOfStoredRecord());
-    	createNewEmptyRecord();    	
+    	if (createNewEmptyRecord()== Constants.RET_ERROR){
+    		action.closeEventFatal(event, "Can't create new record");
+    		return Constants.RET_OK;
+    	}
+    	action.closeEventOk(event);
         return Constants.RET_OK;
     }    
     
     public int saveRecord(){
+    	Event event = action.startEvent(name, "saveRecord");
     	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
+    	action.closeEventOk(event);
         return Constants.RET_OK;
     }
 }  
