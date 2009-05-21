@@ -249,7 +249,7 @@ public class GenericObject {
     	}    	
 
     	if (checkTitle(afterSaveTitle, "After save")==Constants.RET_ERROR){ 
-    		event.advice = "Check if all elements are in object and all of them have right type";
+    		event.advice = "(check if all elements are in object and all of them have right type)";
     		action.closeEventFatal(event);
     		return Constants.RET_ERROR;
     	}       	

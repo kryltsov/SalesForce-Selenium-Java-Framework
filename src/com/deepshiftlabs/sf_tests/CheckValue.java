@@ -12,7 +12,7 @@ public class CheckValue {
 	CheckValue (String a_value, boolean a_shouldBeValid, String a_shouldBeErrorMessage, String a_shouldBeDisplayed){
 		value=a_value;
 
-		if (a_shouldBeDisplayed=="")
+		if (a_shouldBeDisplayed.equals(""))
 			shouldBeDisplayed = a_value; 
 		else
 			shouldBeDisplayed = a_shouldBeDisplayed;
@@ -20,7 +20,7 @@ public class CheckValue {
 		shouldBeValid = a_shouldBeValid;
 		status = Constants.NOT_CHECKED;
 
-		if (a_shouldBeErrorMessage=="")
+		if (a_shouldBeErrorMessage.equals(""))
 			shouldBeErrorMessage = Constants.STANDARD_INVALID_VALUE_ERROR;
 		else
 			shouldBeErrorMessage = a_shouldBeErrorMessage;
@@ -34,7 +34,7 @@ public class CheckValue {
 		shouldBeValid = a_shouldBeValid;
 		status = Constants.NOT_CHECKED;
 
-		if (a_shouldBeErrorMessage=="")
+		if (a_shouldBeErrorMessage.equals(""))
 			shouldBeErrorMessage = Constants.STANDARD_INVALID_VALUE_ERROR;
 		else
 			shouldBeErrorMessage = a_shouldBeErrorMessage;

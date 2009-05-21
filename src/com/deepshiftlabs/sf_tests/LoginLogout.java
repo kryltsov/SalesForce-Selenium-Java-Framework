@@ -61,7 +61,7 @@ public class LoginLogout extends GenericObject {
 			action.closeEventFatal(event);
 			return Constants.RET_ERROR;
 		}
-		if (action.isElementPresent(Constants.LOGIN_FAILED_ERROR)){
+		if (action.isTextPresent(Constants.LOGIN_FAILED_ERROR)){
 			action.closeEventFatal(event);
 			return Constants.RET_ERROR;
 		}

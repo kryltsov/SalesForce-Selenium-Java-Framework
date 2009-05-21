@@ -88,63 +88,63 @@ public class Event {
 		}
 		else {
 			formatString = "EVENT (%s): %s, target: %s";
-			if (resultMessage=="")
+			if (resultMessage.equals(""))
 				formatString = formatString + "%s";
 			else 
 				formatString = formatString + "\nResult: %s. ";
 			
-			if (advice=="")
+			if (advice.equals(""))
 				formatString = formatString + "%s";
 			else 
 				formatString = formatString + " %s";
 			
-			if (value=="" && waitedValue=="" && realValue=="")
+			if (value.equals("") && waitedValue.equals("") && realValue.equals(""))
 			{
 				formatString = formatString + "%s%s%s";
 			}
 			else {
 				formatString = formatString + "\nValues: \t";
-				if (value=="")
+				if (value.equals(""))
 					formatString = formatString + "%s";
 				else 
 					formatString = formatString + "Value: %s; \t";
 				
-				if (waitedValue=="")
+				if (waitedValue.equals(""))
 					formatString = formatString + "%s";
 				else 
 					formatString = formatString + "Waited: %s; \t";
 				
-				if (realValue=="")
+				if (realValue.equals(""))
 					formatString = formatString + "%s";
 				else 
 					formatString = formatString + "Real: %s; \t";
 			}
 			
-			if (beforeScreenshot=="" && afterScreenshot=="")
+			if (beforeScreenshot.equals("") && afterScreenshot.equals(""))
 			{
 				formatString = formatString + "%s%s";
 			}
 			else {
 				formatString = formatString + "\nScreenshots: ";
-				if (beforeScreenshot=="")
+				if (beforeScreenshot.equals(""))
 					formatString = formatString + "%s";
 				else 
 					formatString = formatString + "%s (before) \t";
 				
-				if (afterScreenshot=="")
+				if (afterScreenshot.equals(""))
 					formatString = formatString + "%s";
 				else 
 					formatString = formatString + "%s (after)";
 			}
 
-			if (exceptionMessage=="")
+			if (exceptionMessage.equals(""))
 				formatString = formatString + "%s";
 			else 
 				formatString = formatString + "\nException message: %s.";
 			
 			formatString = formatString + "\n";
 			
-			returnString = String.format(formatString, logLevelToString(logLevel), eventName, targetName, resultMessage, advice, 
+			returnString = "(ID = " + startId +")  "+String.format(formatString, logLevelToString(logLevel), eventName, targetName, resultMessage, advice, 
 											value, waitedValue, realValue,
 											beforeScreenshot,  afterScreenshot,
 											exceptionMessage);
@@ -156,33 +156,33 @@ public class Event {
 		String formatString = "";
 		String returnString = "";
 
-		if (resultMessage=="")
+		if (resultMessage.equals(""))
 			formatString = formatString + "%s";
 		else 
 			formatString = formatString + "Result: %s.<br>\n";
 		
-		if (advice=="")
+		if (advice.equals(""))
 			formatString = formatString + "%s";
 		else 
-			formatString = formatString + " %s.<br>\n";
+			formatString = formatString + " %s<br>\n";
 		
-		if (value=="" && waitedValue=="" && realValue=="")
+		if (value.equals("") && waitedValue.equals("") && realValue.equals(""))
 		{
 			formatString = formatString + "%s%s%s";
 		}
 		else {
 			formatString = formatString + "Values: \t";
-			if (value=="")
+			if (value.equals(""))
 				formatString = formatString + "%s";
 			else 
 				formatString = formatString + "Value: %s; \t";
 			
-			if (waitedValue=="")
+			if (waitedValue.equals(""))
 				formatString = formatString + "%s";
 			else 
 				formatString = formatString + "Waited: %s; \t";
 			
-			if (realValue=="")
+			if (realValue.equals(""))
 				formatString = formatString + "%s";
 			else 
 				formatString = formatString + "Real: %s; \t";
@@ -190,18 +190,18 @@ public class Event {
 			formatString = formatString + "<br>\n";
 		}
 		
-/*		if (beforeScreenshot=="" && afterScreenshot=="")
+/*		if (beforeScreenshot.equals("") && afterScreenshot.equals(""))
 		{
 			formatString = formatString + "%s%s";
 		}
 		else {
 			formatString = formatString + "Screenshots: ";
-			if (beforeScreenshot=="")
+			if (beforeScreenshot.equals(""))
 				formatString = formatString + "%s";
 			else 
 				formatString = formatString + "%s (before) \t";
 			
-			if (afterScreenshot=="")
+			if (afterScreenshot.equals(""))
 				formatString = formatString + "%s";
 			else 
 				formatString = formatString + "%s (after)";

@@ -245,7 +245,7 @@ public class GenericElement {
     	
     	displayedText = action.readText(readLocator);
     	
-    	if  ( displayedText == Constants.RET_ERROR_STRING ){
+    	if  ( displayedText.equals(Constants.RET_ERROR_STRING) ){
     		theValue.displayedRightResult = Constants.CHECK_ERROR;
     		errorsCount++;
         	action.closeEventError(event);

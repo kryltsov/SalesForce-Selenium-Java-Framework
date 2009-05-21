@@ -46,7 +46,7 @@ public class CommonActions {
         	seleniumInstance = null;
 
         	event.exceptionMessage = e.toString();
-        	event.advice = "check if Hub or RC with requested environment is present";
+        	event.advice = "(check if Hub or RC with requested environment is present)";
         	closeEventFatal(event, "can't start selenium driver");
         	
         	return Constants.RET_ERROR;
@@ -80,7 +80,7 @@ public class CommonActions {
         catch (Exception e){
 
         	event.exceptionMessage = e.toString();
-        	closeEventError(event);
+        	closeEventWarn(event);
         	return Constants.RET_ERROR;
         };    	
         getScreenshot();
@@ -119,7 +119,7 @@ public class CommonActions {
 	        
 			if (isTextPresent(Constants.LOGIN_FAILED_ERROR))
 			{
-				event.advice = "check your login and password";
+				event.advice = "(check your login and password)";
 				closeEventFatal(event);
 				return Constants.RET_ERROR;				
 			}
@@ -154,7 +154,7 @@ public class CommonActions {
 	}
 	
 	protected String readText(String a_locator) {
-		Event event = startEventS("readText", a_locator);
+		Event event = startEvent("readText", a_locator);
 
 		String tempString;
 		
@@ -171,27 +171,8 @@ public class CommonActions {
 		return tempString;
 	}  	
 	
-	protected int pressDelete() {
-		String tempLocator = Constants.DELETE_LOCATOR;
-
-		Event event = startEvent("pressDelete", tempLocator);		
-		
-		seleniumInstance.chooseOkOnNextConfirmation();
-		if (click(tempLocator)==Constants.RET_ERROR){
-			closeEventError(event);
-			return Constants.RET_ERROR;		
-		}
-
-//      if will be necessary to use next line, should use Exceptions 		
-//		seleniumInstance.getConfirmation();
-		
-		waitForPageToLoad();	    
-	    closeEventOk(event);
-	   return Constants.RET_OK;
-	}	
-	
 	protected int typeText(String a_locator, String a_text) {            
-		Event event = startEventS("typeText", a_locator);
+		Event event = startEvent("typeText", a_locator);
 		event.setValue(a_text);
 		
 		try {
@@ -259,7 +240,7 @@ public class CommonActions {
 	}  	
 	
 	protected int click(String a_locator) {   
-		Event event = startEventS("click", a_locator);
+		Event event = startEvent("click", a_locator);
 		try {
 			if (!isElementPresent(a_locator)){
 				closeEventError(event, "element is not present");
@@ -276,7 +257,33 @@ public class CommonActions {
 		getScreenshot();
 		closeEventOk(event);
 		return Constants.RET_OK;
-	}  	
+	}
+
+	protected int clickWithConfirmation(String a_locator) {   
+		Event event = startEvent("clickWithConfirmation", a_locator);
+		try {
+			if (!isElementPresent(a_locator)){
+				closeEventError(event, "element is not present");
+				return Constants.RET_ERROR;
+			}
+			seleniumInstance.chooseOkOnNextConfirmation();			
+			seleniumInstance.click(a_locator);
+			try {
+				seleniumInstance.getConfirmation();
+			}
+			catch (Exception e){
+				warn("Some error with conf");
+			}
+		}
+		catch (Exception e){
+			event.exceptionMessage = e.toString();
+			closeEventError(event);
+			return Constants.RET_ERROR;
+		}
+		getScreenshot();
+		closeEventOk(event);
+		return Constants.RET_OK;
+	} 	
 	
 	protected String getScreenshot(boolean isError) {            
 //		if (!Settings.USE_SCREENSHOTS) return;
@@ -284,6 +291,7 @@ public class CommonActions {
 		filename = Utils.generateScreenshotName(isError);
 		
 		Event event = startEvent("getScreenshot", filename);
+		event.beforeScreenshot = "";
 		
 	    try{
 	    	seleniumInstance.captureEntirePageScreenshot(screenshotsPath + filename,"args");
@@ -335,7 +343,7 @@ public class CommonActions {
 	}
 	
 	public boolean waitForCondition(String condition, String timeout){
-		Event event = startEventS("waitForCondition", condition);
+		Event event = startEvent("waitForCondition", condition);
 		try {
 			seleniumInstance.waitForCondition(condition, timeout);
 		} catch (Exception e){
@@ -489,7 +497,7 @@ public class CommonActions {
 	    		closeEventOk(event);
 	    		return Constants.RET_OK;
 	    	}else{
-	    			event.advice="may be record was present before test started";
+	    			event.advice="(may be record was present before test started)";
 	    			closeEventError(event);
 	    			return Constants.RET_ERROR;
 	   		}
@@ -499,6 +507,21 @@ public class CommonActions {
 	    	return Constants.RET_ERROR;
 	    }
 	}
+	
+	protected int pressDelete() {
+		String tempLocator = Constants.DELETE_LOCATOR;
+
+		Event event = startEvent("pressDelete", tempLocator);		
+		
+		if (clickWithConfirmation(tempLocator)==Constants.RET_ERROR){
+			closeEventError(event);
+			return Constants.RET_ERROR;		
+		}
+
+		waitForPageToLoad();	    
+	    closeEventOk(event);
+	   return Constants.RET_OK;
+	}		
 	
 //**************            LOG FUNCTIONS     *********************//	
 	public void info (String message){

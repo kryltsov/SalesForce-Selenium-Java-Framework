@@ -10,7 +10,7 @@ public class NumberElement extends GenericNumber {
         	CheckValue tempValue;
         	tempValue = values.get(i);
         	if (tempValue.shouldBeValid==Constants.IT_IS_INVALID_VALUE &&
-        			tempValue.shouldBeErrorMessage=="")
+        			tempValue.shouldBeErrorMessage.equals(""))
         		tempValue.shouldBeErrorMessage="Invalid number";
         }		
 	}

@@ -73,13 +73,16 @@ public final class Constants {
 // HTML constants
     public static final String HTML_HEADER_START = "<HTML><HEAD>\n";
     public static final String HTML_HEADER_END = "</HEAD>\n";
-    public static final String HTML_BODY_START = "<BODY>\n";
+    public static final String HTML_BODY_START = "<BODY onLoad = \"getEventsByStartId('1')[0].style.display='block'\">\n";
     public static final String HTML_BODY_END = "</BODY>\n";
     public static final String TITLE = "<TITLE>Îò÷¸ò</TITLE>\n";
     public static final String HTML_FOOTER = "</HTML>";
-//  public static final String HTML_SCRIPT = "<script>function change(textId){\nvar obj=document.getElementById(textId);\nif(obj.style.display=='none'){\n obj.style.display='block';\n}else {\nobj.style.display='none';\n}\n}</script>\n\n\n";
-    public static final String HTML_SCRIPT_TOGGLE_NODE = "<script>function toggleNode(textId){\nvar obj=document.getElementById(textId);\nvar img=document.images[textId+'img'];\nif(obj.style.display=='none'){\n\tobj.style.display='block';\n\timg.src = '../../img/m.gif';\n}else {\n\tobj.style.display='none';\n\timg.src = '../../img/p.gif';\n}\n}</script>";
-    public static final String HTML_SCRIPT_TOGGLE_DETAILS = "<script>function toggleDetails(textId){\nvar obj=document.getElementById(textId);\nvar img=document.images[textId+'img'];\nif(obj.style.display=='none'){\n\tobj.style.display='block';\n\timg.src = '../../img/detailsHide.gif';\n}else {\n\tobj.style.display='none';\n\timg.src = '../../img/detailsShow.gif';\n}\n}</script>";
+
+    public static final String HTML_SCRIPT = "<SCRIPT LANGUAGE=\"JavaScript\" SRC=\"../../js/script.js\"></SCRIPT>\n\n";
+        
+    public static final String HTML_CHKBOX = "<input onclick=\"toggleLevel(this)\"  type=\"checkbox\" value=\"%s\" checked>%s&nbsp&nbsp&nbsp\n";
+    
+    public static final String HTML_SELECTOR = "<select size=\"1\" name=\"levelSelector\" onChange='onSelector(this.value)'>\n    <option disabled>Select log level</option>\n    <option value=\"0\" \nselected>All events</option>\n    <option value=\"1\">Error&Fatal events</option> \n    <option value=\"2\">Fatal events only</option>\n<option value=\"-1\">Compress all</option>\n</select>";
     	
     public static final String HTML_OPEN_CHILD_LINK = "<a href=\"javascript:toggleNode('%s')\" title=\"Click here to see child events\" %s>%s</a>";
     public static final String HTML_OPEN_DETAILS_LINK = "<a href=\"javascript:toggleDetails('%s')\" title=\"Click here to see details of event\" %s>%s</a>";
@@ -89,7 +92,9 @@ public final class Constants {
     public static final String HTML_SCR_EQUAL = "<a href=\"..\\screenshots\\%s\" target=\"_blank\" title=\"Event did not act on browser\">%s</a>";
 
     public static final String HTML_SUBBLOCK_COLOR_OPEN = "\n%s<DIV %s>";
-    public static final String HTML_SUBBLOCK_OPEN = "\n%s<DIV ID=%s %s>\n";
+    public static final String HTML_SUBBLOCK_NAMED_OPEN = "\n%s<DIV NAME=%s ID=%s >\n";
+    public static final String HTML_SUBBLOCK_OPEN = "\n<DIV ID=%s Name=%s %s>\n";
+    public static final String HTML_EVENT_BLOCK_OPEN = "\n<DIV ID=%s name=%s class=%s %s>\n";
     public static final String HTML_SUBBLOCK_CLOSE = "%s</DIV>\n";
     public static final String HTML_DEFAULT_COLOR = "black";
     public static final String HTML_DETAILS_LINK_NAME = "...";
@@ -98,8 +103,10 @@ public final class Constants {
     public static final String HTML_STYLE = "Style='display:none;padding-left: %dpx'";    
     public static final String HTML_STYLE_DETAILS = "Style='display:none;padding-left: 15px; margin: 0 60\u0025 0 20px;background: #F9F9A2;border: 2px solid blue;'";
     
-    public static final String HTML_STYLE_RED = " <style type=\"text/css\">\nred{color: red}</style>";
-    public static final String HTML_STYLE_BLACK = " <style type=\"text/css\">\nblack{color: black}</style>";
+    public static final String HTML_STYLE_OK = " <style type=\"text/css\">\nstyle_black{color: black}</style>";
+    public static final String HTML_STYLE_ERROR = " <style type=\"text/css\">\nstyle_SaddleBrown{color: pink}</style>";
+    public static final String HTML_STYLE_FATAL = " <style type=\"text/css\">\nstyle_red{color: red}</style>";
+
     
     public static final String HTML_IMG_CHILD_SHOW = "<img name=\"%s\" src=\"..\\..\\img\\p.gif\"alt=\"Child events\" hspace=\"5\">";
     public static final String HTML_IMG_CHILD_HIDE = "<img name=\"%s\" src=\"..\\..\\img\\p.gif\"alt=\"Child events\" hspace=\"5\">";

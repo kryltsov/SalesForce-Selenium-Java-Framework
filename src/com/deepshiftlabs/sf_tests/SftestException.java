@@ -8,6 +8,6 @@ public class SftestException extends Exception {
 	}
 	
 	public String toString() { 
-		return "Exception resultMessage is: "+ message; 
+		return message; 
 	}
 }
