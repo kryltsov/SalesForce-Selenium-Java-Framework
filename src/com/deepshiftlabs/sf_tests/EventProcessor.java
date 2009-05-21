@@ -96,7 +96,7 @@ public class EventProcessor {
 	}
 	
 	public String getStyle (int a_level){
-		String style = String.format(Constants.HTML_STYLE, a_level*20);
+		String style = String.format(Constants.HTML_STYLE, 30);
 		return style;		
 	}
 	
@@ -121,6 +121,12 @@ public class EventProcessor {
 		{
 			return scrLinks;
 		}
+		
+		if (a_event.beforeScreenshot.equals(a_event.afterScreenshot))
+		{
+			scrLinks = scrLinks + String.format(Constants.HTML_SCR_EQUAL, a_event.beforeScreenshot, Constants.HTML_IMG_EQUAL);
+			return scrLinks;
+		}
 		else {
 			if (!a_event.beforeScreenshot.equals("") ){
 				scrLinks = scrLinks + String.format(Constants.HTML_SCR_BEFORE, a_event.beforeScreenshot, Constants.HTML_IMG_BEFORE);
@@ -129,7 +135,7 @@ public class EventProcessor {
 			if (!a_event.afterScreenshot.equals("") ){
 				scrLinks = scrLinks + String.format(Constants.HTML_SCR_AFTER, a_event.afterScreenshot, Constants.HTML_IMG_AFTER); 
 			}
-			scrLinks = scrLinks+"<br>\n";
+//			scrLinks = scrLinks+"<br>\n";
 		}
 		return scrLinks;
 	}
@@ -137,7 +143,9 @@ public class EventProcessor {
 	public void eventToHtmlString(Event a_event, int a_level){
 		String color = getHtmlColor(a_event.logLevel);
 		String htmlId = "id"+a_event.getStartId();
+		String imgChildName = htmlId+"img";
 		String detailsHtmlId = "idDetails"+a_event.getStartId();
+		String imgDetailsName = detailsHtmlId+"img";
 		String linkStyle = getStyleColor(color);
 		String detailsLinkStyle = getStyleColor(Constants.HTML_DEFAULT_COLOR);
 		String details = a_event.toHtmlDetail();
@@ -149,20 +157,21 @@ public class EventProcessor {
 			s = s + "<"+color+">"+a_event.eventName + "</"+color+">";
 		}
 		else {
-			s = s + String.format(Constants.HTML_OPEN_CHILD_LINK, htmlId, linkStyle, Constants.HTML_IMG_CHILD_SHOW + a_event.eventName);
+			String imageString = String.format(Constants.HTML_IMG_CHILD_SHOW, imgChildName);
+			s = s + String.format(Constants.HTML_OPEN_CHILD_LINK, htmlId, linkStyle, imageString + a_event.eventName);
 		}
 
 		s = s+" Target: "+a_event.targetName+"\n";
-
+		s = s+ prepareScreenshotsLinks(a_event);
+		
 		if ( !details.equals("") ){
 			
-			s = s + String.format(Constants.HTML_OPEN_DETAILS_LINK, detailsHtmlId, detailsLinkStyle, Constants.HTML_IMG_DETAILS_SHOW);			
-
+			String imageDetailsString = String.format(Constants.HTML_IMG_DETAILS_SHOW, imgDetailsName);
+			s = s + getTabs(a_level) + String.format(Constants.HTML_OPEN_DETAILS_LINK, detailsHtmlId, detailsLinkStyle, imageDetailsString);			
 			writeToFile (s);
 			writeToFile ("<br>\n");
 			openSubBlock(detailsHtmlId, a_level+1, Constants.HTML_STYLE_DETAILS);
 			writeToFile (details);
-			writeToFile ( prepareScreenshotsLinks(a_event));
 			closeSubBlock(a_level+1);
 		}
 		else {
@@ -219,7 +228,8 @@ public class EventProcessor {
 		writeToFile(Constants.HTML_STYLE_RED);
 		writeToFile(Constants.HTML_HEADER_END);
 		writeToFile(Constants.HTML_BODY_START);
-		writeToFile(Constants.HTML_SCRIPT);
+		writeToFile(Constants.HTML_SCRIPT_TOGGLE_NODE);
+		writeToFile(Constants.HTML_SCRIPT_TOGGLE_DETAILS);
 
 		nextEventToProcess = lastProcessedEvent+1;
 		while (nextEventToProcess<=lastEventStartId){

@@ -83,6 +83,7 @@ public class CommonActions {
         	closeEventError(event);
         	return Constants.RET_ERROR;
         };    	
+        getScreenshot();
         closeEventOk(event);
     	return Constants.RET_OK;
     }
