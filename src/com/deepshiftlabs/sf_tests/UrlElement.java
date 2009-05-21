@@ -1,7 +1,5 @@
 package com.deepshiftlabs.sf_tests;
 
-import com.thoughtworks.selenium.DefaultSelenium;
-
 public class UrlElement extends GenericTextElement {
 
 	UrlElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired){
@@ -21,22 +19,20 @@ public class UrlElement extends GenericTextElement {
     }
     
 	protected int checkIsDisplayedRight(CheckValue theValue){
-		Event event = action.startEvent(name, "checkIsDisplayedRight");		
+		Event event = action.startEvent("checkIsDisplayedRight", name);		
 		int retValue;
 		
 		retValue = super.checkIsDisplayedRight(theValue);
      	if (retValue!=Constants.RET_PAGE_BROKEN_OK){
-     		action.warn("Check if url field displayed as url SKIPPED for element _"+name+"_ because checkIsDisplayedRight FAILED)");
-     		action.closeEventWarn(event);
+     		errorsCount++;
+     		action.closeEventError(event);
      		return retValue;
      	}
      	if ( action.isElementPresent("link="+ theValue.shouldBeDisplayed)){
-    		action.info("Value _"+theValue.shouldBeDisplayed+"_ for element (URL) _"+name+"_ is displayed as URL (OK)");
     		action.closeEventOk(event);
     		return Constants.RET_PAGE_BROKEN_OK;
     	} else {
-    		action.error("Value _"+theValue.shouldBeDisplayed+"_ for element (URL) _"+name+"_ is NOT displayed as URL (ERROR)");
-    		action.getScreenshot(true);
+    		errorsCount++;
     		action.closeEventError(event);
     		return Constants.RET_PAGE_BROKEN_ERROR;
     	}

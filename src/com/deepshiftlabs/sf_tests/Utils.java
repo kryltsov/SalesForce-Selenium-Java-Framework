@@ -2,18 +2,12 @@ package com.deepshiftlabs.sf_tests;
 
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
-//import org.apache.log4j.Level;
-//import org.apache.log4j.SimpleLayout;
-//import org.apache.log4j.FileAppender.*;
 
 /**
   * @author bear
@@ -31,8 +25,7 @@ public class Utils {
         }
         
         public Utils(){
-// TODO why this constructor is called 4 times in login-logout test        	
-        	System.out.println("CONSTRUCTOR");
+//        	System.out.println("CONSTRUCTOR");
         }
         
         public void info (String message){

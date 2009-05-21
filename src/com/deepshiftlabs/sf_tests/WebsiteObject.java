@@ -9,7 +9,6 @@ package com.deepshiftlabs.sf_tests;
 
 import org.testng.annotations.*;
 
-import java.util.*;
 import java.io.*;
 
 public class WebsiteObject {
@@ -35,7 +34,7 @@ public class WebsiteObject {
     @Test(groups = {"default"}, description = "Website object test")
     @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
     public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
-    	Event event = action.startEvent(name, "runAllPageTests");
+    	Event event = action.startEvent("runAllPageTests", name);
     	action.init();
     	
         if (seleniumHost.equals("")){
@@ -48,9 +47,6 @@ public class WebsiteObject {
         wwwObject.init(action);
     	addAllElements();
     
-    	Utils.generateScreenshotName(false);
-    	Utils.generateScreenshotName(false);
-    	
     	try {
 	    	wwwObject.setDeterminingRecordIdField("Employment Website Name");
 	    	wwwObject.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
@@ -60,19 +56,19 @@ public class WebsiteObject {
 	    	wwwObject.freeBrowser();
 	    	action.closeEventOk(event);
     	}
-    	catch (SftestException E)
+    	catch (SftestException e)
     	{
-    		wwwObject.action.fatal("Test stopped after fatal error. "+E);
     		wwwObject.freeBrowser();
-    		action.closeEventFatal(event, "Test stopped after fatal error. "+E);
+    		event.exceptionMessage = e.toString();
+    		action.closeEventFatal(event);
     	}
-    	catch (Exception E){
-    		wwwObject.action.fatal("Test stopped after outer fatal error. "+E);
-    		action.closeEventFatal(event, "Test stopped after fatal error. "+E);
+    	catch (Exception e){
+    		event.exceptionMessage = e.toString();
+    		action.closeEventFatal(event);
     	}
     	
-    	wwwObject.printErrorsSummary();
-    	action.generateReport();
+//    	wwwObject.printErrorsSummary();
+//    	action.generateReport();
     	action.eventsToHtml(name);     	
         
 /*        try{

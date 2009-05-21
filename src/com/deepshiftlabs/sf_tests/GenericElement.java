@@ -1,7 +1,6 @@
 package com.deepshiftlabs.sf_tests;
 
 import java.util.ArrayList;
-import com.thoughtworks.selenium.*;
 
 /** 
  * @class GenericElement
@@ -29,7 +28,7 @@ public class GenericElement {
     protected ArrayList <CheckValue> values = new ArrayList <CheckValue> ();
     
     String recordId = "";
-    CommonActions action = new CommonActions();
+    CommonActions action = null;
     
     GenericElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired) {
         name = a_elementName;
@@ -73,21 +72,19 @@ public class GenericElement {
     
 // you should use this func only on add/edit page because of writeLocator using     
     public int checkPresence (){
-    	Event event = action.startEvent(name, "checkPresence");
+    	Event event = action.startEvent("checkPresence", name);
         
         if (action.isElementPresent(writeLocator)){
-            action.info ("Element name = "+name + " is PRESENT");
             action.closeEventOk(event);
             return Constants.RET_OK;
         }
-        action.error ("Element name = "+name + " is NOT PRESENT. Locator was _"+writeLocator+"_");
         action.closeEventError(event);
         errorsCount++;
         return Constants.RET_ERROR;
     }
     
     public int fillByValidValue (){
-    	Event event = action.startEvent(name, "fillByValidValue");
+    	Event event = action.startEvent("fillByValidValue", name);
         String tempValidValue = validValue;
         
         if (determinesRecordId) tempValidValue = recordId;
@@ -98,13 +95,12 @@ public class GenericElement {
         	return Constants.RET_ERROR;
         }
         lastEnteredValue = tempValidValue;
-        action.infoV ("Filling Element _"+ name + "_ by valid value = _"+tempValidValue+"_");
         action.closeEventOk(event);
        return Constants.RET_OK;
     }
     
     public int fillByInvalidValue (){
-    	Event event = action.startEvent(name, "fillByInvalidValue");
+    	Event event = action.startEvent("fillByInvalidValue", name);
         String tempInvalidValue = invalidValue;
         
         if (determinesRecordId) tempInvalidValue = recordId;
@@ -116,20 +112,18 @@ public class GenericElement {
         }
 // TODO: in future next string may became wrong 
         lastEnteredValue = tempInvalidValue;
-        action.infoV ("Filling Element _"+ name + "_ by invalid value = _"+tempInvalidValue+"_");
         action.closeEventOk(event);
        return Constants.RET_OK;
     }    
     
     public int fillByNull (){
-    	Event event = action.startEvent(name, "fillByNull");
+    	Event event = action.startEvent("fillByNull", name);
         if (action.typeText(writeLocator, "") == Constants.RET_ERROR){
         	errorsCount++;
         	action.closeEventError(event);
         	return Constants.RET_ERROR;
         }
         lastEnteredValue = "";
-        action.infoV ("Filling Element _"+ name + "_ by NULL");
         action.closeEventOk(event);
        return Constants.RET_OK;
     }
@@ -142,10 +136,9 @@ public class GenericElement {
     private Event checkAllEvent = null;
     public int  checkAll (){
     	if (checkAllEvent==null){
-    		checkAllEvent = action.startEvent(name, "checkAll"); 
+    		checkAllEvent = action.startEvent("checkAll", name); 
     	}
     	int returnedValue;
-        action.infoV ("Starting checking all for element _"+name+"_");
 
         returnedValue = checkRequired(); 
         if ((returnedValue == Constants.RET_PAGE_BROKEN_OK)||
@@ -165,47 +158,40 @@ public class GenericElement {
    
     private int checkRequiredRunCount=0;
     public int checkRequired (){
-    	boolean realRequired = false;
+    	Boolean realRequired = false;
     	if (checkRequiredRunCount>0) {
-    		action.infoV("CheckRequired for element _"+name+"_ already was performed, skipping");
     		return Constants.RET_SKIPPED;
     	}
     	checkRequiredRunCount++;
-    	Event event = action.startEvent(name, "checkRequired");
-    	event.setWaitedValue(new Boolean(isRequired).toString());
+    	Event event = action.startEvent("checkRequired", name);
+    	event.setWaitedValue("should be required = " + new Boolean(isRequired).toString());
     	
-	        action.infoV ("Starting checkRequired for _"+name+"_");
 	    	fillByNull();
 	    	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
 	    	
 	    	realRequired = action.isErrorPresent("You must enter a value");
-	    	event.setRealValue(new Boolean(realRequired).toString());
+	    	event.setRealValue("required = " + realRequired.toString());
+	    	
+	    	if (isRequired ^ realRequired){
+	    		action.closeEventError(event);
+	    	}
+	    	else {
+	    		action.closeEventOk(event);
+	    	}
 
-	    	if (realRequired==true){
-	    		if (isRequired==true){
-	    	    	action.info("Element _"+ name + "_ is required!(OK)");
-	    			action.getScreenshot(false);
-	    			action.closeEventOk(event);
+	    	if (realRequired){
+	    		if (isRequired){
 	    			return Constants.RET_OK;
 	    		}else{
-	    			action.error("Element _"+ name + "_ is required!(ERROR)");
-	    			action.getScreenshot(true);
 	    			errorsCount++;
-	    			action.closeEventError(event);
 	    			return Constants.RET_ERROR;
 	    		}
 	    	}
 	    	else{
-	    		if (isRequired==false){
-	    	    	action.info("Element _"+ name + "_ is NOT required!(OK)");
-	    			action.getScreenshot(false);
-	    			action.closeEventOk(event);
+	    		if (!isRequired){
 	    			return Constants.RET_PAGE_BROKEN_OK;
 	    		}else{
-	    			action.error("Element _"+ name + "_ is NOT required!(ERROR)");
-	    			action.getScreenshot(true);
 	    			errorsCount++;
-	    			action.closeEventError(event);
 	    			return Constants.RET_PAGE_BROKEN_ERROR;
 	    		}
 	    	}
@@ -213,13 +199,12 @@ public class GenericElement {
     
  // TODO - Text element we should check if theValue.value.length()>maxLength and then skip this value
     private int checkValueValidity(CheckValue theValue){
-    	Event event = action.startEvent(name, "checkValueValidity");
-    	boolean isValid = false;
-    	boolean isValueOK = false;
+    	Event event = action.startEvent("checkValueValidity", name);
+    	Boolean isValid = false;
     	boolean pageBroken = false;
     	
     	event.setValue(theValue.value);
-    	event.setWaitedValue(new Boolean(theValue.shouldBeValid).toString());
+    	event.setWaitedValue("should be valid : " + new Boolean(theValue.shouldBeValid).toString());
     	
     	theValue.status = Constants.CHECKED;
     	action.typeText(writeLocator, theValue.value);
@@ -227,82 +212,66 @@ public class GenericElement {
     	
     	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
     	isValid = !(action.isErrorPresent(theValue.shouldBeErrorMessage));
-    	event.setRealValue(new Boolean(isValid).toString());
-    	pageBroken = isValid;
-    	
-    	isValueOK = (isValid==theValue.shouldBeValid);
-    	if (isValueOK) theValue.validCheckResult= Constants.CHECK_OK;
-    	else theValue.validCheckResult = Constants.CHECK_ERROR;
 
-// logging
-		String isValidInRealString = "invalid";
-		if (isValid) 
-			isValidInRealString = "valid";
-		
-    	if (isValueOK)
-    		action.info("Value _"+theValue.value+"_ for element _"+name+"_ is "+isValidInRealString+" (OK)");
-    	else {
-    		errorsCount++;
-    		action.error("Value _"+theValue.value+"_ for element _"+name+"_ is "+isValidInRealString+" (ERROR)");
-    		action.getScreenshot(true);
-    	}
-    	
-    	if (isValueOK)
-			action.closeEventOk(event);
-		else
-			action.closeEventError(event);    	
-// end logging    	
-    	
-    	if (pageBroken){
-    		if (isValueOK) return Constants.RET_PAGE_BROKEN_OK;
-    		else return Constants.RET_PAGE_BROKEN_ERROR;
-    	}
+    	event.setRealValue("is valid : " + isValid.toString());
 
-    	if (isValueOK) return Constants.RET_OK;
+    	pageBroken = isValid;  // because if value is valid in real, we just saved record    	
+    	if (isValid==theValue.shouldBeValid){
+    		theValue.validCheckResult= Constants.CHECK_OK;
+    		action.closeEventOk(event);
+    		
+    		if (pageBroken) 
+    			return Constants.RET_PAGE_BROKEN_OK;
+    		else
+    			return Constants.RET_OK;
+    	}	
     	else {
+    		theValue.validCheckResult = Constants.CHECK_ERROR;
     		errorsCount++;
-    		return Constants.RET_ERROR;
+    		action.closeEventError(event);
+    		if (pageBroken) 
+    			return Constants.RET_PAGE_BROKEN_ERROR;
+    		else
+    			return Constants.RET_ERROR;    		
     	}
-    }
+	}
 
     protected int checkIsDisplayedRight(CheckValue theValue){
-    	Event event = action.startEvent(name, "checkIsDisplayedRight");
+    	Event event = action.startEvent("checkIsDisplayedRight", name);
     	String displayedText;
     	
     	event.setValue(theValue.value);
     	event.setWaitedValue(theValue.shouldBeDisplayed);
     	
     	displayedText = action.readText(readLocator);
-    	event.setRealValue(displayedText);
+    	
     	if  ( displayedText == Constants.RET_ERROR_STRING ){
     		theValue.displayedRightResult = Constants.CHECK_ERROR;
     		errorsCount++;
-    		action.error("Can't get text for element _"+name);
-        	action.getScreenshot(true);
         	action.closeEventError(event);
         	return Constants.RET_PAGE_BROKEN_ERROR;    		
     	}
     	
+    	event.setRealValue(displayedText);    	
+    	
     	if ( theValue.shouldBeDisplayed.equals(displayedText)){
-    		action.infoV("Value _"+theValue.value+"_ for element _"+name+"_ is displayed as _"+displayedText+"_ (OK)");
     		theValue.displayedRightResult = Constants.CHECK_OK;
     		action.closeEventOk(event);
     		return Constants.RET_PAGE_BROKEN_OK;
     	}
-    	
-    	theValue.displayedRightResult = Constants.CHECK_ERROR;
-    	errorsCount++;
-    	action.error("Value _"+theValue.value+"_ for element _"+name+"_ is displayed as _"+displayedText+"_ (should be _"+theValue.shouldBeDisplayed+"_)(ERROR)");
-    	action.getScreenshot(true);
-    	action.closeEventError(event);
-    	return Constants.RET_PAGE_BROKEN_ERROR;
+    	else {
+	    	theValue.displayedRightResult = Constants.CHECK_ERROR;
+	    	errorsCount++;
+	    	action.closeEventError(event);
+	    	return Constants.RET_PAGE_BROKEN_ERROR;
+    	}
     }
     
     private Event checkAllValuesEvent = null;
     private int checkAllValuesRunCount=0;
     public int checkAllValues (){
     	if (checkAllValuesEvent==null){
-    		checkAllValuesEvent = action.startEvent(name, "checkAllValues"); 
+    		checkAllValuesEvent = action.startEvent("checkAllValues", name); 
     	}
     	int retValue;
     	CheckValue tempCheckValue;
@@ -312,7 +281,6 @@ public class GenericElement {
     	countOfValuesToRun = values.size();
     	
     	if (checkAllValuesRunCount>countOfValuesToRun-1) {
-    		action.infoV("checkAllValues _"+name+"_ already was performed, skipping");
     		return Constants.RET_SKIPPED;
     	}
 
@@ -343,5 +311,3 @@ public class GenericElement {
     	return Constants.RET_OK;
     }
 }
-      
-

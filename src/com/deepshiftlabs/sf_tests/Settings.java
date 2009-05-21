@@ -4,8 +4,8 @@ public final class Settings {
 	
 
 // login options
-	public static final String SF_LOGIN = "bearoffl_dev@rambler.ru";
-	public static final String SF_PASSWORD = "bear1221";
+	public static final String SF_LOGIN = "login";
+	public static final String SF_PASSWORD = "passw";
 	
 // selenium params
     public static final String TIMEOUT = "180000";
@@ -15,7 +15,7 @@ public final class Settings {
 	public static final String WEB_SITE = "https://login.salesforce.com";    
 
 // tests options
-     public static final int LIMIT_CHECK_VALUES_COUNT_TO = -1;  // set -1 to run all values, don't set to 0
+     public static final int LIMIT_CHECK_VALUES_COUNT_TO = 1;  // set -1 to run all values, don't set to 0
      public static final Boolean USE_FAST_NEW_RECORD = false;
      
      

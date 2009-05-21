@@ -20,10 +20,10 @@ public class LoginLogoutTest {
  @Test(groups = {"default"}, description = "login_logout_test")
  @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
  public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
-	 Event event = action.startEvent(name, "runAllPageTests");
+	 Event event = action.startEvent("runAllPageTests", name);
 	 
 	 action.init();
-	 
+ 
      if (seleniumHost.equals("")){
          seleniumHost = Settings.SELENIUM_HOST;
          seleniumPort = Settings.SELENIUM_PORT;
@@ -33,7 +33,7 @@ public class LoginLogoutTest {
  	
      loginObject = new LoginLogout ("Loginlogout", "LoginlogoutObject", "Loginlogout Object");
      loginObject.init(action);
- 	addAllElements();
+     addAllElements();
  	
  	try {
  		loginObject.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
@@ -41,14 +41,13 @@ public class LoginLogoutTest {
  		loginObject.freeBrowser();
 	    action.closeEventOk(event);
  	}
- 	catch (SftestException E)
+ 	catch (SftestException e)
  	{
- 		loginObject.action.fatal("Test stopped after fatal error. "+E);
  		loginObject.freeBrowser();
- 		action.closeEventFatal(event, "Test stopped after fatal error. "+E); 		
+ 		event.exceptionMessage = e.toString(); 		
+ 		action.closeEventFatal(event); 		
  	}
 
- 	action.generateReport();
 	action.eventsToHtml(name);
  }
 }

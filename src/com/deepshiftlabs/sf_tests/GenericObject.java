@@ -1,7 +1,5 @@
 package com.deepshiftlabs.sf_tests;
 
-import com.thoughtworks.selenium.*;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -39,9 +37,9 @@ public class GenericObject {
     
     public int prepareBrowser(String hub, int port, String browser, String url) throws SftestException
     {
-    	Event event = action.startEvent(name, "prepareBrowser");    	
+    	Event event = action.startEvent("prepareBrowser", hub+":"+port);    	
         if (action.startSelenium(hub, port, browser, url)==Constants.RET_ERROR){
-        	action.closeEventFatal(event, "Can't connect to selenium server!");
+        	action.closeEventFatal(event);
         	throw new SftestException("Can't connect to selenium server!");
         }
         action.closeEventOk(event);
@@ -52,6 +50,7 @@ public class GenericObject {
     	action.logout();
         return Constants.RET_OK;    	
     }
+    
     public int freeBrowser()
     {
         action.freeSelenium();
@@ -119,10 +118,10 @@ public class GenericObject {
         return Constants.RET_ERROR;
     }       
     
-    public int checkElementsPresence (){
-    	Event event = action.startEvent(name, "checkElementsPresence");
+    public int missedElementsCount (){
+    	Event event = action.startEvent("missedElementsCount", name);
         GenericElement tempElement;
-        int missed = 0;
+        Integer missed = 0;
 
         Iterator <GenericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
@@ -131,19 +130,25 @@ public class GenericObject {
 		        missed++;
 		    }
 	    }
-	    action.closeEventOk(event);
+	    if (missed>0){
+	    	event.setRealValue("missed: " + missed.toString());
+	    	action.closeEventError(event);
+	    }
+	    else {
+	    	action.closeEventOk(event);
+	    }
 	    return missed;
     }
     
     public int fillElementsByValidValues(){
-    	Event event = action.startEvent(name, "fillElementsByValidValues");
+    	Event event = action.startEvent("fillElementsByValidValues", name);
         GenericElement tempElement;
 
         Iterator <GenericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (GenericElement)iterator.next();
 		     if (tempElement.fillByValidValue()==Constants.RET_ERROR){
-		    	 action.closeEventError(event, "Can't fill all elements by valid values.");
+		    	 action.closeEventError(event);
 		    	 return Constants.RET_ERROR;
 		     }
 	    }
@@ -152,14 +157,14 @@ public class GenericObject {
     }
     
     public int fillElementsByInvalidValues() {
-    	Event event = action.startEvent(name, "fillElementsByInvalidValues");
+    	Event event = action.startEvent("fillElementsByInvalidValues", name);
         GenericElement tempElement;
 
         Iterator <GenericElement> iterator = elements.iterator();
 	    while (iterator.hasNext()) {
 		     tempElement = (GenericElement)iterator.next();
 		     if (tempElement.fillByInvalidValue()==Constants.RET_ERROR){
-		    	 action.closeEventFatal(event, "Can't fill all elements by invalid values.");
+		    	 action.closeEventFatal(event);
 		    	 return Constants.RET_ERROR;
 		     }
 	    }
@@ -168,20 +173,20 @@ public class GenericObject {
     }    
     
     public int checkAllElements(){
-    	Event event = action.startEvent(name, "checkAllElements");
+    	Event event = action.startEvent("checkAllElements", name);
         GenericElement tempElement;
         int returnedValue;
 
         Iterator <GenericElement> iterator = elements.iterator();
         
 	    	if (createNewEmptyRecord() == Constants.RET_ERROR){
-	    		action.closeEventFatal(event, "Can't create new empty record");
+	    		action.closeEventFatal(event);
 	    		return Constants.RET_ERROR;
 	    	}
 		    
 		    while (iterator.hasNext()) {
 		    	 if (fillElementsByValidValues() == Constants.RET_ERROR){
-		    		 action.closeEventFatal(event, "Can't fill all elements by valid values!");
+		    		 action.closeEventFatal(event);
 		    		 return Constants.RET_ERROR;	    	
 		    	 }
 			     tempElement = (GenericElement)iterator.next();
@@ -190,18 +195,17 @@ public class GenericObject {
 			     while (returnedValue!=Constants.RET_OK){
 			    	 returnedValue = tempElement.checkAll();
 			    	 if (tempElement.getErrorsCount()>=Settings.FATAL_ELEMENT_ERRORS_COUNT){
-			     		action.fatal("Too many errors per element _"+tempElement.getElementName()+"_ ("+tempElement.getErrorsCount()+")");
-			     		action.closeEventFatal(event, "Too many errors per element _"+tempElement.getElementName()+"_ ("+tempElement.getErrorsCount()+")");
+			     		action.closeEventFatal(event, "too many errors per element");
 			     		return Constants.RET_ERROR;		    		 
 			    	 }
 			    	 if (returnedValue==Constants.RET_PAGE_BROKEN_ERROR || 
 			    			 returnedValue==Constants.RET_PAGE_BROKEN_OK){
 				    	if (recreateRecord() == Constants.RET_ERROR){
-				    		action.closeEventFatal(event, "Can't recreate record");
+				    		action.closeEventFatal(event);
 				    		return Constants.RET_ERROR;
 				    	}
 				    	if (fillElementsByValidValues() == Constants.RET_ERROR){
-				    		action.closeEventFatal(event, "Can't fill all elements by valid values!");
+				    		action.closeEventFatal(event);
 				    		return Constants.RET_ERROR;
 				    	}
 			    	 }
@@ -213,46 +217,40 @@ public class GenericObject {
     }
     
     public int checkIsRecordSavable(){
-    	Event event = action.startEvent(name, "checkIsRecordSavable");
-    	
+    	Event event = action.startEvent("checkIsRecordSavable", name);
+
     	String afterSaveTitle = defaultTitleSingular+": "+ myRecordId+" ~ Salesforce - Developer Edition";
     	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
-    	int retValue;
     	
     	if (createNewEmptyRecord() == Constants.RET_ERROR){
-    		action.fatal("Cant't create new record of _"+parentTabID+"_, can't perform check IsRecordSavable");
-    		action.closeEventFatal(event, "Cant't create new record");
+    		action.closeEventFatal(event);
     		return Constants.RET_ERROR;
     	}
     	
     	if ((checkTitle(newTitle, "New record")==Constants.RET_ERROR) ||
     	    	(!action.isElementPresent(Constants.SAVE_RECORD_LOCATOR))) {
-    		action.fatal("Cant't create new record of _"+parentTabID+"_, can't perform check IsRecordSavable");
-    		action.closeEventFatal(event, "Cant't create new record");
+    		action.closeEventFatal(event);
     		return Constants.RET_ERROR;
     	}    	
     	
-    	retValue=checkElementsPresence();
-    	if (retValue>0){
-    		action.fatal("Can't find "+retValue+" element(s), can't perform check IsRecordSavable");
-    		action.closeEventFatal(event, "Can't find "+retValue+" element(s)");
+    	if (missedElementsCount()>0){
+    		action.closeEventFatal(event);
     		return Constants.RET_ERROR;    		
     	}
     	
     	if (fillElementsByValidValues()==Constants.RET_ERROR){
-    		action.fatal("Cant't fill all elements in _"+parentTabID+"_, can't perform check IsRecordSavable");
-    		action.closeEventFatal(event, "Cant't fill all elements");
+    		action.closeEventFatal(event);
     		return Constants.RET_ERROR;
     	}
     	
     	if (action.pressButton(Constants.SAVE_RECORD_LOCATOR) == Constants.RET_ERROR){
-    		action.closeEventFatal(event, "Can't create or save new record.");
+    		action.closeEventFatal(event);
     		return Constants.RET_ERROR;
     	}    	
 
     	if (checkTitle(afterSaveTitle, "After save")==Constants.RET_ERROR){ 
-    		action.fatal("Cant't save new record of _"+parentTabID+"_, can't end check IsRecordSavable. Check if all elements are in object and all of them have right type (see screenshot for details).");
-    		action.closeEventFatal(event, "Can't save new record.");
+    		event.advice = "Check if all elements are in object and all of them have right type";
+    		action.closeEventFatal(event);
     		return Constants.RET_ERROR;
     	}       	
     	
@@ -264,24 +262,25 @@ public class GenericObject {
     }
     
     public int checkTitle(String shouldBeTitle, String titleKind){
-    	Event event = action.startEvent(name, "checkTitle");
+    	Event event = action.startEvent("checkTitle", titleKind);
     	event.setWaitedValue(shouldBeTitle);
     	String tempString;
     	
     	tempString = action.getTitle();
+		event.setRealValue(tempString);
+		
     	if (!shouldBeTitle.equals(tempString)){
-    		action.error(titleKind + " title of page _"+ parentTabID +"_ is _"+tempString+"_ (should be _"+shouldBeTitle+"_)");
-    		event.badValue(tempString);
+    		action.closeEventError(event);
     		return Constants.RET_ERROR;
     	}      	
-    	action.info(titleKind + " title of page _"+ parentTabID +"_ is _"+tempString+" (OK)");
     	action.closeEventOk(event);
     	return Constants.RET_OK;
     }
     
     public int checkSequence(){
-    	Event event = action.startEvent(name, "checkSequence");
-    	
+    	Event event = action.startEvent("checkSequence", name);
+
+    	// TODO should place this masks to constants and use format function here
     	String homeTitle = defaultTitlePlural+": Home ~ Salesforce - Developer Edition";;
     	String newTitle = defaultTitleSingular+" Edit: New "+ defaultTitleSingular+" ~ Salesforce - Developer Edition";
     	String editTitle = defaultTitleSingular+" Edit: "+ myRecordId+ " ~ Salesforce - Developer Edition";
@@ -293,8 +292,7 @@ public class GenericObject {
     	if (checkTitle(homeTitle, "Home")==Constants.RET_ERROR)
 			return Constants.RET_ERROR;    	
     	if (createNewEmptyRecord() == Constants.RET_ERROR){
-    		action.error("Cant't create new record of _"+parentTabID+"_, checkTitles skipped");
-    		action.closeEventError(event, "Cant't create new record, checkSequence skipped");
+    		action.closeEventError(event, "checkSequence skipped");
     		return Constants.RET_ERROR;
     	}
     	if (checkTitle(newTitle, "New record")==Constants.RET_ERROR){
@@ -302,9 +300,8 @@ public class GenericObject {
 			return Constants.RET_ERROR;    	
     	}
     	
-    	// TODO - should provide error if can't fill
     	if (fillElementsByValidValues() == Constants.RET_ERROR){
-    		action.closeEventError(event, "Can't fill all elements by valid values!");
+    		action.closeEventError(event);
     		return Constants.RET_ERROR;	    	
     	}
     	
@@ -380,22 +377,19 @@ public class GenericObject {
     }    
     
     public int checkAll() throws SftestException{
-    	Event event = action.startEvent(name, "checkAll");
+    	Event event = action.startEvent("checkAll", name);
     	
         if (checkIsRecordSavable()==Constants.RET_ERROR){
-			action.fatal("can't save record with valid values");
-			action.closeEventFatal(event, "can't save record with valid values");
+			action.closeEventFatal(event);
 			throw new SftestException("Saving record error");    	
         }
     	
     	if (checkSequence()==Constants.RET_ERROR){
     		if (Settings.IS_CHECKSEQUENCE_FATAL){
-    			action.fatal("Fatal error while checking common sequense.");
-    			action.closeEventFatal(event, "Fatal error while checking common sequense.");
+    			action.closeEventFatal(event);
     			throw new SftestException("Check sequence error!"); 
     		}
-    		action.error("Non-fatal error while checking common sequense (unfinished actions was skipped).");
-    		action.getScreenshot(true);
+
     		if (isThereUndeletedRecord){
     			action.deleteRecord(parentTabID, getIdOfStoredRecord());
     			isThereUndeletedRecord = false;
@@ -403,14 +397,68 @@ public class GenericObject {
     	}
         
         if (checkAllElements()==Constants.RET_ERROR){
-			action.fatal("Fatal error while checkAllElements.");
-			action.closeEventFatal(event, "Fatal error while checkAllElements.");
-			throw new SftestException("Check sequence error!");    	
+			action.closeEventFatal(event);
+			throw new SftestException("Check all elements error!");    	
         }
     	
         action.closeEventOk(event);
     	return Constants.RET_OK;
     }
+    
+    public int login()throws SftestException{
+    	Event event = action.startEvent("login", name);
+    	if (action.login(Settings.SF_LOGIN, Settings.SF_PASSWORD) == Constants.RET_ERROR){
+    		action.closeEventFatal(event);
+    		throw new SftestException("Login failed.");
+    	}
+    	action.closeEventOk(event);
+    	return Constants.RET_OK;
+    }
+    
+    public int createNewEmptyRecord(){
+    	Event event = action.startEvent("createNewEmptyRecord", name);
+    	int retValue;
+    	
+    	if (Settings.USE_FAST_NEW_RECORD){
+    		retValue = action.createNewEmptyRecordFast(parentTabID, waitCondition); 
+    	} else {
+    		retValue = action.createNewEmptyRecord(parentTabID); 
+    	}
+    	
+    	if (retValue == Constants.RET_ERROR){
+    		action.closeEventFatal(event);
+    		return Constants.RET_ERROR;
+    	}
+    	
+    	action.closeEventOk(event);
+    	return Constants.RET_OK;    	
+    }
+    
+    public String getIdOfStoredRecord(){
+        GenericElement tempElement;    	
+    	
+        if (determiningRecordFieldIndex==-1)
+        	return myRecordId;
+        if (determiningRecordFieldIndex>=0 || determiningRecordFieldIndex< elements.size()){
+        	tempElement = (GenericElement)elements.get(determiningRecordFieldIndex);
+        	return tempElement.getLastEnteredValue(); 
+        }
+        else {
+        	action.error("No such element");
+        	return myRecordId;
+        }
+    }
+    
+    public int recreateRecord() {
+    	Event event = action.startEvent("recreateRecord", name);
+    	action.deleteRecord(parentTabID, getIdOfStoredRecord());
+    	if (createNewEmptyRecord()== Constants.RET_ERROR){
+    		action.closeEventFatal(event);
+    		return Constants.RET_OK;
+    	}
+    	action.closeEventOk(event);
+        return Constants.RET_OK;
+    }    
     
     public void printErrorsSummary(){
     	GenericElement tempElement;
@@ -421,68 +469,6 @@ public class GenericObject {
     		tempElement = (GenericElement)elements.get(i);
     		action.warn(tempElement.getErrorsCount() + "              " +tempElement.getElementName());
     	}    	
-    }
-    
-    public int login()throws SftestException{
-    	Event event = action.startEvent(name, "login");
-    	if (action.login(Settings.SF_LOGIN, Settings.SF_PASSWORD) == Constants.RET_ERROR){
-    		action.closeEventFatal(event, "Login failed.");
-    		throw new SftestException("Login failed.");
-    	}
-    	action.closeEventOk(event);
-    	return Constants.RET_OK;
-    }
-    
-    public int createNewEmptyRecord(){
-    	Event event = action.startEvent(name, "createNewEmptyRecord");
-    	int retValue;
-    	
-    	if (Settings.USE_FAST_NEW_RECORD){
-    		retValue = action.createNewEmptyRecordFast(parentTabID, waitCondition); 
-    	} else {
-    		retValue = action.createNewEmptyRecord(parentTabID); 
-    	}
-    	
-    	if (retValue == Constants.RET_ERROR){
-    		action.closeEventFatal(event, "Can't create new record.");
-    		return Constants.RET_ERROR;
-    	}
-    	
-    	action.closeEventOk(event);
-    	return Constants.RET_OK;    	
-    }
-    
-    String getIdOfStoredRecord(){
-        GenericElement tempElement;    	
-    	
-        if (determiningRecordFieldIndex==-1)
-        	return myRecordId;
-        if (determiningRecordFieldIndex>=0 || determiningRecordFieldIndex< elements.size()){
-        	tempElement = (GenericElement)elements.get(determiningRecordFieldIndex);
-        	return tempElement.getLastEnteredValue(); 
-        }
-        else {
-        	action.error("No such element");        	
-        	return myRecordId;
-        }
-    }
-    
-    public int recreateRecord() {
-    	Event event = action.startEvent(name, "recreateRecord");
-    	action.deleteRecord(parentTabID, getIdOfStoredRecord());
-    	if (createNewEmptyRecord()== Constants.RET_ERROR){
-    		action.closeEventFatal(event, "Can't create new record");
-    		return Constants.RET_OK;
-    	}
-    	action.closeEventOk(event);
-        return Constants.RET_OK;
     }    
-    
-    public int saveRecord(){
-    	Event event = action.startEvent(name, "saveRecord");
-    	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
-    	action.closeEventOk(event);
-        return Constants.RET_OK;
-    }
 }  
 

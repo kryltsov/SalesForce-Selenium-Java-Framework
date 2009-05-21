@@ -4,41 +4,34 @@ import java.util.*;
 
 public class Event {
 	
-	static int idGen=0;
-	static Utils ut=new Utils();;
+	private static int idGen=0;
 	
-	CommonActions action;
 	private int startId=0;
 	private int endId=0;
 	int type=0;
-	Date time = new Date();
+	private Date time = new Date();
 
 	boolean isClosed = false;
-	String eventName="";
-	String message="";
-//	String exceptionMessage;
-	String beforeScreenshot="";
-	String afterScreenshot="";
+	String eventName = "";
+	String resultMessage = "";
+	String advice = "";
+	String exceptionMessage;
+	String beforeScreenshot = "";
+	String afterScreenshot = "";
 //	String method;
-	String targetName="";
-	String value="";
-	String waitedValue="";
-	String realValue="";
-	int codeLevel=0;
-	int logLevel=0;
+	String targetName = "";
+	String value = "";
+	String waitedValue = "";
+	String realValue = "";
+	int codeLevel = 0;
+	int logLevel = 0;
 	
-/*	public Event(){
-		time.getTime();
-		startId = ++idGen;
-	}*/
-	public Event(String a_targetName, String a_eventName){
+	public Event(String a_eventName, String a_targetName){
 		eventName = a_eventName;
 		targetName = a_targetName;
 		time.getTime();
 		startId = ++idGen;
-//		ut.info("startId=  "+startId+" name= "+a_eventName);
 	}	
-	
 	
 	public String prepareOneValue(String valueName, String value){
 		return valueName+"\t"+value+"\n";
@@ -53,7 +46,7 @@ public class Event {
 		tempString = tempString+prepareOneValue("time", time.toString());
 		tempString = tempString+prepareOneValue("isClosed", new Boolean(isClosed).toString());
 		tempString = tempString+prepareOneValue("eventName", eventName);
-		tempString = tempString+prepareOneValue("message", message);
+		tempString = tempString+prepareOneValue("resultMessage", resultMessage);
 		tempString = tempString+prepareOneValue("beforeScreenshot", beforeScreenshot);
 		tempString = tempString+prepareOneValue("afterScreenshot", afterScreenshot);
 		tempString = tempString+prepareOneValue("targetName", targetName);
@@ -62,6 +55,8 @@ public class Event {
 		tempString = tempString+prepareOneValue("realValue", realValue);
 		tempString = tempString+prepareOneValue("codeLevel", new Integer(codeLevel).toString());
 		tempString = tempString+prepareOneValue("logLevel", new Integer(logLevel).toString());
+		tempString = tempString+prepareOneValue("Advice", advice);
+		tempString = tempString+prepareOneValue("exception", exceptionMessage);
 		tempString = tempString+"\n";
 		
 		return tempString;
@@ -70,7 +65,7 @@ public class Event {
 
 	public void close(int a_logLevel, String a_message, String a_screenshot){
 		logLevel = a_logLevel;		
-		message = a_message;
+		resultMessage = a_message;
 		afterScreenshot = a_screenshot;
 		endId = getLastId();
 		isClosed = true;
@@ -87,13 +82,6 @@ public class Event {
 	public void setRealValue(String a_realValue){
 		realValue = a_realValue;
 	}	
-	
-	public void badValue(String a_realValue){
-		realValue = a_realValue;
-		logLevel = Constants.ERROR;
-		endId = getLastId();
-		isClosed = true;		
-	}
 	
 	public void setTargetName(String a_targetName){
 		targetName = a_targetName;

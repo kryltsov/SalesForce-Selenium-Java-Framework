@@ -27,13 +27,17 @@ public class GenericTextElement extends GenericElement {
      }
      
     public boolean isValueValidForThisElementLength(CheckValue theValue){
+    	Event event = action.startEvent("isValueValidForThisElementLength", theValue.value);
+    	
     	if (theValue.value.length()>inputLength){
-    		action.error("Length of check value _"+theValue.value+"_ is greater then element _"+name+"_ max size ("+inputLength+"), value skipped.");
+    		action.closeEventError(event, "value is greater than setted element lenght");
     		return false;
     	}
+    	action.closeEventOk(event);
     	return true;
     }     
-     
+
+// TODO optimize!    
      public int checkMaxLengthRunCount=0;
      public int checkMaxLength(DefaultSelenium selInstance){
       	if (checkMaxLengthRunCount>0) {
@@ -42,16 +46,17 @@ public class GenericTextElement extends GenericElement {
       	}
       	checkMaxLengthRunCount++;    	 
     	
-      	Event event = action.startEvent(name, "checkMaxLength");
+      	Event event = action.startEvent("checkMaxLength", name);
          String testString;
          int realLength;
          char validChar;
          
          if (validValue.length()>inputLength){
-        	 action.error("Can't perform check because max Length is less than validValue");
         	 action.closeEventError(event, "max Length is less than validValue");
         	 return Constants.RET_ERROR;
          } 
+         event.setWaitedValue(Integer.toString(inputLength));
+         
          validChar = validValue.charAt(0);
          testString = validValue;
          
@@ -67,20 +72,27 @@ public class GenericTextElement extends GenericElement {
              }
              action.typeText(writeLocator, testString);
              realLength = action.readValue(writeLocator).length();
-        	 action.error ("Real maxLenght of  _"+ name + "_ is "+realLength+" (should be "+inputLength+" )");
-        	 action.getScreenshot(true);        	 
          }
-        action.info ("Real maxLenght for _"+ name + "_ is OK.");
-        action.getScreenshot(false);
-        action.closeEventOk(event);
-        return Constants.RET_OK;
+        
+         event.setRealValue(Integer.toString(realLength));
+         
+        if (realLength != inputLength) {
+        	errorsCount++;
+	        action.closeEventError(event);
+	        return Constants.RET_ERROR;        	
+        }
+        else
+        {
+	        action.closeEventOk(event);
+	        return Constants.RET_OK;
+        }
      }
     
      private Event checkAllEventGenericText = null;
      public int  checkAll (DefaultSelenium selInstance){
     	int returnedValue;
     	if (checkAllEventGenericText==null){
-    		checkAllEventGenericText = action.startEvent(name, "checkAll"); 
+    		checkAllEventGenericText = action.startEvent("checkAll", name); 
     	}    	
 
     	returnedValue = super.checkAll();

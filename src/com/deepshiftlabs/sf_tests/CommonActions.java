@@ -3,20 +3,12 @@
 package com.deepshiftlabs.sf_tests;
 
 import org.testng.Reporter;
-import org.testng.annotations.Test;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Parameters;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.io.IOException;
+
+/*import java.util.Date;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
-import java.io.*;
-
-
+import java.text.SimpleDateFormat;*/
 
 import com.thoughtworks.selenium.*;
 
@@ -32,7 +24,7 @@ public class CommonActions {
     ArrayList <Event> events = new ArrayList <Event>();
     EventProcessor eventProc = new EventProcessor();
     DefaultSelenium seleniumInstance;
-    String name = "actions";
+    String name = "Selenium driver";
     String screenshotsPath = "none";
     String lastScreenshotFilename = "";
     
@@ -46,24 +38,29 @@ public class CommonActions {
     
     protected int startSelenium(String seleniumHost, int seleniumPort, String browser, String webSite){
         seleniumInstance = new DefaultSelenium(seleniumHost, seleniumPort, browser, webSite);
-        Event event = startEvent(name, "startSelenium");
+        Event event = startEvent("startSelenium", seleniumHost+":"+seleniumPort+", "+ browser+":"+webSite);
         try {
         	seleniumInstance.start();
         } 
         catch (Exception e){
         	seleniumInstance = null;
-        	fatal("Can't establish connection to Selenium Hub. Check if Hub or RC with requested environment is present.");
-        	closeEventFatal(event, "Can't establish connection to Selenium Hub. Check if Hub or RC with requested environment is present.");
+
+        	event.exceptionMessage = e.toString();
+        	event.advice = "check if Hub or RC with requested environment is present";
+        	closeEventFatal(event, "can't start selenium driver");
+        	
         	return Constants.RET_ERROR;
         };
         
     	seleniumInstance.setTimeout(Settings.TIMEOUT);
+
+    	event.realValue = seleniumInstance.toString();
     	closeEventOk(event);
     	return Constants.RET_OK;
    }
 
     public void freeSelenium() {
-    	Event event = startEvent(name, "freeSelenium");
+    	Event event = startEvent("freeSelenium", seleniumInstance.toString());
     	if (seleniumInstance!=null){
 	        seleniumInstance.stop();
 	        seleniumInstance = null;
@@ -72,14 +69,14 @@ public class CommonActions {
     	closeEventOk(event);
     }
     
-    public int open (String url){
-    	Event event = startEvent(name, "open");
-    	infoV("Opening url _"+url+"_");
+    public int openUrl (String url){
+    	Event event = startEvent("openUrl", url);
         try {
         	seleniumInstance.open(url);
         } 
         catch (Exception e){
-        	error("Error while opening url. Exception is: _"+e+"_");
+
+        	event.exceptionMessage = e.toString();
         	closeEventError(event);
         	return Constants.RET_ERROR;
         };    	
@@ -88,7 +85,7 @@ public class CommonActions {
     }
 
 	protected int login(String a_login, String a_password) {
-			Event event = startEvent(name, "login");
+			Event event = startEvent("login", a_login+"/"+a_password);
 			ArrayList <String> locatorsList = new ArrayList <String>();		
 			String tempLocator = Constants.LOGIN_LOCATOR;
 			String title = "";
@@ -98,15 +95,10 @@ public class CommonActions {
 	        info("Login started");
 
 	        seleniumInstance.setTimeout(Constants.MIN_SELENIUM_TIMEOUT);
-	        open("/");
+	        openUrl("/");
 	        seleniumInstance.setTimeout(Settings.TIMEOUT);
 	        
-	        if (waitForListOfElements(locatorsList, Settings.TIMEOUT)){
-	        	infoV("Inputs for login found before page load.");
-	        }
-	        else
-	        {
-				fatal("Can't login - can't found inputs!");
+	        if (!waitForListOfElements(locatorsList, Settings.TIMEOUT)){
 				closeEventFatal(event, "cant found inputs");
 				return Constants.RET_ERROR;
 	        }
@@ -114,10 +106,8 @@ public class CommonActions {
 	        typeText("username",a_login);
 	        typeText("password",a_password);
 	        
-	        
 			if (click(tempLocator)==Constants.RET_ERROR){
-				fatal("Can't login - cant click on locator _"+tempLocator+"_ ");
-				closeEventFatal(event, "cant click on locator _"+tempLocator+"_ ");
+				closeEventFatal(event);
 				return Constants.RET_ERROR;				
 			}
 			
@@ -125,8 +115,8 @@ public class CommonActions {
 	        
 			if (isTextPresent(Constants.LOGIN_FAILED_ERROR))
 			{
-				fatal("Can't login - may be your login or password are incorrect.");
-				closeEventFatal(event, "cant click on locator _"+tempLocator+"_ ");
+				event.advice = "check your login and password";
+				closeEventFatal(event);
 				return Constants.RET_ERROR;				
 			}
 			
@@ -134,44 +124,45 @@ public class CommonActions {
 			
 			if (!title.equals(Constants.HOME_PAGE_TITLE))
 			{
-				fatal("Can't login - invalid home page title. See screenshot for details.");
-				closeEventFatal(event, "invalid home page title");
+				closeEventFatal(event);
 				return Constants.RET_ERROR;				
 			}				
 			
-	        info("Login done: logged to "+ title);
 	        closeEventOk(event);
 	        return Constants.RET_OK;
 	    }
 
 	protected int waitForPageToLoad(){
-		Event event = startEvent(name, "waitForPageToLoad");
+		Event event = startEvent("waitForPageToLoad", name+"(timeout "+new Integer (Settings.TIMEOUT).toString()+")");
 		try {
 			seleniumInstance.waitForPageToLoad(Settings.TIMEOUT);
 		}
 		catch (Exception e){
-			error("ERROR while waiting for page to load!");
 			getScreenshot(true);
+			event.exceptionMessage = e.toString();
 			closeEventError(event);
 			return Constants.RET_ERROR;
 		}
+// TODO check if we need in screenshot here
+		getScreenshot();
 		closeEventOk(event);
 		return Constants.RET_OK;
 	}
 	
 	protected String readText(String a_locator) {
-		Event event = startEventS(name, "readText");
-		event.setTargetName(a_locator);
+		Event event = startEventS("readText", a_locator);
+
 		String tempString;
 		
 		try {
 			tempString = seleniumInstance.getText(a_locator);
 		}
 		catch (Exception e){
-			error("ERROR while reading text on locator _"+a_locator+"_, check if element is present.");
+			event.exceptionMessage = e.toString();
 			closeEventError(event);
 			return Constants.RET_ERROR_STRING;
 		}
+		event.setRealValue(tempString);
 		closeEventOk(event);
 		return tempString;
 	}  	
@@ -179,34 +170,31 @@ public class CommonActions {
 	protected int pressDelete() {
 		String tempLocator = Constants.DELETE_LOCATOR;
 
-		Event event = startEvent(name, "pressDelete");		
-		event.setTargetName(tempLocator);
+		Event event = startEvent("pressDelete", tempLocator);		
 		
-	    infoV("Pressing delete started");
 		seleniumInstance.chooseOkOnNextConfirmation();
 		if (click(tempLocator)==Constants.RET_ERROR){
-			error("Can't click on button delete, locator _"+tempLocator+"_ , check button presence");
 			closeEventError(event);
 			return Constants.RET_ERROR;		
 		}
-// TODO if will be necessary to use next line, should use Exceptions 		
+
+//      if will be necessary to use next line, should use Exceptions 		
 //		seleniumInstance.getConfirmation();
+		
 		waitForPageToLoad();	    
-	    info("Delete pressed OK");
 	    closeEventOk(event);
 	   return Constants.RET_OK;
 	}	
 	
 	protected int typeText(String a_locator, String a_text) {            
-		Event event = startEventS(name, "typeText");
-		event.setTargetName(a_locator);
+		Event event = startEventS("typeText", a_locator);
 		event.setValue(a_text);
 		
 		try {
 			seleniumInstance.type(a_locator, a_text);
 		}
 		catch (Exception e){
-			error("ERROR while typing text on locator _"+a_locator+"_, check if element is present.");
+			event.exceptionMessage = e.toString();
 			getScreenshot(true);
 			closeEventError(event);			
 			return Constants.RET_ERROR;
@@ -217,15 +205,15 @@ public class CommonActions {
 	}
 	
 	protected String readValue(String a_locator) {  
-		Event event = startEvent(name, "readValue");
-		event.setTargetName(a_locator);
+		Event event = startEvent("readValue", a_locator);
+
 		String tempString;
 		
 		try {
 			tempString = seleniumInstance.getValue(a_locator);
 		}
 		catch (Exception e){
-			error("ERROR while reading value on locator _"+a_locator+"_, check if element is present.");
+			event.exceptionMessage = e.toString();
 			closeEventError(event);
 			return Constants.RET_ERROR_STRING;
 		}
@@ -235,51 +223,49 @@ public class CommonActions {
 	}  	
 	
 	protected boolean isElementPresent(String a_locator) {
-		Event event = startEvent(name, "isElementPresent");
-		event.setTargetName(a_locator);
-		boolean result = false;
+		Event event = startEvent("isElementPresent", a_locator);
+		Boolean result = false;
 		
 		try {
 			result = seleniumInstance.isElementPresent(a_locator);
 		}
 		catch (Exception e){
-			error("ERROR while doing isElementPresent on locator _"+a_locator+"_, check if element is present.");
+			event.exceptionMessage = e.toString();
 			closeEventError(event);
 		}
+		event.setRealValue(result.toString());
 		closeEventOk(event);
 		return result;
 	}  
 	
 	protected boolean isTextPresent(String a_text) {
-		Event event = startEvent(name, "isTextPresent");
-		event.setTargetName(a_text);
-		boolean result = false;
+		Event event = startEvent("isTextPresent", a_text);
+		Boolean result = false;
 		
 		try {
 			result = seleniumInstance.isTextPresent(a_text);
 		}
 		catch (Exception e){
+			event.exceptionMessage = e.toString();
 			closeEventError(event);
-			error("ERROR while doing isTextPresent on text _"+a_text+"_, check if text is present.");
 		}
+		event.setRealValue(result.toString());
 		closeEventOk(event);
 		return result;
 	}  	
 	
 	protected int click(String a_locator) {   
-		Event event = startEventS(name, "click");
-		event.setTargetName(a_locator);
+		Event event = startEventS("click", a_locator);
 		try {
 			if (!isElementPresent(a_locator)){
-				error("ERROR while click on locator _"+a_locator+"_, element is not present.");
-				closeEventError(event);
+				closeEventError(event, "element is not present");
 				return Constants.RET_ERROR;
 			}
 			
 			seleniumInstance.click(a_locator);
 		}
 		catch (Exception e){
-			error("ERROR while clicking on locator _"+a_locator+"_");
+			event.exceptionMessage = e.toString();
 			closeEventError(event);
 			return Constants.RET_ERROR;
 		}
@@ -289,22 +275,23 @@ public class CommonActions {
 	}  	
 	
 	protected String getScreenshot(boolean isError) {            
-		Event event = startEvent(name, "getScreenshot");
 //		if (!Settings.USE_SCREENSHOTS) return;
 		String filename;
-		
 		filename = Utils.generateScreenshotName(isError);
-	    info("Getting screenshot to file "+filename);
+		
+		Event event = startEvent("getScreenshot", filename);
+		
 	    try{
 	    	seleniumInstance.captureEntirePageScreenshot(screenshotsPath + filename,"args");
 	    }
 	    catch(Exception e){
-	    	error("ERROR while getting screenshot to file _"+filename+"_, check if directory is present.");
 	    	lastScreenshotFilename = "";
+	    	event.exceptionMessage = e.toString();
 	    	closeEventError(event);
 	    	return Constants.RET_ERROR_STRING;
 	    };
 	    lastScreenshotFilename = filename; 
+
 	    closeEventOk(event);
 	    return filename;
 	}
@@ -312,36 +299,57 @@ public class CommonActions {
 	protected String getScreenshot() {            
 	    return getScreenshot(false);
 	}	
-	
-	protected String getTitle() {            
-		Event event = startEvent(name, "getTitle");
+
+	// TODO this function can miss exception
+	protected String getTitle() {
+		String tempString = "";
+		Event event = startEvent("getTitle", name);
+		tempString = seleniumInstance.getTitle();
+		event.setRealValue(tempString);
 		closeEventOk(event);
-	    return seleniumInstance.getTitle();
+	    return tempString;
 	}	
 	
 	// TODO this function should be optimized
 	public boolean isErrorPresent (String errorMessage){
-		Event event = startEvent(name, "isErrorPresent");
-		event.setTargetName(errorMessage);
-		boolean isPresent = false; 
+		Event event = startEvent("isErrorPresent", errorMessage);
+
+		Boolean isPresent = false; 
 		String tempLocator;
 		tempLocator = "//*[contains(text(),'"+Constants.GENERAL_PAGE_ERROR+"')]";
 		if (isElementPresent(tempLocator)&&
 				seleniumInstance.isVisible(tempLocator)){
 					tempLocator = "//*[contains(text(),'"+errorMessage+"')]";
 					if (isElementPresent(tempLocator)&&
-							seleniumInstance.isVisible(tempLocator))
+							seleniumInstance.isVisible(tempLocator)){
 						isPresent = true;
+					}
 		}
+		event.setRealValue(isPresent.toString());
 		closeEventOk(event);
 		return isPresent;
 	}
 	
+	public boolean waitForCondition(String condition, String timeout){
+		Event event = startEventS("waitForCondition", condition);
+		try {
+			seleniumInstance.waitForCondition(condition, timeout);
+		} catch (Exception e){
+			getScreenshot();
+			event.exceptionMessage = e.toString();
+			closeEventError(event);
+			return false;
+		}
+		getScreenshot();
+		closeEventOk(event);
+		return true;
+	}
+
+// TODO I think it's duplicated code (see utils?)	
 	public boolean waitForListOfElements(ArrayList <String> locators, String timeout){
-		Event event = startEventS(name, "waitForListOfElements");
-		
+		Boolean result = false;
+
 		String tempScript = "var result = false; ";
-		infoV("Waiting for list of elements started");
 		if (locators.size()>0) {
 			tempScript = tempScript+ "result = selenium.isElementPresent('"+locators.get(0)+"');";
 		}
@@ -349,155 +357,115 @@ public class CommonActions {
 			tempScript = tempScript+ "result = result && selenium.isElementPresent('"+locators.get(i)+"');";
 		}
 		
-		event.setTargetName(tempScript);
-		try {
-			seleniumInstance.waitForCondition(tempScript, timeout);
-		} catch (Exception E){
-			getScreenshot(true);
-			closeEventError(event);
-			return false;
-		}
-		getScreenshot();
+		Event event = startEvent("waitForListOfElements", tempScript);
+		
+		result = waitForCondition(tempScript, timeout);
+
+		event.setRealValue(result.toString());
 		closeEventOk(event);
-		return true;
+		return result;
 	}
 	
-	public boolean waitForCondition(String condition, String timeout){
-		Event event = startEventS(name, "waitForCondition");
-		event.setTargetName(condition);
-		try {
-			seleniumInstance.waitForCondition(condition, timeout);
-		} catch (Exception E){
-			closeEventError(event);
-			return false;
-		}
-		getScreenshot();
-		closeEventOk(event);
-		return true;
-	}		
-	
 //**************            FUNCTIONS WICH DO ACTIONS WITH BROWSER   *********************//	
+	
 	protected int logout() {
-			Event event = startEvent(name, "logout");
+			Event event = startEvent("logout", name);
 			String tempLocator = Constants.LOGOUT_LOCATOR;
 			
 	        info("Logout started");
 			if (click(tempLocator)==Constants.RET_ERROR){
-				error("Can't logout - cant click on locator _"+tempLocator+"_ ");
 				closeEventError(event);
 				return Constants.RET_ERROR;				
 			}
 			waitForPageToLoad();
-	        info("Logout done: logged to "+ getTitle());
+			getTitle();
 	        closeEventOk(event);
 	        return Constants.RET_OK;
 	    }
 
 	protected int openTab(String tabName) {            
-			Event event = startEvent(name, "openTab");
+			Event event = startEvent("openTab", tabName);
 			String tempLocator = "link="+tabName;
 		
-	        infoV("Tab opening started");
 			if (click(tempLocator)==Constants.RET_ERROR){
-				error("Can't click on tab locator _"+tempLocator+"_ ");
 				closeEventError(event);
 				return Constants.RET_ERROR;	
 			}
 			waitForPageToLoad();
-	        infoV("Tab opened: title is "+ getTitle());
+			getTitle();
 	        closeEventOk(event);
 	        return Constants.RET_OK;
 	    }    
 	
 	protected int pressButton(String a_locator) {            
-		Event event = startEvent(name, "pressButton");
-		event.setTargetName(a_locator);
+		Event event = startEvent("pressButton", a_locator);
 		
-		infoV("Pressing button with locator _"+a_locator+"_ started");
 		if (click(a_locator)==Constants.RET_ERROR){
-			error("Can't click on button locator _"+a_locator+"_ , check button presence");
 			closeEventError(event);
 			return Constants.RET_ERROR;
 		}
 		waitForPageToLoad();
-	    info("Pressed button with locator _"+a_locator+"_ (OK)");
 	    closeEventOk(event);
 	    return Constants.RET_OK;
 	}   
 	
-	protected int checkRecordPresence(String tabName, String recordId) {
-		Event event = startEvent(name, "checkRecordPresence");
-	    event.setTargetName(recordId);
+	protected boolean isRecordPresence(String tabName, String recordId) {
+		Event event = startEvent("checkRecordPresence", recordId);
 	    String tempLocator;
+	    Boolean result = false;
 	    
 	    openTab(tabName);
 	
 	    tempLocator = "//a[contains(text(),'"+recordId+"')]";
 	    
-	    if (isElementPresent(tempLocator)){
-	        infoV("--------RECORD _"+tabName+":"+recordId+"_ FOUND");    	
-	        closeEventError(event);
-	    	return Constants.RET_OK;
-	    }
-	    else {
-	    	infoV("--------RECORD _"+tabName+":"+recordId+" NOT FOUND");
-	    	closeEventOk(event);
-	    	return Constants.RET_ERROR;
-	    }
+	    result = isElementPresent(tempLocator);
+	    
+	    event.setRealValue(result.toString());
+	    closeEventOk(event);
+	    
+	    return result;
 	}
 	
 	public int createNewEmptyRecord(String tabName){
-		Event event = startEvent(name, "createNewEmptyRecord");
-	    event.setTargetName(tabName);		
+		Event event = startEvent("createNewEmptyRecord", tabName);
 		String tempLocator =  "//input[@name='new']";
 		
 		openTab(tabName);
 
 		if (click(tempLocator)==Constants.RET_ERROR){
-			error("Can't createNewEmptyRecord - cant click on New, locator _"+tempLocator+"_ ");
 			closeEventError(event);
 			return Constants.RET_ERROR;				
 		}	 		
 		
 		waitForPageToLoad() ;
 	    
-		info("New record on tab _"+tabName+"_ created, waiting for input.");
 		closeEventOk(event);
 	    return Constants.RET_OK;
 	}
 	
 	public int createNewEmptyRecordFast(String tabName, String condition){
-		Event event = startEvent(name, "createNewEmptyRecordFast");
-		event.setTargetName(tabName);
-		
+		Event event = startEvent("createNewEmptyRecordFast", tabName);
+
 		String tempLocator =  "//input[@name='new']";
 		
 		openTab(tabName);
 
 		if (click(tempLocator)==Constants.RET_ERROR){
-			error("Can't createNewEmptyRecord - cant click on New, locator _"+tempLocator+"_ ");
 			closeEventError(event);
 			return Constants.RET_ERROR;				
 		}	 		
 		
-        if (waitForCondition(condition, Settings.TIMEOUT)){
-        	infoV("All inputs on new record page found before page load.");
-        }
-        else
-        {
-			fatal("Can't createNewEmptyRecordFast  - cant found all locators!");
+        if (!waitForCondition(condition, Settings.TIMEOUT)){
 			closeEventError(event);
 			return Constants.RET_ERROR;	
         }		
 	    
-		info("New record on tab _"+tabName+"_ created, waiting for input.");
 		closeEventOk(event);
 	    return Constants.RET_OK;
 	}	
 
 	protected int deleteRecord(String tabName, String recordId) {
-		Event event = startEvent(name, "deleteRecord");
-		event.setTargetName(recordId);
+		Event event = startEvent("deleteRecord", recordId);
     	String tempLocator;
 
 	    openTab(tabName);
@@ -505,9 +473,7 @@ public class CommonActions {
 	    tempLocator = "//a[contains(text(),'"+recordId+"')]";
 	    
 	    if (isElementPresent(tempLocator)){
-	        infoV("--------RECORD _"+tabName+":"+recordId+"_ FOUND");
 			if (click(tempLocator)==Constants.RET_ERROR){
-				error("Can't createNewEmptyRecord - cant click on record, locator _"+tempLocator+"_ ");
 				closeEventError(event);
 				return Constants.RET_ERROR;				
 			}	 	        
@@ -515,24 +481,20 @@ public class CommonActions {
 	
 	    	pressDelete();
 	    	
-	    	if (checkRecordPresence(tabName, recordId)==Constants.RET_ERROR){
-	    		info("--------RECORD _"+tabName+":"+recordId+" DELETED");
+	    	if (!isRecordPresence(tabName, recordId)){
 	    		closeEventOk(event);
 	    		return Constants.RET_OK;
 	    	}else{
-	    			error("--------RECORD _"+tabName+":"+recordId+" CAN'T BE DELETED (may be record was present before test started)");    		
+	    			event.advice="may be record was present before test started";
 	    			closeEventError(event);
 	    			return Constants.RET_ERROR;
 	   		}
 	    }
-	
 	    else {
-	    	error("--------RECORD _"+tabName+":"+recordId+" NOT FOUND FOR REMOVAL");
 	    	closeEventError(event);
 	    	return Constants.RET_ERROR;
 	    }
 	}
-
 	
 //**************            LOG FUNCTIONS     *********************//	
 	public void info (String message){
@@ -561,22 +523,21 @@ public class CommonActions {
 	        ut.info("(V)"+message);
 	        Reporter.log("(V)"+message);
 	}
-	
 
 //**************            FUNCTIONS WITH EVENTS AND EVENTS LIST     *********************//
 	
-	public Event startEvent(String eventName, String elementName)
+	public Event startEvent(String eventName, String target)
 	{
-		Event tempEvent = new Event(eventName, elementName);
+		Event tempEvent = new Event(eventName, target);
 		events.add(tempEvent);
 		tempEvent.beforeScreenshot = lastScreenshotFilename;
 		return tempEvent;
 	}
 	
-	public Event startEventS(String eventName, String elementName)
+	public Event startEventS(String eventName, String target)
 	{
 		getScreenshot();
-		return startEvent(eventName, elementName);
+		return startEvent(eventName, target);
 	}
 	
 	public void closeEvent(Event a_event, int a_logLevel, String a_message){
