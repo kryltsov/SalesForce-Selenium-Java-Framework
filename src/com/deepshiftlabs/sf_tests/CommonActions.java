@@ -19,7 +19,7 @@ import com.thoughtworks.selenium.*;
  */
 
 public class CommonActions {
-  
+
     Utils ut = new Utils();
     ArrayList <Event> events = new ArrayList <Event>();
     EventProcessor eventProc = new EventProcessor();

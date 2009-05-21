@@ -130,7 +130,7 @@ public class LoginLogout extends GenericObject {
     	
     	if (checkLoginLogout() == Constants.RET_ERROR){
     		action.closeEventFatal(event, "can't login or logout");
-    		throw new SftestException("can't login or logour");
+    		throw new SftestException("can't login or logout");
     	}
     	
     	action.closeEventOk(event);

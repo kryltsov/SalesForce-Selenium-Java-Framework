@@ -105,11 +105,6 @@ public class EventProcessor {
 		return style;		
 	}
 	
-	public String getStyleDetails (int a_level){
-		String style = String.format(Constants.HTML_STYLE_DETAILS, a_level*20);
-		return style;
-	}	
-	
 	public void openSubBlock(String a_htmlId, int a_level, String style){
 		String s = String.format(Constants.HTML_SUBBLOCK_OPEN, getTabs(a_level), a_htmlId, style);
 		writeToFile (s);
@@ -118,6 +113,26 @@ public class EventProcessor {
 	public void closeSubBlock(int a_level){
 		writeToFile (String.format(Constants.HTML_SUBBLOCK_CLOSE, getTabs(a_level)));
 	}	
+	
+	public String prepareScreenshotsLinks(Event a_event){
+		String scrLinks = "";
+		
+		if (a_event.beforeScreenshot.equals("") && a_event.afterScreenshot.equals(""))
+		{
+			return scrLinks;
+		}
+		else {
+			if (!a_event.beforeScreenshot.equals("") ){
+				scrLinks = scrLinks + String.format(Constants.HTML_SCR_BEFORE, a_event.beforeScreenshot, Constants.HTML_IMG_BEFORE);
+			}
+			
+			if (!a_event.afterScreenshot.equals("") ){
+				scrLinks = scrLinks + String.format(Constants.HTML_SCR_AFTER, a_event.afterScreenshot, Constants.HTML_IMG_AFTER); 
+			}
+			scrLinks = scrLinks+"<br>\n";
+		}
+		return scrLinks;
+	}
 	
 	public void eventToHtmlString(Event a_event, int a_level){
 		String color = getHtmlColor(a_event.logLevel);
@@ -130,24 +145,29 @@ public class EventProcessor {
 		String s = getTabs(a_level);
 		
 		if (a_event.getStartId() == a_event.getEndId()){
+			s = s + Constants.HTML_IMG_NO_CHILD;
 			s = s + "<"+color+">"+a_event.eventName + "</"+color+">";
 		}
 		else {
-			s = s + String.format(Constants.HTML_OPEN_CHILD_LINK, htmlId, linkStyle, a_event.eventName);
+			s = s + String.format(Constants.HTML_OPEN_CHILD_LINK, htmlId, linkStyle, Constants.HTML_IMG_CHILD_SHOW + a_event.eventName);
 		}
 
 		s = s+" Target: "+a_event.targetName+"\n";
 
 		if ( !details.equals("") ){
-			s = s + String.format(Constants.HTML_OPEN_CHILD_LINK, detailsHtmlId, detailsLinkStyle, Constants.HTML_DETAILS_LINK_NAME);
-		}
-		s = s + "<br>\n"; 	
-		writeToFile (s);
+			
+			s = s + String.format(Constants.HTML_OPEN_DETAILS_LINK, detailsHtmlId, detailsLinkStyle, Constants.HTML_IMG_DETAILS_SHOW);			
 
-		if ( !details.equals("") ){
-			openSubBlock(detailsHtmlId, a_level+1, getStyleDetails(a_level+2));
+			writeToFile (s);
+			writeToFile ("<br>\n");
+			openSubBlock(detailsHtmlId, a_level+1, Constants.HTML_STYLE_DETAILS);
 			writeToFile (details);
+			writeToFile ( prepareScreenshotsLinks(a_event));
 			closeSubBlock(a_level+1);
+		}
+		else {
+			writeToFile (s);
+			writeToFile ("<br>\n");
 		}
 	}	
 	

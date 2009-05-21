@@ -190,7 +190,7 @@ public class Event {
 			formatString = formatString + "<br>\n";
 		}
 		
-		if (beforeScreenshot=="" && afterScreenshot=="")
+/*		if (beforeScreenshot=="" && afterScreenshot=="")
 		{
 			formatString = formatString + "%s%s";
 		}
@@ -207,16 +207,15 @@ public class Event {
 				formatString = formatString + "%s (after)";
 			
 			formatString = formatString + "<br>\n";
-		}
+		}*/
 
-		if (exceptionMessage=="")
+		if (exceptionMessage.equals(""))
 			formatString = formatString + "%s";
 		else 
-			formatString = formatString + "\nException message: %s.";
+			formatString = formatString + "\nException message: %s.<br>\n";
 		
 		returnString = String.format(formatString, resultMessage, advice, 
 										value, waitedValue, realValue,
-										beforeScreenshot,  afterScreenshot,
 										exceptionMessage);
 		return returnString;
 	}	

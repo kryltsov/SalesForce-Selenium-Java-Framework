@@ -78,20 +78,34 @@ public final class Constants {
     public static final String TITLE = "<TITLE>Îò÷¸ò</TITLE>\n";
     public static final String HTML_FOOTER = "</HTML>";
     public static final String HTML_SCRIPT = "<script>function change(textId){\nvar obj=document.getElementById(textId);\nif(obj.style.display=='none'){\n obj.style.display='block';\n}else {\nobj.style.display='none';\n}\n}</script>\n\n\n";
-    public static final String HTML_OPEN_CHILD_LINK = "<a href=\"javascript:change('%s')\" %s>%s</a>";
-    public static final String HTML_STYLE = "Style='display:none;padding-left: %dpx'";
-    public static final String HTML_STYLE_COLOR = "Style='color: %s'";
+    public static final String HTML_OPEN_CHILD_LINK = "<a href=\"javascript:change('%s')\" title=\"Click here to see child events\" %s>%s</a>";
+    public static final String HTML_OPEN_DETAILS_LINK = "<a href=\"javascript:change('%s')\" title=\"Click here to see details of event\" %s>%s</a>";
+
+    public static final String HTML_SCR_BEFORE = "<a href=\"..\\screenshots\\%s\" target=\"_blank\" title=\"Screenshot before event start\">%s</a>";
+    public static final String HTML_SCR_AFTER = "<a href=\"..\\screenshots\\%s\" target=\"_blank\" title=\"Screenshot after event start\">%s</a>";    
+
     public static final String HTML_SUBBLOCK_COLOR_OPEN = "\n%s<DIV %s>";
     public static final String HTML_SUBBLOCK_OPEN = "\n%s<DIV ID=%s %s>\n";
     public static final String HTML_SUBBLOCK_CLOSE = "%s</DIV>\n";
     public static final String HTML_DEFAULT_COLOR = "black";
     public static final String HTML_DETAILS_LINK_NAME = "...";
-    
-    
-    public static final String HTML_STYLE_DETAILS = "Style='display:none;padding-left: %dpx;background: #F9F9A2;border: 2px solid blue;'";
+
+    public static final String HTML_STYLE_COLOR = "Style='color: %s'";
+    public static final String HTML_STYLE = "Style='display:none;padding-left: %dpx'";    
+    public static final String HTML_STYLE_DETAILS = "Style='display:none;padding-left: 10px; margin: 0 60\u0025 0 20px;background: #F9F9A2;border: 2px solid blue;'";
     
     public static final String HTML_STYLE_RED = " <style type=\"text/css\">\nred{color: red}</style>";
     public static final String HTML_STYLE_BLACK = " <style type=\"text/css\">\nblack{color: black}</style>";
+    
+    public static final String HTML_IMG_CHILD_SHOW = "<img src=\"..\\..\\img\\p.gif\"alt=\"Child events\" hspace=\"5\">";
+    public static final String HTML_IMG_CHILD_HIDE = "<img src=\"..\\..\\img\\p.gif\"alt=\"Child events\" hspace=\"5\">";
+    public static final String HTML_IMG_DETAILS_SHOW = "<img src=\"..\\..\\img\\details.gif\"alt=\"Child events\" hspace=\"5\">";
+    public static final String HTML_IMG_DETAILS_HIDE = "<img src=\"..\\..\\img\\details.gif\"alt=\"Child events\" hspace=\"5\">";
+    public static final String HTML_IMG_NO_CHILD = "<img src=\"..\\..\\img\\n.gif\"alt=\"No child events\" hspace=\"5\">";
+    public static final String HTML_IMG_BEFORE = "<img src=\"..\\..\\img\\before.gif\"alt=\"Before screenshot\" hspace=\"3\" vspace=\"2\">";
+    public static final String HTML_IMG_AFTER = "<img src=\"..\\..\\img\\after.gif\"alt=\"After screenshot\" hspace=\"3\" vspace=\"2\">";
+    
+    
     
     
 }
