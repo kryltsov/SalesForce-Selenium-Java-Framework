@@ -69,6 +69,10 @@ public final class Constants {
     
     public static final String TITLE_LOGIN_PAGE = "Salesforce.com - Customer Secure Login Page";
     public static final String TITLE_LOGOUT_PAGE = "Salesforce - Developer Edition";
+
+// some default messages
+    
+    public static final String NO_EVENT_GOAL = "is not set";
     
 // HTML constants
     public static final String HTML_HEADER_START = "<HTML><HEAD>\n";
@@ -84,7 +88,7 @@ public final class Constants {
     
     public static final String HTML_SELECTOR = "<select size=\"1\" name=\"levelSelector\" onChange='onSelector(this.value)'>\n    <option disabled>Select log level</option>\n    <option value=\"0\" \nselected>All events</option>\n    <option value=\"1\">Error&Fatal events</option> \n    <option value=\"2\">Fatal events only</option>\n<option value=\"-1\">Compress all</option>\n</select>";
     	
-    public static final String HTML_OPEN_CHILD_LINK = "<a href=\"javascript:toggleNode('%s')\" title=\"Click here to see child events\" %s>%s</a>";
+    public static final String HTML_OPEN_CHILD_LINK = "<a href=\"javascript:toggleNode('%s')\" title=\"%s\" %s>%s</a>";
     public static final String HTML_OPEN_DETAILS_LINK = "<a href=\"javascript:toggleDetails('%s')\" title=\"Click here to see details of event\" %s>%s</a>";
 
     public static final String HTML_SCR_BEFORE = "<a href=\"..\\screenshots\\%s\" target=\"_blank\" title=\"Screenshot before event start\">%s</a>";

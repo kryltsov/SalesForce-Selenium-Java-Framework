@@ -4,8 +4,6 @@ import java.util.*;
 
 public class Event {
 	
-	private static int idGen=0;
-	
 	private int startId=0;
 	private int endId=0;
 	private Date startTime = new Date();
@@ -13,6 +11,7 @@ public class Event {
 
 	boolean isClosed = false;
 	String eventName = "";
+	String checkLoginLogout = "";
 	String resultMessage = "";
 	String advice = "";
 	String exceptionMessage = "";
@@ -24,13 +23,23 @@ public class Event {
 	String realValue = "";
 	int codeLevel = 0;
 	int logLevel = Constants.TOP_IERARCHY_LEVEL;
+	String goal;
 	
-	public Event(String a_eventName, String a_targetName){
+	static ResourceBundle goals = ResourceBundle.getBundle("GoalsBundle", new Locale(Settings.MY_LOCALE));
+	
+	public Event(int id, String a_eventName, String a_targetName){
 		eventName = a_eventName;
 		targetName = a_targetName;
 		logLevel = Constants.STARTED;
 		startTime.getTime();
-		startId = ++idGen;
+		startId = id;
+		
+		try {
+			goal = "Goal: " + goals.getString(a_eventName) + '.';
+		}
+		catch (Exception e){
+			goal = "Goal: " + Constants.NO_EVENT_GOAL;
+		}
 	}	
 	
 	public String prepareOneValue(String valueName, String value){
@@ -221,12 +230,12 @@ public class Event {
 	}	
 	
 
-	public void close(int a_logLevel, String a_message, String a_screenshot){
+	public void close(int a_logLevel, String a_message, String a_screenshot, int a_endId){
 		logLevel = a_logLevel;		
 		resultMessage = a_message;
 		afterScreenshot = a_screenshot;
 		endTime.getTime();
-		endId = getLastId();
+		endId = a_endId;
 		isClosed = true;
 	}
 	
@@ -257,8 +266,5 @@ public class Event {
 	public int getEndId(){
 		return endId;
 	}
-	
-	public static int getLastId(){
-		return idGen;
-	};
+
 }

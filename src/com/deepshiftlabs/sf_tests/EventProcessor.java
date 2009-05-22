@@ -177,6 +177,7 @@ public class EventProcessor {
 		String detailsLinkStyle = getStyleColor(Constants.HTML_DEFAULT_COLOR);
 		String details = a_event.toHtmlDetail();
 		String style = getStyle(a_level+1);
+		String linkTitle = a_event.goal;
 		
 		String s;
 
@@ -188,7 +189,7 @@ public class EventProcessor {
 		}
 		else {
 			String imageString = String.format(Constants.HTML_IMG_CHILD_SHOW, imgChildName);
-			s = getTabs(a_level) + String.format(Constants.HTML_OPEN_CHILD_LINK, a_event.getStartId(), linkStyle, imageString + a_event.eventName);
+			s = getTabs(a_level) + String.format(Constants.HTML_OPEN_CHILD_LINK, a_event.getStartId(), linkTitle, linkStyle, imageString + a_event.eventName);
 		}
 
 		s = s+"&nbsp&nbsp<i> Target:</i> "+a_event.targetName+"\n";

@@ -18,10 +18,11 @@ public final class Settings {
      public static final int LIMIT_CHECK_VALUES_COUNT_TO = 1;  // set -1 to run all values, don't set to 0
      public static final Boolean USE_FAST_NEW_RECORD = false;
      
-     
 // log options
      public static final String SCREENSHOTS_PATH = "logs\\screenshots\\";
      public static final String REPORT_PATH = "logs\\html\\";
+     
+     public static final String MY_LOCALE = "ru";     
      
 //     public static final Boolean USE_SCREENSHOTS = true;
      public static final int LOG_LEVEL = 0;     

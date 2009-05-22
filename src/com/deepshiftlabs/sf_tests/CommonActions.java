@@ -27,6 +27,7 @@ public class CommonActions {
     String name = "Selenium driver";
     String screenshotsPath = "none";
     String lastScreenshotFilename = "";
+    int lastEventId = 0;
     
     public void init (){
     	eventProc.init(events);
@@ -555,7 +556,7 @@ public class CommonActions {
 	
 	public Event startEvent(String eventName, String target)
 	{
-		Event tempEvent = new Event(eventName, target);
+		Event tempEvent = new Event(++lastEventId, eventName, target);
 		events.add(tempEvent);
 		tempEvent.beforeScreenshot = lastScreenshotFilename;
 		logEvent (tempEvent);
@@ -569,7 +570,7 @@ public class CommonActions {
 	}
 	
 	public void closeEvent(Event a_event, int a_logLevel, String a_message){
-		a_event.close(a_logLevel, a_message, lastScreenshotFilename);
+		a_event.close(a_logLevel, a_message, lastScreenshotFilename, lastEventId);
 		logEvent (a_event);
 	}
 	

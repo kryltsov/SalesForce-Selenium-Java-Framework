@@ -20,9 +20,8 @@ public class LoginLogoutTest {
  @Test(groups = {"default"}, description = "login_logout_test")
  @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
  public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
-	 Event event = action.startEvent("runAllPageTests", name);
-	 
 	 action.init();
+	 Event event = action.startEvent("runAllPageTests", name);
  
      if (seleniumHost.equals("")){
          seleniumHost = Settings.SELENIUM_HOST;

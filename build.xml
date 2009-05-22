@@ -6,6 +6,8 @@
                  <mkdir dir="build/class"/>
                  <mkdir dir="logs"/>
                  <copy file="src/log4j.properties" todir="build/class/"/>
+                 <copy file="src/GoalsBundle_ru.properties" todir="build/class/"/>
+                 <copy file="src/GoalsBundle.properties" todir="build/class/"/>
          </target>
     
 <!--  ukazanie putei dlya poiska bibliotek i klassov    -->      
