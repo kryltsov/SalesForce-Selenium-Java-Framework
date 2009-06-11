@@ -1,7 +1,6 @@
 package com.deepshiftlabs.sf_tests;
 
 public final class Settings {
-	
 
 // login options
 	public static final String SF_LOGIN = "login";
@@ -19,18 +18,17 @@ public final class Settings {
      public static final Boolean USE_FAST_NEW_RECORD = false;
      
 // log options
-     public static final String SCREENSHOTS_PATH = "logs\\screenshots\\";
      public static final String REPORT_PATH = "logs\\html\\";
-     
+
+     public static final String SCREENSHOTS_PATH = "logs\\screenshots\\";
+     public static final String SCREENSHOTS_PREFIX = "screen_";
+     public static final String SCREENSHOTS_POSTFIX_FORMAT = "HHmmssSSS_ddMMyy";
+    
      public static final String MY_LOCALE = "ru";     
      
-//     public static final Boolean USE_SCREENSHOTS = true;
      public static final int LOG_LEVEL = 0;     
      public static final Boolean LOG_INFOS = true;
      public static final Boolean LOG_VERBOSE = true;
-     
-     public static final String SCREENSHOTS_PREFIX = "screen_";
-     public static final String SCREENSHOTS_POSTFIX_FORMAT = "HHmmssSSS_ddMMyy";
      
 // fatal errors options     
      public static final Boolean IS_CHECKSEQUENCE_FATAL = true;
