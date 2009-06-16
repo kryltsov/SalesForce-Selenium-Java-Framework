@@ -38,7 +38,8 @@
 <!--  udalenie papok so starymi versiyami  -->
          <target name="clean" description="Clean up">
                  <delete dir="build"/>
-                 <delete file="logs/message.log"/>
+                 <delete dir="logs"/>
+                 <delete dir="doc"/>
                  <echo>Dirs deleted!</echo>
          </target>
 
@@ -59,4 +60,9 @@
                 <arg value="testng.xml"/>    <!--  fail dlya nastroiki testng  -->
              </java>
         </target>
+
+<!--  eta tsel' generiruet docs by javadoc  -->        
+    <target name="make_javadoc">
+        <javadoc access="private" author="true" classpath="lib/selenium-grid-tools-standalone-1.0.2.jar;lib/commons-logging-1.0.4.jar;lib/testng-5.8-jdk15.jar;lib/log4j-1.2.15.jar;lib/selenium-java-client-driver-1.0-SNAPSHOT.jar" destdir="doc" doctitle="sf_tests_package_doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="com.deepshiftlabs.sf_tests" source="1.6" sourcepath="lib;src" splitindex="true" use="true" version="true"/>
+    </target>        
 </project>
