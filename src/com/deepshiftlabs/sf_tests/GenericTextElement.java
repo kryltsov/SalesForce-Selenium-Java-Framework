@@ -2,10 +2,21 @@ package com.deepshiftlabs.sf_tests;
 
 import com.thoughtworks.selenium.DefaultSelenium;
 
+/**
+ * Represents parent class for text branch of elements tree.
+ * @author Yakubovskiy Dima, bear@deepshiftlabs.com
+ *
+ */
 public class GenericTextElement extends GenericElement {
 	
-    public GenericTextElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired, int a_maxLength){
-        super(a_elementName, a_elementSfId,a_parentObjectType, a_isRequired);
+    /**
+     * @param a_elementName Salesforce name of element 
+     * @param a_parentObjectType name of salesforce object which contains this element 
+     * @param a_isRequired determines if element should be filled with value to store record
+     * @param a_maxLength assumed maximal length of element
+     */
+    public GenericTextElement(String a_elementName, String a_parentObjectType, boolean a_isRequired, int a_maxLength){
+        super(a_elementName, a_parentObjectType,a_isRequired);
         validValue = "a";
         setInputLength(a_maxLength);
 
@@ -26,6 +37,9 @@ public class GenericTextElement extends GenericElement {
        return inputLength;
      }
      
+    /* 
+     * @see com.deepshiftlabs.sf_tests.GenericElement#isValueValidForThisElementLength(com.deepshiftlabs.sf_tests.CheckValue)
+     */
     public boolean isValueValidForThisElementLength(CheckValue theValue){
     	Event event = action.startEvent("isValueValidForThisElementLength", theValue.value);
     	
@@ -37,11 +51,22 @@ public class GenericTextElement extends GenericElement {
     	return true;
     }     
 
-// TODO optimize!    
-     public int checkMaxLengthRunCount=0;
-     public int checkMaxLength(DefaultSelenium selInstance){
+// TODO optimize and comment!    
+    /**
+     * This variable used to determine should we process or skip function checkMaxLength.
+     * @see #checkAll()
+     */
+    public int checkMaxLengthRunCount=0;
+
+    /**
+     * Checks accordance of assumed element length with its real value.
+     * @return RET_OK,
+     * RET_ERROR, 
+     * RET_SKIPPED if this check was done before (checkMaxLengthRunCount>0).
+     */
+    public int checkMaxLength(){
       	if (checkMaxLengthRunCount>0) {
-    		action.info("checkMaxLength for element _"+elementSfId+"_ already was performed, skipping");      		
+    		action.info("checkMaxLength for element _"+name+"_ already was performed, skipping");      		
       		return Constants.RET_SKIPPED;
       	}
       	checkMaxLengthRunCount++;    	 
@@ -88,18 +113,37 @@ public class GenericTextElement extends GenericElement {
         }
      }
     
-     private Event checkAllEventGenericText = null;
-     public int  checkAll (DefaultSelenium selInstance){
+    /**
+     * Because method checkAll may be called many times for one element, we can't simple create Event object inside it.
+     * So we declare variable here and at first call of checkAll instantiate object.
+     * CheckAll method can't generate errors itself, so we use this event only to block all elements checks. 
+     * @see #checkAll()
+     */
+    private Event checkAllEventGenericText = null;
+    
+    /* 
+     * @see com.deepshiftlabs.sf_tests.GenericElement#checkAll()
+     */
+    public int  checkAll (){
     	int returnedValue;
     	if (checkAllEventGenericText==null){
     		checkAllEventGenericText = action.startEvent("checkAll", name); 
     	}    	
 
     	returnedValue = super.checkAll();
+	   	if (returnedValue==Constants.RET_ERROR){
+	   		action.closeEventFatal(checkAllEventGenericText);
+	   		return Constants.RET_ERROR;	   	
+	   	}    	
+    	
     	if (returnedValue!=Constants.RET_OK)
     		return returnedValue;
     	
-     	checkMaxLength(selInstance);
+     	checkMaxLength();
+    	if (errorsCount >= Settings.FATAL_ELEMENT_ERRORS_COUNT){
+    		action.closeEventFatal(checkAllEventGenericText, "Too many errors per element");
+    		return Constants.RET_ERROR;
+    	}     	
 	   	action.closeEventOk(checkAllEventGenericText);     	
      	return Constants.RET_OK;
      }         

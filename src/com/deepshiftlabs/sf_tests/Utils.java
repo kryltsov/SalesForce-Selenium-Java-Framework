@@ -1,20 +1,22 @@
 package com.deepshiftlabs.sf_tests;
 
-
-import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.io.*;
 
 import org.apache.log4j.Logger;
 
 /**
-  * @author bear
-  * @date 05 Jan 2009
+ * Represents class which contains small auxiliary functions.
+ * It has a object of log4j Logger which is used for logging to console and files (exclude HTML reports).
+ * logger is static member and as there may be several Utils objects at the same time (at least one for each parallel test
+ * executed) all this objects are using ONLY ONE logger. 
+ * @author Yakubovskiy Dima, bear@deepshiftlabs.com
+ *
  */
  
-
 public class Utils {
         private static Logger logger = null;
 
@@ -25,7 +27,6 @@ public class Utils {
         }
         
         public Utils(){
-//        	System.out.println("CONSTRUCTOR");
         }
         
         public void info (String message){
@@ -42,14 +43,21 @@ public class Utils {
             logger.fatal(message);
        }
         
+        /**
+         * @param tempString String that may contain symbols that should be preceded by escape symbols
+         * @return Processed string.
+         */
         static public String prepareForJavaScript(String tempString){
-
         	tempString = tempString.replace("'", "\\'");
-        	
         	return tempString;
         }
         
-        static public String prepareCondition (ArrayList <String> locators){        
+        /**
+         * @param locators locators to elements which should be present on page
+         * @return JavaScript which will determine if all needed elements on page loaded.
+         * @see CommonActions#waitForCondition(String, String) 
+         */
+        static public String prepareCondition (ArrayList <String> locators){ 
 			String tempScript = "var result = false; ";
 			
 			if (locators.size()>0) {
@@ -78,12 +86,25 @@ public class Utils {
 			return generateScreenshotName(false);
         }
         
-// returns absolute path to dir        
+        /**
+         * If not exist creates directory and return absolute path to it. 
+         * @param dirPath absolute or relative path to directory (e.g. "logs\\screenshots\\"). 
+         * If relative, build.xml directory is assumed as parent. 
+         * @return Absolute path to dirPath.
+         */
         static public String prepareDir(String dirPath){
     		File f = new File(dirPath);
     		if (!f.exists()){
     			f.mkdirs();
     		}
     		return f.getAbsolutePath()+"\\";
+        }
+        
+        static public void waitForEnterPressed(){
+        	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+        	try{
+        		System.out.println("------------------PRESS ENTER-------------------");
+        		stdin.read();}
+        	catch(IOException e) {}; 
         }
 }

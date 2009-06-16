@@ -9,28 +9,49 @@ package com.deepshiftlabs.sf_tests;
 
 import org.testng.annotations.*;
 
-import java.io.*;
-
+/**
+ * Represents test of Website object. Can be executed in parallel with other tests.  
+ * @author Yakubovskiy Dima, bear@deepshiftlabs.com
+ *
+ */
 public class WebsiteObject {
-	BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+	/**
+	 * Each test has object of CommonActions. It's created here. 
+	 * Don't forget initialize objects of GenericObject and inherited objects with link on CommonActions instance!  
+	 */
 	CommonActions action = new CommonActions();
-    
+	
+	/**
+	 * Will contain all needed elements and common check sequences.
+	 */
 	GenericObject wwwObject;
 	
-	int actID = 0;
+	/**
+	 * Will be used in Event generation. 
+	 */
 	String name = "Website object";
 
-    public int addAllElements(){
+	 /**
+	 * Adds to GenericObject all needed elements.
+	 */
+    public void addAllElements(){
        
-    	wwwObject.addElement(new TextElement("Employment Website Name", Constants.RESERVED_PARAMETER, wwwObject.parentTabID, Constants.REQUIRED,80));
-    	wwwObject.addElement(new UrlElement("Web Address", Constants.RESERVED_PARAMETER, wwwObject.parentTabID, Constants.REQUIRED));
-    	wwwObject.addElement(new CurrencyElement("Price Per Post", Constants.RESERVED_PARAMETER, wwwObject.parentTabID, Constants.REQUIRED,5,2));
-    	wwwObject.addElement(new CurrencyElement("Maximum Budget", Constants.RESERVED_PARAMETER, wwwObject.parentTabID, Constants.REQUIRED,6,2));
+    	wwwObject.addElement(new TextElement("Employment Website Name", wwwObject.parentTabID, Constants.REQUIRED, 80));
+    	wwwObject.addElement(new UrlElement("Web Address", wwwObject.parentTabID, Constants.REQUIRED));
+    	wwwObject.addElement(new CurrencyElement("Price Per Post", wwwObject.parentTabID, Constants.REQUIRED, 5,2));
+    	wwwObject.addElement(new CurrencyElement("Maximum Budget", wwwObject.parentTabID, Constants.REQUIRED, 6,2));
+    	// we should call this method if FAST record creation will be used
     	wwwObject.updateLocatorsLists();
-       
-       return 0;
     }
 
+    /**
+     * Main method, it'll be executed in parallel by TestNG.
+     * It get TestNG parameters. If seleniumHost parameter is not received from TestNG, parameters from Settings class are used.
+     * @see Settings#SELENIUM_HOST
+     * @see Settings#SELENIUM_PORT
+     * @see Settings#BROWSER
+     * @see Settings#WEB_SITE
+    */    
     @Test(groups = {"default"}, description = "Website object test")
     @Parameters({"seleniumHost", "seleniumPort", "browser", "webSite"})    
     public void runAllPageTests(@Optional("") String seleniumHost, @Optional("-1") int seleniumPort, @Optional("") String browser, @Optional("") String webSite){
@@ -46,7 +67,6 @@ public class WebsiteObject {
         wwwObject = new GenericObject ("Employment Websites", "websitePage00001", "Employment Website");
         wwwObject.init(action);
     	addAllElements();
-    	// TODO  add comments
     	try {
 	    	wwwObject.setDeterminingRecordIdField("Employment Website Name");
 	    	wwwObject.prepareBrowser(seleniumHost, seleniumPort, browser, webSite);
@@ -69,14 +89,9 @@ public class WebsiteObject {
     	
 //    	wwwObject.printErrorsSummary();
 //    	action.generateReport();
+    	
+     	// HTML report generation
     	action.eventsToHtml(name);     	
-        
-/*        try{
-        	System.out.println("------------------WAITING FOR ENTER-------------------");
-        	stdin.read();}
-        catch(IOException e) {}; 
-        */
-        
     };
 }  
 

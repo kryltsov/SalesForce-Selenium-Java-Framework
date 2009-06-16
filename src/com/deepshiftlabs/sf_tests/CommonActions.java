@@ -13,22 +13,28 @@ import java.text.SimpleDateFormat;*/
 import com.thoughtworks.selenium.*;
 
 /**
- *
+ * Represents all functions for work with Selenium driver, some common browsing sequences, some common log functions.
+ * Have the exemplar of DefaultSelenium which is working with single test object (like WebsiteObject).
  * @author Bear, Jan 15, 2009
- * TODO Now CommonActions can have several instances in runtime. It's not optimal, may be it should be something like singleton * 
  */
-
 public class CommonActions {
-
     Utils ut = new Utils();
     ArrayList <Event> events = new ArrayList <Event>();
     EventProcessor eventProc = new EventProcessor();
     DefaultSelenium seleniumInstance;
+
+    // this name is used in report generation as event's parent.
     String name = "Selenium driver";
-    String screenshotsPath = "none";
+    
+    String screenshotsPath = "";
+    
+    // this variable is used in closing event. 
     String lastScreenshotFilename = "";
     int lastEventId = 0;
     
+    /**
+     * You have to call this function after creating a new CommonActions object.  
+     */
     public void init (){
     	eventProc.init(events);
 		Utils.prepareDir(Settings.REPORT_PATH);
@@ -37,6 +43,11 @@ public class CommonActions {
 
 //**************            FUNCTIONS WICH USE SELENIUM DRIVER    *********************//
     
+    /**
+     * Creates instance of DefaultSelenium and tries to connect to Selenium server.
+     * If connection is set, browser window will be opened. 
+     * @return RET_OK, RET_ERROR if some errors happened. Exception message will be saved to corresponding event. 
+     */
     protected int startSelenium(String seleniumHost, int seleniumPort, String browser, String webSite){
         seleniumInstance = new DefaultSelenium(seleniumHost, seleniumPort, browser, webSite);
         Event event = startEvent("startSelenium", seleniumHost+":"+seleniumPort+", "+ browser+":"+webSite);
@@ -60,6 +71,9 @@ public class CommonActions {
     	return Constants.RET_OK;
    }
 
+    /**
+     * If seleniumInstance is not null, will stop it (it'll close browser windows and disconnect from Selenium server)
+     */
     public void freeSelenium() {
     	Event event;
     	if (seleniumInstance==null){
@@ -89,6 +103,12 @@ public class CommonActions {
     	return Constants.RET_OK;
     }
 
+	/**
+	 * Do standard sequence to log into Salesforce. Does title and errors checks.
+	 * @param a_login Salesforce login 
+	 * @param a_password Salesforce password
+	 * @return RET_ERROR if login failed, RET_OK if login succeed.
+	 */
 	protected int login(String a_login, String a_password) {
 			Event event = startEvent("login", a_login+"/"+a_password);
 			ArrayList <String> locatorsList = new ArrayList <String>();		
@@ -137,6 +157,9 @@ public class CommonActions {
 	        return Constants.RET_OK;
 	    }
 
+	/**
+	 * @return RET_ERROR if waiting failed.
+	 */
 	protected int waitForPageToLoad(){
 		Event event = startEvent("waitForPageToLoad", name+"(timeout "+new Integer (Settings.TIMEOUT).toString()+")");
 		try {
@@ -154,6 +177,10 @@ public class CommonActions {
 		return Constants.RET_OK;
 	}
 	
+	/**
+	 * @param a_locator locator which defines place from where driver should read text  
+	 * @return Read string or RET_ERROR_STRING in case of error.
+	 */
 	protected String readText(String a_locator) {
 		Event event = startEvent("readText", a_locator);
 
@@ -206,7 +233,7 @@ public class CommonActions {
 		event.setRealValue(tempString);
 		closeEventOk(event);
 		return tempString;
-	}  	
+	}
 	
 	protected boolean isElementPresent(String a_locator) {
 		Event event = startEvent("isElementPresent", a_locator);
@@ -240,6 +267,10 @@ public class CommonActions {
 		return result;
 	}  	
 	
+	/**
+	 * Before click check of element presence called.
+	 * @param a_locator element which should be clicked
+	 */
 	protected int click(String a_locator) {   
 		Event event = startEvent("click", a_locator);
 		try {
@@ -260,6 +291,10 @@ public class CommonActions {
 		return Constants.RET_OK;
 	}
 
+	/**
+	 * This function should be used when clicking on element show an JS confirmation like Delete confirmation.
+	 * @param a_locator element which should be clicked
+	 */
 	protected int clickWithConfirmation(String a_locator) {   
 		Event event = startEvent("clickWithConfirmation", a_locator);
 		try {
@@ -286,8 +321,12 @@ public class CommonActions {
 		return Constants.RET_OK;
 	} 	
 	
+	/**
+	 * Modifies lastScreenshotFilename variable.
+	 * @param isError if set to true, adds (ERR) to end of screenshot filename
+	 * @return Filename of screenshot. 
+	 */
 	protected String getScreenshot(boolean isError) {            
-//		if (!Settings.USE_SCREENSHOTS) return;
 		String filename;
 		filename = Utils.generateScreenshotName(isError);
 		
@@ -324,6 +363,11 @@ public class CommonActions {
 	}	
 	
 	// TODO this function should be optimized
+	/**
+	 * Before looking for errorMessage string, Constants.GENERAL_PAGE_ERROR string presence will be checked. 
+	 * @param errorMessage string which should be present on page
+	 * @return true if both strings are present and visible, false otherwise.
+	 */
 	public boolean isErrorPresent (String errorMessage){
 		Event event = startEvent("isErrorPresent", errorMessage);
 
@@ -343,6 +387,11 @@ public class CommonActions {
 		return isPresent;
 	}
 	
+	/**
+	 * @param condition Condition on JavaScript, which will be executed on browser side.
+	 * @param timeout Max time to wait for condition.
+	 * @return true if condition carried out, false otherwise.
+	 */
 	public boolean waitForCondition(String condition, String timeout){
 		Event event = startEvent("waitForCondition", condition);
 		try {
@@ -359,6 +408,12 @@ public class CommonActions {
 	}
 
 // TODO I think it's duplicated code (see utils?)	
+	/**
+	 * Prepares a JavaScript code which checks if all elements are present on page, and then use it to wait till elements load.    
+	 * @param locators List of locators of elements which will be waited on page
+	 * @param timeout Max time to wait elements
+	 * @return true if all elements loaded. 
+	 */
 	public boolean waitForListOfElements(ArrayList <String> locators, String timeout){
 		Boolean result = false;
 
@@ -381,6 +436,9 @@ public class CommonActions {
 	
 //**************            FUNCTIONS WICH DO ACTIONS WITH BROWSER   *********************//	
 	
+	/**
+	 * Do logout from Salesforce sequence.
+	 */
 	protected int logout() {
 			Event event = startEvent("logout", name);
 			String tempLocator = Constants.LOGOUT_LOCATOR;
@@ -422,6 +480,12 @@ public class CommonActions {
 	    return Constants.RET_OK;
 	}   
 	
+	/**
+	 * Checks for record presence in application. 
+	 * @param tabName corresponding to type of record tab 
+	 * @param recordId record identifier
+	 * @return true if record is present.
+	 */
 	protected boolean isRecordPresence(String tabName, String recordId) {
 		Event event = startEvent("checkRecordPresence", recordId);
 	    String tempLocator;
@@ -439,6 +503,11 @@ public class CommonActions {
 	    return result;
 	}
 	
+	/**
+	 * Sequence to create new record of stated type. After executing New record edit page is opened.
+	 * @param tabName corresponding to type of record tab
+	 * @return RET_OK if record created successfully.
+	 */
 	public int createNewEmptyRecord(String tabName){
 		Event event = startEvent("createNewEmptyRecord", tabName);
 		String tempLocator =  "//input[@name='new']";
@@ -456,6 +525,13 @@ public class CommonActions {
 	    return Constants.RET_OK;
 	}
 	
+	/**
+	 * Sequence to create new record of stated type. After executing New record edit page is opened.
+	 * Function waits for condition fulfillment, not for entire page loaded. 
+	 * @param tabName corresponding to type of record tab
+	 * @param condition javaScript code which determines key elements presence
+	 * @return RET_OK if record created successfully.
+	 */
 	public int createNewEmptyRecordFast(String tabName, String condition){
 		Event event = startEvent("createNewEmptyRecordFast", tabName);
 
@@ -477,6 +553,14 @@ public class CommonActions {
 	    return Constants.RET_OK;
 	}	
 
+	/**
+	 * Sequence to delete stated record.
+	 * @param tabName corresponding to type of record tab 
+	 * @param recordId record identifier
+	 * @return RET_OK if record was deleted without problems, RET_ERROR if some problems were. 
+	 * Note that success of deletion is determined as absence of record with the recordId after operation.
+	 * So if there more than one record with same recordId, function returns RET_ERROR too.
+	 */
 	protected int deleteRecord(String tabName, String recordId) {
 		Event event = startEvent("deleteRecord", recordId);
     	String tempLocator;
@@ -509,6 +593,9 @@ public class CommonActions {
 	    }
 	}
 	
+	/**
+	 * Sequence to press Delete button on Edit record page. It uses clickWithConfirmation method.
+	 */
 	protected int pressDelete() {
 		String tempLocator = Constants.DELETE_LOCATOR;
 
@@ -554,6 +641,14 @@ public class CommonActions {
 
 //**************            FUNCTIONS WITH EVENTS AND EVENTS LIST     *********************//
 	
+	/**
+	 * Creates a new Event object with given parameters and adds it to event list. 
+	 * Fills beforeScreenshot and id field of it  
+	 * @param eventName event name, which is usually chosen as method name in which event is created 
+	 * @param target definite object or element on which influence will be done due event, or name of method's class   
+	 * @return Link to just created and added to list event. It's not the only way to get access to the event. 
+	 * Access can be realized by events array scanning.
+	 */
 	public Event startEvent(String eventName, String target)
 	{
 		Event tempEvent = new Event(++lastEventId, eventName, target);
@@ -563,12 +658,26 @@ public class CommonActions {
 		return tempEvent;
 	}
 	
+	/**
+	 * Creates a new Event object with given parameters and adds it to event list.
+	 * Before creations does screenshot.
+	 * @deprecated
+	 * @param eventName event name, which is usually chosen as method name in which event is created  
+	 * @param target definite object or element on which influence will be done due event, or name of method's class   
+	 * @return Link to just created and added to list event.
+	 */
 	public Event startEventS(String eventName, String target)
 	{
 		getScreenshot();
 		return startEvent(eventName, target);
 	}
 	
+	/**
+	 * Make event closed.
+	 * @param a_event event to be closed
+	 * @param a_logLevel error level of closed event
+	 * @param a_message description of event closing
+	 */
 	public void closeEvent(Event a_event, int a_logLevel, String a_message){
 		a_event.close(a_logLevel, a_message, lastScreenshotFilename, lastEventId);
 		logEvent (a_event);
@@ -600,6 +709,10 @@ public class CommonActions {
 
 	// action.closeEventOk(event);
 	
+	/**
+	 * Prints event to console if logging of it's log level is switched on. 
+	 * @param a_event event to print
+	 */
 	public void logEvent(Event a_event){
 		switch( a_event.logLevel )
 	    {
@@ -613,11 +726,9 @@ public class CommonActions {
 	    }
 	}
 	
-	public void eventsToHtml(String a_name){
-		eventProc.eventsToHtml(a_name);
-	}
-
-//**************            OTHER FUNCTIONS            *********************//	
+	/**
+	 * Generates simple report to console. Prints only events with certain log level. 
+	 */
 	public void generateReport(){
 		Event tempEvent;
 		
@@ -628,5 +739,15 @@ public class CommonActions {
 				logEvent(tempEvent);
 		}
 	}	
+	
+	/**
+	 * Prepares HTML report of all events in events list.
+	 * @param a_name name of HTML report file
+	 */
+	public void eventsToHtml(String a_name){
+		eventProc.eventsToHtml(a_name);
+	}
 
+//**************            OTHER FUNCTIONS            *********************//	
+	
 }

@@ -3,37 +3,65 @@ package com.deepshiftlabs.sf_tests;
 import java.util.ArrayList;
 
 /** 
- * @class GenericElement
- * This class is base for all other elements classes.
- * It contains all common methods and properties
+ * Represent a class which is base for all other elements classes.
+ * It contains all common methods and properties.
+ * After construction, you have to call init method.
  * @author Bear
  * @author bear@deepshiftlabs.com
 
 */
 public class GenericElement {
     protected String name;
-    protected String elementSfId;
     protected String parentObjectType;
+    
+    /**
+     * Known as valid value.
+     */
     protected String validValue;
+
+    /**
+     * Known as invalid value.
+     */
     protected String invalidValue;
     protected String writeLocator;    
     protected String readLocator;
+
+    /**
+     * This variable is used when element determines record Id and we want to delete saved record. 
+     */
     protected String lastEnteredValue;
     protected int inputLength;
     protected boolean isRequired;
+
+    /**
+     * if true, value of this element will determine whole record Id.
+     * Only 1 element can be determining.
+     */
     protected boolean determinesRecordId = false;
     protected int errorsCount = -1;
      
     
+    /**
+     * This list contains all values which should be used to test element.
+     */
     protected ArrayList <CheckValue> values = new ArrayList <CheckValue> ();
     
     String recordId = "";
+    
+    /**
+     * Link to CommonActions object. Will be inited in init method. Each element of this test has the same link.  
+     */
     CommonActions action = null;
     
-    GenericElement(String a_elementName, String a_elementSfId, String a_parentObjectType, boolean a_isRequired) {
+    
+    /**
+     * @param a_elementName Salesforce name of element 
+     * @param a_parentObjectType name of salesforce object which contains this element 
+     * @param a_isRequired determines if element should be filled with value to store record
+     */
+    GenericElement(String a_elementName, String a_parentObjectType, boolean a_isRequired) {
         name = a_elementName;
         parentObjectType = a_parentObjectType;
-        elementSfId = a_elementSfId;  // now this is reserved param
         isRequired = a_isRequired;
         writeLocator = "//label[text()='"+a_elementName+"']/following::input";
         readLocator = "//*[@class='labelCol' and text()='"+a_elementName+"']/following::*[@class]";
@@ -41,6 +69,10 @@ public class GenericElement {
         inputLength = 32000+100;
     }
     
+    
+    /**
+     * Call of this method is obligatory after construction of element.
+     */
     public void init(CommonActions a_action){
     	action = a_action;
     }
@@ -70,7 +102,10 @@ public class GenericElement {
     	recordId = a_recordId;
     }
     
-// you should use this func only on add/edit page because of writeLocator using     
+    /**
+     * Determines if element is presented on page. 
+     * This function is ONLY for edit (or add) record pages because it uses writeLocator of element to search.
+     */
     public int checkPresence (){
     	Event event = action.startEvent("checkPresence", name);
         
@@ -83,6 +118,11 @@ public class GenericElement {
         return Constants.RET_ERROR;
     }
     
+    /**
+     * Fills element with known-as-good value.
+     * ! Note that if element determines recordId, valid value will be taken from recordId field.
+     * This field should be set by parent genericObject of this element. 
+     */
     public int fillByValidValue (){
     	Event event = action.startEvent("fillByValidValue", name);
         String tempValidValue = validValue;
@@ -99,6 +139,9 @@ public class GenericElement {
        return Constants.RET_OK;
     }
     
+    /**
+     * Fills element with known-as-invalid value.
+     */
     public int fillByInvalidValue (){
     	Event event = action.startEvent("fillByInvalidValue", name);
         String tempInvalidValue = invalidValue;
@@ -128,25 +171,57 @@ public class GenericElement {
        return Constants.RET_OK;
     }
 
-    // only template - each subclass will implement own 
+  
+    /**
+     * Only template in this parent class - each subclass will implement own.
+     * Used to determine if test value is more than element input length.
+     * @return true.
+     */
     public boolean isValueValidForThisElementLength(CheckValue theValue){
     	return true;
     }
     
+    /**
+     * Because method checkAll may be called many times for one element, we can't simple create Event object inside it.
+     * So we declare variable here and at first call of checkAll instantiate object.
+     * CheckAll method can't generate errors itself, so we use this event only to block all elements checks. 
+     * @see #checkAll()
+     */
     private Event checkAllEvent = null;
+
+    /**
+     * This method performs all checks that element has.
+     * When it is called, add or edit record page should be opened, with all elements filled by valid values,
+     * so we should not think about other elements, only about current.
+     * Some checks which are called in this method can lead to saving of record and opening Show record page 
+     * (e.g. if we examine valid value of element). As this, one element level of test know anything about other elements,
+     * we should ask parent object to delete saved record and create new, and then call this method again to continue with
+     * next check.
+     * So this method may be executed several times for one element. 
+     *    
+     * @return RET_PAGE_BROKEN_OK when page was saved and it was waited,  
+     * RET_PAGE_BROKEN_ERROR when page was saved and it was NOT waited,
+     * RET_OK if all checks done, 
+     * RET_ERROR if there was some fatal error in element checks.
+     */
     public int  checkAll (){
     	if (checkAllEvent==null){
     		checkAllEvent = action.startEvent("checkAll", name); 
     	}
     	int returnedValue;
 
-        returnedValue = checkRequired(); 
+        returnedValue = checkRequired();
         if ((returnedValue == Constants.RET_PAGE_BROKEN_OK)||
     			(returnedValue== Constants.RET_PAGE_BROKEN_ERROR)){ 
     		return returnedValue;
         }
 
         returnedValue = checkAllValues(); 
+        if (returnedValue == Constants.RET_ERROR){
+        	action.closeEventFatal(checkAllEvent, "Fatal error when doing checkAllValues for element. May be too much errors per element.");
+        	return returnedValue;
+        }
+        
         if ((returnedValue == Constants.RET_PAGE_BROKEN_OK)||
     			(returnedValue== Constants.RET_PAGE_BROKEN_ERROR)){ 
     		return returnedValue;
@@ -155,8 +230,27 @@ public class GenericElement {
         action.closeEventOk(checkAllEvent); 
         return Constants.RET_OK;
     }
-   
+    
+    /**
+     * Because method checkAll may be called many times for one element, and each time in it checkRequired method called,
+     * we should improve mechanism to skip already executed checks.
+     * This variable used to determine should we process or skip function checkRequired.
+     * @see #checkAll()
+     * 
+     */
     private int checkRequiredRunCount=0;
+    
+    /**
+     * Checks if element which should be required is really required and vice versa
+     * @see #checkRequiredRunCount
+     * 
+     * @return RET_OK if element considered required is required in real, 
+     * RET_ERROR if element considered required is not required in real, 
+     * RET_PAGE_BROKEN_OK if element considered not required is not required in real, 
+     * RET_PAGE_BROKEN_ERROR if element considered required is not required in real, 
+     * RET_SKIPPED if this check was done before (checkRequiredRunCount>0).
+     * 
+     */
     public int checkRequired (){
     	Boolean realRequired = false;
     	if (checkRequiredRunCount>0) {
@@ -166,38 +260,44 @@ public class GenericElement {
     	Event event = action.startEvent("checkRequired", name);
     	event.setWaitedValue("should be required = " + new Boolean(isRequired).toString());
     	
-	    	fillByNull();
-	    	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
-	    	
-	    	realRequired = action.isErrorPresent("You must enter a value");
-	    	event.setRealValue("required = " + realRequired.toString());
-	    	
-	    	if (isRequired ^ realRequired){
-	    		action.closeEventError(event);
-	    	}
-	    	else {
-	    		action.closeEventOk(event);
-	    	}
+    	fillByNull();
+    	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
+    	
+    	realRequired = action.isErrorPresent("You must enter a value");
+    	event.setRealValue("required = " + realRequired.toString());
+    	
+    	if (isRequired ^ realRequired){
+    		action.closeEventError(event);
+    	}
+    	else {
+    		action.closeEventOk(event);
+    	}
 
-	    	if (realRequired){
-	    		if (isRequired){
-	    			return Constants.RET_OK;
-	    		}else{
-	    			errorsCount++;
-	    			return Constants.RET_ERROR;
-	    		}
-	    	}
-	    	else{
-	    		if (!isRequired){
-	    			return Constants.RET_PAGE_BROKEN_OK;
-	    		}else{
-	    			errorsCount++;
-	    			return Constants.RET_PAGE_BROKEN_ERROR;
-	    		}
-	    	}
+    	if (realRequired){
+    		if (isRequired){
+    			return Constants.RET_OK;
+    		}else{
+    			errorsCount++;
+    			return Constants.RET_ERROR;
+    		}
+    	}
+    	else{
+    		if (!isRequired){
+    			return Constants.RET_PAGE_BROKEN_OK;
+    		}else{
+    			errorsCount++;
+    			return Constants.RET_PAGE_BROKEN_ERROR;
+    		}
+    	}
     }
     
- // TODO - Text element we should check if theValue.value.length()>maxLength and then skip this value
+    /**
+     * Checks if value considered as valid is valid in real and vice versa.
+     * @return RET_OK if value considered valid is valid in real, 
+     * RET_ERROR if value considered valid is not valid in real, 
+     * RET_PAGE_BROKEN_OK if value considered not valid is not valid in real, 
+     * RET_PAGE_BROKEN_ERROR if value considered valid is not valid in real.
+     */
     private int checkValueValidity(CheckValue theValue){
     	Event event = action.startEvent("checkValueValidity", name);
     	Boolean isValid = false;
@@ -211,6 +311,8 @@ public class GenericElement {
     	lastEnteredValue = theValue.value;
     	
     	action.pressButton(Constants.SAVE_RECORD_LOCATOR);
+    	
+// TODO inspect and comment next string    	
     	isValid = !(action.isErrorPresent(theValue.shouldBeErrorMessage));
 
     	event.setRealValue("is valid : " + isValid.toString());
@@ -236,6 +338,11 @@ public class GenericElement {
     	}
 	}
 
+    /**
+     * Checks if valid value after saving record is displayed as it is waited.
+     * RET_PAGE_BROKEN_OK if value is displayed as waited, 
+     * RET_PAGE_BROKEN_ERROR if value is displayed wrong.
+     */
     protected int checkIsDisplayedRight(CheckValue theValue){
     	Event event = action.startEvent("checkIsDisplayedRight", name);
     	String displayedText;
@@ -267,8 +374,32 @@ public class GenericElement {
     	}
     }
     
+    /**
+     * @see #checkAll()
+     * @see #checkAllEvent 
+     */
     private Event checkAllValuesEvent = null;
+    
+    /**
+     * Because method checkAll may be called many times for one element, and each time in it checkAllValues method called,
+     * we should improve mechanism to skip already checked values.
+     * This variable used to determine how many values in list are already checked in checkAllValues.
+     * @see #checkAll()
+     */
     private int checkAllValuesRunCount=0;
+    
+    /**
+     * Checks each value to be really valid or invalid, for valid values checks if stored value is displayed correctly,
+     * for invalid values checks that certain errors are displayed.
+     * @see #checkAllValuesRunCount
+     * @see #checkAll()
+     * @return RET_OK if all values have been checked
+     * RET_PAGE_BROKEN_OK if some value was considered valid and was valid in real - so record was saved,  
+     * RET_PAGE_BROKEN_ERROR if some value was considered invalid and was valid in real - so record was saved,  
+     * RET_ERROR if fatal error happened (for example number of element's error became > FATAL_ELEMENT_ERRORS_COUNT)
+     * @see Settings#FATAL_ELEMENT_ERRORS_COUNT
+     * 
+     */
     public int checkAllValues (){
     	if (checkAllValuesEvent==null){
     		checkAllValuesEvent = action.startEvent("checkAllValues", name); 
@@ -284,13 +415,14 @@ public class GenericElement {
     		return Constants.RET_SKIPPED;
     	}
 
-// TODO implement count limit 0    	
+// TODO implement count limit 0    
+    	// of in Settings we limit the number of values to check
     	if (Settings.LIMIT_CHECK_VALUES_COUNT_TO > 0 &&
     			Settings.LIMIT_CHECK_VALUES_COUNT_TO<countOfValuesToRun){
         			countOfValuesToRun = Settings.LIMIT_CHECK_VALUES_COUNT_TO;
         			action.warn("CountOfValuesToRun is limited to " + countOfValuesToRun);
         	}    	
-
+    	// if we have unchecked values in list
     	while (checkAllValuesRunCount<countOfValuesToRun){
     		tempCheckValue = values.get(checkAllValuesRunCount);
 
@@ -303,6 +435,11 @@ public class GenericElement {
 		    		retValue = checkIsDisplayedRight(tempCheckValue);
 	
 		    	checkAllValuesRunCount++;
+		    	
+		    	if (errorsCount >= Settings.FATAL_ELEMENT_ERRORS_COUNT){
+		    		action.closeEventFatal(checkAllValuesEvent, "Too many errors per element");
+		    		return Constants.RET_ERROR;
+		    	}
 		    	if (retValue==Constants.RET_PAGE_BROKEN_ERROR || retValue==Constants.RET_PAGE_BROKEN_OK)
 		    		return retValue;
     		}

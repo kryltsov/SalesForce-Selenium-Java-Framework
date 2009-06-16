@@ -1,11 +1,21 @@
 package com.deepshiftlabs.sf_tests;
 
+/**
+ * Represents GenericObject for login-logout test. Stores needed elements and check sequences.   
+ * @author Yakubovskiy Dima, bear@deepshiftlabs.com
+ * @see GenericObject
+ *
+ */
 public class LoginLogout extends GenericObject {
 
 	public LoginLogout (String a_parentTabID, String a_myRecordId, String a_defaultTitleSingular ) {
 		super(a_parentTabID, a_myRecordId, a_defaultTitleSingular);
     }
 
+	/**
+	 * As it's not usual Salesforce object like websites, we should provide self method for values init. 
+	 * @return RET_OK, RET_ERROR if can't find in elements list one of needed elements ("User Name" or "Password").
+	 */
 	public int initValues(){
 		GenericElement username;
 		GenericElement password;
@@ -34,6 +44,10 @@ public class LoginLogout extends GenericObject {
 		return Constants.RET_OK;		
 	}
 	
+	/**
+	 * Check Salesforce reaction on login attempt with invalid values. 
+	 * @return RET_OK, RET_ERROR.
+	 */
 	public int checkWrongValues(){
 		Event event = action.startEvent("checkWrongValues", name);
 		
@@ -54,6 +68,10 @@ public class LoginLogout extends GenericObject {
 		return Constants.RET_OK;
 	}
 	
+	/**
+	 * Check if we can login with right credentials. Checks titles.  
+	 * @return RET_OK, RET_ERROR.
+	 */
 	public int checkLoginLogout(){
 		Event event = action.startEvent("checkLoginLogout", name);
 		fillElementsByValidValues();
@@ -85,8 +103,13 @@ public class LoginLogout extends GenericObject {
 		return Constants.RET_OK;
 	}
 	
+	/**
+	 * Opens login page and checks if all needed elements are presented and title is right.
+	 * @return RET_OK, RET_ERROR if elements missed or title is invalid.
+	 */
 	public int openWithElementsAndTitleCheck(){
 		Event event = action.startEvent("openWithElementsAndTitleCheck", name);
+// TODO see if I should move openUrl command from here		
     	action.openUrl("/");
     	if (missedElementsCount()>0){
     		action.closeEventFatal(event);
@@ -98,9 +121,15 @@ public class LoginLogout extends GenericObject {
     		return Constants.RET_ERROR;
     	}
     	action.closeEventOk(event);
-    	return Constants.OK;    	
+    	return Constants.RET_OK;    	
 	}
 	
+    /* 
+     * Do all needed checks and common sequences checks.
+     * @see com.deepshiftlabs.sf_tests.GenericObject#checkAll()
+     * @return RET_OK
+     * @throws SftestException if any check is failed.
+     */
     public int checkAll() throws SftestException{
     	Event event = action.startEvent("checkAll", name);
     	if (initValues() == Constants.RET_ERROR){
